@@ -1,29 +1,25 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.zs.assignment1.controllers;
 
 import com.zs.assignment1.services.Service;
 import com.zs.assignment1.system.SystemInfo;
 
 public class Controller {
-    private Service service = new Service();
+    private final Service service = new Service();
 
     public void executeRequest() {
         System.out.println("--- Fetching System Information ---");
-        SystemInfo data = this.service.fetchSystemData();
-        this.displayResult(data);
+        SystemInfo data = service.fetchSystemData();
+        displayResult(data);
     }
 
     private void displayResult(SystemInfo info) {
-        System.out.println("Current User: " + info.userName);
-        System.out.println("Home Directory: " + info.homeDir);
-        System.out.println("OS Version: " + info.osVersion);
-        System.out.println("OS Build: " + info.osBuild);
-        System.out.println("Cores: " + info.cpuCores);
-        System.out.println("Memory: " + info.totalMemoryGB + " GB");
-        System.out.println("Disk Size: " + info.totalDiskGB + " GB");
+        // Using Getters instead of direct field access
+        System.out.println("Current User: " + info.getUserName());
+        System.out.println("Home Directory: " + info.getHomeDir());
+        System.out.println("OS Version: " + info.getOsVersion());
+        System.out.println("OS Build: " + info.getOsBuild());
+        System.out.println("Cores: " + info.getCpuCores());
+        System.out.println("SystemMemory: " + info.getSystemMemory() + " GB");
+        System.out.println("SystemSpace: " + info.getSystemSpace() + " GB");
     }
 }
