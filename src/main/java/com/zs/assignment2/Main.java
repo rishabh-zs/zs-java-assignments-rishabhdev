@@ -4,6 +4,7 @@ import com.zs.assignment2.controllers.MatrixController;
 
 public class Main {
     public static void main(String[] args) {
-        new MatrixController().start();
+        MatrixController controller = new MatrixController();
+        controller.start();
     }
 }

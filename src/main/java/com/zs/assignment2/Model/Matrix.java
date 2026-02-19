@@ -1,8 +1,8 @@
 package com.zs.assignment2.Model;
 
 public class Matrix {
-    private int rows;
-    private int cols;
+    private final int rows;
+    private final int cols;
     private double[][] data;
 
     public Matrix(int rows, int cols) {
@@ -11,18 +11,21 @@ public class Matrix {
         this.data = new double[rows][cols];
     }
 
-    // Getters and Setters
+    // Getters
     public int getRows() { return rows; }
     public int getCols() { return cols; }
-
     public double[][] getData() { return data; }
 
-    public void setData(double[][] data) {
-        this.data = data;
+    // Setters
+    public void setData(double[][] data) { this.data = data; }
+
+    public void setElement(int r, int c, double value) {
+        if (r >= 0 && r < rows && c >= 0 && c < cols) {
+            data[r][c] = value;
+        }
     }
 
-    // Helper to set a specific element
-    public void setElement(int r, int c, double value) {
-        data[r][c] = value;
+    public double getElement(int r, int c) {
+        return data[r][c];
     }
 }
