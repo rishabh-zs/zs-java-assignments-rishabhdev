@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.zs.assignment3'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'com.zs.assignment3.Main'
+}
