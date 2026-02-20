@@ -24,7 +24,6 @@ hs_err_pid*
 replay_pid*
 
 
-.idea
 
 # Ignore Gradle project-specific cache directory
 .gradle
@@ -34,3 +33,5 @@ build
 
 # Ignore Kotlin plugin data
 .kotlin
+
+.idea
