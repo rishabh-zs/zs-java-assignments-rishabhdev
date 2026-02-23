@@ -23,6 +23,7 @@
 hs_err_pid*
 replay_pid*
 
+<<<<<<< assignment-3-company-catalogue
 
 
 # Ignore Gradle project-specific cache directory
@@ -36,3 +37,11 @@ build
 
 .idea
 .idea
+=======
+.idea
+.gradle
+build
+
+gradlew
+gradlew.bat
+>>>>>>> main
