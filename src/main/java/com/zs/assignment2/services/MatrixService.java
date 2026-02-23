@@ -22,12 +22,7 @@ public class MatrixService {
         return res;
     }
 
-
-    /**
-     * Overloaded multiply method to handle scalar multiplication.
-     * Changed from 'scalarMultiply' to just 'multiply' per review feedback.
-     */
-    / Method 1: Matrix * Matrix
+    // Method 1: Matrix * Matrix
     public Matrix multiply(Matrix a, Matrix b) {
         if (a.getCols() != b.getRows()) return null;
         Matrix res = new Matrix(a.getRows(), b.getCols());
@@ -43,7 +38,7 @@ public class MatrixService {
         return res;
     }
 
-    / Method 2: scalar * Matrix
+    // Method 2: scalar * Matrix
     public Matrix multiply(double k, Matrix a) {
         Matrix res = new Matrix(a.getRows(), a.getCols());
         for (int i = 0; i < a.getRows(); i++)
@@ -52,13 +47,8 @@ public class MatrixService {
         return res;
     }
 
-
-
-    /**
-     * Overloaded multiply method (swapped parameters) for flexibility: Matrix * scalar
-     */
-    public Matrix multiply(Matrix a, double k) {
-        return multiply(k, a); // Simply calls the version above
+    public Matrix scalarMultiply(double k, Matrix a) {
+        return multiply(k, a);
     }
 
 

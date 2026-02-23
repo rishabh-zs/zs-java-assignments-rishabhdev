@@ -12,12 +12,22 @@ public class Matrix {
     }
 
     // Getters
-    public int getRows() { return rows; }
-    public int getCols() { return cols; }
-    public double[][] getData() { return data; }
+    public int getRows() {
+        return rows;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public double[][] getData() {
+        return data;
+    }
 
     // Setters
-    public void setData(double[][] data) { this.data = data; }
+    public void setData(double[][] data) {
+        this.data = data;
+    }
 
     public void setElement(int r, int c, double value) {
         if (r >= 0 && r < rows && c >= 0 && c < cols) {
