@@ -1,4 +1,4 @@
-
+package com.zs.assignment1.system;
 
 public class SystemInfo {
     private final String userName;
