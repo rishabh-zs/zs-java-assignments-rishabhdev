@@ -17,13 +17,45 @@ public abstract class Product {
     public abstract boolean isReturnable();
 
     // Getters and Setters (Encapsulation)
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
-    public String getBrand() { return brand; }
-    public void setBrand(String brand) { this.brand = brand; }
-}
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    @Override
+    public String toString() {
+        // Format price to two decimals and guard nulls for readability
+        String safeName = name == null ? "(no-name)" : name;
+        String safeBrand = brand == null ? "(no-brand)" : brand;
+        String formattedPrice = String.format("%.2f", price);
+        String returnable = isReturnable() ? "Yes" : "No";
+        return String.format("%s | Brand: %s | Price: $%s | Returnable: %s", safeName, safeBrand, formattedPrice, returnable);
+    }
+}

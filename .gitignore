@@ -23,25 +23,16 @@
 hs_err_pid*
 replay_pid*
 
-<<<<<<< assignment-3-company-catalogue
-
-
-# Ignore Gradle project-specific cache directory
-.gradle
-
-# Ignore Gradle build output directory
-build
-
-# Ignore Kotlin plugin data
-.kotlin
-
-.idea
-.idea
-=======
 .idea
 .gradle
 build
 
 gradlew
 gradlew.bat
->>>>>>> main
+
+run_assignment5.sh
+test.sh
+
+gradlew
+gradlew.bat
+

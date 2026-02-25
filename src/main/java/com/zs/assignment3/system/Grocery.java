@@ -9,7 +9,18 @@ public class Grocery extends Product {
     }
 
     @Override
-    public boolean isReturnable() { return true; }
-    public String getExpiryDate() { return expiryDate; }
-}
+    public boolean isReturnable() {
+        return true;
+    }
 
+    public String getExpiryDate() {
+        return expiryDate;
+    }
+
+    @Override
+    public String toString() {
+        String base = super.toString();
+        String safeExpiry = expiryDate == null ? "(no-expiry)" : expiryDate;
+        return base + " | Expiry: " + safeExpiry;
+    }
+}

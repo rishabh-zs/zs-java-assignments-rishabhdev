@@ -1,7 +1,5 @@
 package com.zs.assignment3.system;
 
-
-
 public class Electronics extends Product {
     private int warrantyMonths;
 
@@ -11,6 +9,17 @@ public class Electronics extends Product {
     }
 
     @Override
-    public boolean isReturnable() { return true; }
-    public int getWarrantyMonths(){ return warrantyMonths; }
+    public boolean isReturnable() {
+        return true;
+    }
+
+    public int getWarrantyMonths(){
+        return warrantyMonths;
+    }
+
+    @Override
+    public String toString() {
+        String base = super.toString();
+        return base + " | Warranty: " + warrantyMonths + " months";
+    }
 }
