@@ -29,3 +29,6 @@ build
 
 gradlew
 gradlew.bat
+
+run_assignment5.sh
+test.sh
