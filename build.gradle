@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.zs'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes('Main-Class': 'com.zs.assignment1.Main')
+    }
+}
+
+tasks.register('runAssignment5', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 5 - Git Log Parser'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment5.Main'
+    args = ['src/packages/sample_git.log', '2026-02-20']
+}
+

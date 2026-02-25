@@ -1,0 +1,12 @@
+package com.zs.assignment5.exceptions;
+
+//base checked exception for all Git Log parsing errors.
+public class GitLogException extends Exception {
+    public GitLogException(String message) {
+        super(message);
+    }
+
+    public GitLogException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
