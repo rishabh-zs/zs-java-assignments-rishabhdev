@@ -13,3 +13,7 @@ repositories {
 application {
     mainClass = 'com.zs.assignment3.Main'
 }
+
+tasks.named('run') {
+    standardInput = System.in
+}
