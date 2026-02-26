@@ -47,10 +47,7 @@ public class ProductController {
 
     private void listAll() {
         List<Product> items = productService.fetchAllProducts();
-        printGroceryCatalogue(items);
-        printElectronicsCatalogue(items);
-        printPersonalCareCatalogue(items);
-        printBabyProductCatalogue(items);
+        printAllSubcategoryCatalogue(items);
     }
 
     private void addProductMenu() {
@@ -194,48 +191,18 @@ public class ProductController {
         }
     }
 
-    // Use toString() on the entity to avoid tight coupling on Grocery, Electronics, PersonalCare, and BabyProduct.
-    private void printGroceryCatalogue(List<Product> items) {
-        System.out.println("\n---------------Grocery--------------------");
-        int count = 1;
-        for (Product item : items) {
-            if (item instanceof Grocery) {
-                System.out.println(count + ". " + item);
-                count++;
-            }
-        }
-    }
+    private void printAllSubcategoryCatalogue(List<Product> items) {
+        Class<?>[] types = {Grocery.class, Electronics.class, PersonalCare.class, BabyProduct.class};
+        String[] titles = {"Grocery", "Electronics", "Personal Care", "Baby Product"};
 
-    private void printElectronicsCatalogue(List<Product> items) {
-        System.out.println("\n---------------Electronics--------------------");
-        int count = 1;
-        for (Product item : items) {
-            if (item instanceof Electronics) {
-                System.out.println(count + ". " + item);
-                count++;
-            }
-        }
-    }
-
-    private void printPersonalCareCatalogue(List<Product> items) {
-        System.out.println("\n---------------Personal Care--------------------");
-        int count = 1;
-        for (Product item : items) {
-            if (item instanceof PersonalCare) {
-                // Personal care products are non-returnable;
-                System.out.println(count + ". " + item);
-                count++;
-            }
-        }
-    }
-
-    private void printBabyProductCatalogue(List<Product> items) {
-        System.out.println("\n---------------Baby Product--------------------");
-        int count = 1;
-        for (Product item : items) {
-            if (item instanceof BabyProduct) {
-                System.out.println(count + ". " + item);
-                count++;
+        for (int i = 0; i < types.length; i++) {
+            System.out.println("\n---------------" + titles[i] + "--------------------");
+            int count = 1;
+            for (Product item : items) {
+                if (types[i].isInstance(item)) {
+                    System.out.println(count + ". " + item);
+                    count++;
+                }
             }
         }
     }
