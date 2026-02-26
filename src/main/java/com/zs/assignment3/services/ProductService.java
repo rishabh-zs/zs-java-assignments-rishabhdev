@@ -24,9 +24,7 @@ public class ProductService {
 
     public List<Product> searchByName(String name) {
         String query = (name == null) ? "" : name.toLowerCase(Locale.ROOT).trim();
-        return repository.findAll().stream()
-                .filter(p -> p.getName().toLowerCase().contains(query))
-                .collect(Collectors.toList());
+        return repository.findAll().stream().filter(p -> p.getName().toLowerCase().contains(query)).collect(Collectors.toList());
     }
 
     public Product findById(String id) {
@@ -38,8 +36,4 @@ public class ProductService {
         }
         return null;
     }
-
-
-
-
 }

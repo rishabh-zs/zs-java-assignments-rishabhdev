@@ -13,10 +13,6 @@ public class Grocery extends Product {
         return true;
     }
 
-    public String getExpiryDate() {
-        return expiryDate;
-    }
-
     @Override
     public String toString() {
         String base = super.toString();

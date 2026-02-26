@@ -13,14 +13,6 @@ public class BabyProduct extends Product {
         return true;
     }
 
-    public String getRecommendedAge() {
-        return recommendedAge;
-    }
-
-    public void setRecommendedAge(String age) {
-        this.recommendedAge = age;
-    }
-
     @Override
     public String toString() {
         String base = super.toString();

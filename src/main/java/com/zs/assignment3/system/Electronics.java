@@ -13,10 +13,6 @@ public class Electronics extends Product {
         return true;
     }
 
-    public int getWarrantyMonths(){
-        return warrantyMonths;
-    }
-
     @Override
     public String toString() {
         String base = super.toString();
