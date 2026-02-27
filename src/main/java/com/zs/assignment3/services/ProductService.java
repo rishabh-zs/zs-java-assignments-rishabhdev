@@ -15,7 +15,9 @@ public class ProductService {
     }
 
     public void addProduct(Product p) {
-        if (p != null) repository.save(p);
+        if (p != null){
+            repository.save(p);
+        }
     }
 
     public boolean removeProductById(String id) {
