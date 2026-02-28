@@ -31,3 +31,4 @@ Main.run.xml
 
 gradlew
 gradlew.bat
+gradle.properties
