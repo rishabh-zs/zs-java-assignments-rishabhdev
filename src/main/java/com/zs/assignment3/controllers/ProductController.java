@@ -29,21 +29,25 @@ public class ProductController {
      * 0. Exit the application
      */
     public void executeRequest() {
-        while (true) {
-            printMainMenu();
-            String choice = scanner.nextLine().trim();
-            switch (choice) {
-                case "1" -> listAll();
-                case "2" -> addProductMenu();
-                case "3" -> removeProductMenu();
-                case "4" -> searchByIdMenu();
-                case "5" -> searchByNameMenu();
-                case "0" -> {
-                    System.out.println("Exiting. Goodbye!");
-                    return;
+        try {
+            while (true) {
+                printMainMenu();
+                String choice = scanner.nextLine().trim();
+                switch (choice) {
+                    case "1" -> listAll();
+                    case "2" -> addProductMenu();
+                    case "3" -> removeProductMenu();
+                    case "4" -> searchByIdMenu();
+                    case "5" -> searchByNameMenu();
+                    case "0" -> {
+                        System.out.println("Exiting. Goodbye!");
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice. Please try again.");
                 }
-                default -> System.out.println("Invalid choice. Please try again.");
             }
+        } finally {
+            scanner.close();
         }
     }
 
