@@ -10,10 +10,24 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The type Product controller.
+ */
 public class ProductController {
     private final ProductService productService = new ProductService();
     private final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Execute request.
+     * This method runs an interactive console menu for managing the product catalogue.
+     * The menu options include:
+     * 1. List all products
+     * 2. Add a new product (with sub-menu for category)
+     * 3. Remove a product by ID
+     * 4. Search for a product by ID
+     * 5. Search for products by name
+     * 0. Exit the application
+     */
     public void executeRequest() {
         while (true) {
             printMainMenu();
