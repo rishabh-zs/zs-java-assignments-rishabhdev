@@ -1,7 +1,14 @@
 package com.zs.assignment5.exceptions;
 
-//Specific exception thrown when the git log format does not match the expected format, such as missing fields or incorrect delimiters.
+/**
+ * The type File format entry exception.
+ */
 public class FileFormatEntryException extends GitLogException {
+    /**
+     * Instantiates a new File format entry exception.
+     *
+     * @param message the message
+     */
     public FileFormatEntryException(String message) {
         super(message);
     }

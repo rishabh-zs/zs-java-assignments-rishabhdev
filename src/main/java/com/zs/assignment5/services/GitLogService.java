@@ -10,10 +10,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The type Git log service.
+ */
 @ParserInfo(version = "2.0")
 public class GitLogService {
-
-    // Generic method to read and parse
+    /**
+     * Parse git log list.
+     *
+     * @param filePath the file path
+     * @return the list
+     * @throws GitLogException the git log exception
+     * @throws IOException     the io exception
+     */
     public List<Commit> parseGitLog(String filePath) throws GitLogException, IOException {
         File file = new File(filePath);
         if (!file.exists()) throw new FileNotFoundException("Log file not found at: " + filePath);
@@ -22,52 +31,45 @@ public class GitLogService {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                // Skip empty lines
                 if (line.trim().isEmpty()) continue;
 
-                // Validation logic for commit entry - must start with "commit"
                 if (!line.startsWith("commit")) {
                     throw new FileFormatEntryException("Invalid Format: Expected 'commit' but found: " + line);
                 }
 
-                // Validate logic for Author entry - must start with "Author:"
                 String authorLine = br.readLine();
                 if (authorLine == null || !authorLine.startsWith("Author:")) {
                     throw new GitLogException("Incomplete info: Missing Author line");
                 }
 
-                // Validation logic for Date entry - must start with "Date:"
                 String dateLine = br.readLine();
                 if (dateLine == null || !dateLine.startsWith("Date:")) {
                     throw new GitLogException("Incomplete info: Missing Date line");
                 }
 
-                // Try to extract date - skip entries with invalid/missing dates
                 LocalDate date;
                 try {
                     date = extractDate(dateLine);
                 } catch (GitLogException e) {
-                    // Skip this entry if date is invalid or missing
-                    br.readLine(); // Skip the message line
+                    br.readLine();
                     continue;
                 }
 
-                // Extract developer name from Author line
                 String developer = extractDeveloperName(authorLine);
 
-                // Read message (next line)
                 String message = br.readLine();
-                if (message == null) message = "";
+                if (message == null) {
+                    message = "";
+                }
 
                 commits.add(new Commit(developer, date, message));
             }
         }
+
         return commits;
     }
 
     private String extractDeveloperName(String authorLine) {
-        // Format: "Author: John Doe <john.doe@example.com>"
-        // Extract: "John Doe"
         int startIdx = authorLine.indexOf(": ") + 2;
         int endIdx = authorLine.indexOf(" <");
         if (endIdx > startIdx) {
@@ -77,8 +79,6 @@ public class GitLogService {
     }
 
     private LocalDate extractDate(String dateLine) throws GitLogException {
-        // Format: "Date:   2026-02-20" or "Date:" (empty)
-        // Extract the date part after "Date:"
         String dateStr = dateLine.substring(5).trim(); // Remove "Date:" and trim whitespace
 
         if (dateStr.isEmpty()) {
@@ -92,12 +92,27 @@ public class GitLogService {
         }
     }
 
+    /**
+     * Gets total commits per dev.
+     *
+     * @param commits the commits
+     * @param since   the since
+     * @return the total commits per dev
+     */
     public Map<String, Long> getTotalCommitsPerDev(List<Commit> commits, LocalDate since) {
-        return commits.stream().filter(c -> !c.date().isBefore(since)).collect(Collectors.groupingBy(Commit::developer, Collectors.counting()));
+        return commits
+                .stream()
+                .filter(c -> !c.date().isBefore(since))
+                .collect(Collectors.groupingBy(Commit::developer, Collectors.counting()));
     }
 
+    /**
+     * Gets inactive developers.
+     *
+     * @param commits the commits
+     * @return the inactive developers
+     */
     public List<String> getInactiveDevelopers(List<Commit> commits) {
-        // Logic to find devs with 2-day gaps in sequence
         Map<String, List<Commit>> commitsByDev = commits.stream()
                 .collect(Collectors.groupingBy(Commit::developer));
 
@@ -109,7 +124,6 @@ public class GitLogService {
                     .sorted()
                     .toList();
 
-            // Check for 2-day gaps
             for (int i = 0; i < dates.size() - 1; i++) {
                 long daysBetween = ChronoUnit.DAYS.between(dates.get(i), dates.get(i + 1));
                 if (daysBetween >= 2) {
@@ -122,9 +136,15 @@ public class GitLogService {
         return inactiveDevelopers;
     }
 
+    /**
+     * Gets active developers.
+     *
+     * @param commits the commits
+     * @return the active developers
+     */
     public List<String> getActiveDevelopers(List<Commit> commits) {
-        // Logic to find devs WITHOUT 2-day gaps
-        Map<String, List<Commit>> commitsByDev = commits.stream()
+        Map<String, List<Commit>> commitsByDev = commits
+                .stream()
                 .collect(Collectors.groupingBy(Commit::developer));
 
         List<String> activeDevelopers = new ArrayList<>();
@@ -135,7 +155,6 @@ public class GitLogService {
                     .sorted()
                     .toList();
 
-            // Check for 2-day gaps
             boolean hasGap = false;
             for (int i = 0; i < dates.size() - 1; i++) {
                 long daysBetween = ChronoUnit.DAYS.between(dates.get(i), dates.get(i + 1));
@@ -145,7 +164,6 @@ public class GitLogService {
                 }
             }
 
-            // Add to active list if no gaps found
             if (!hasGap) {
                 activeDevelopers.add(entry.getKey());
             }

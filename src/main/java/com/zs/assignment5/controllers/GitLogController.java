@@ -5,9 +5,18 @@ import com.zs.assignment5.models.Commit;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * The type Git log controller.
+ */
 public class GitLogController {
     private final GitLogService service = new GitLogService();
 
+    /**
+     * Process git stats.
+     *
+     * @param filePath the file path
+     * @param dateStr  the date str
+     */
     public void processGitStats(String filePath, String dateStr) {
         try {
             LocalDate sinceDate = LocalDate.parse(dateStr);

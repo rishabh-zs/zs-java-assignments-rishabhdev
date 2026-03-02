@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.RUNTIME) // Available at runtime for reflection
-@Target(ElementType.TYPE)           // Applied to classes (The Service Layer)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface ParserInfo {
     String version() default "1.0";
 }
