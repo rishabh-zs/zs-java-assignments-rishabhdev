@@ -2,21 +2,35 @@ package com.zs.assignment4.controllers;
 
 import com.zs.assignment4.models.CacheEntry;
 import com.zs.assignment4.services.LRUCacheService;
-import com.zs.assignment4.services.CategoryService;
 import java.util.Scanner;
 
-public class AssignmentController {
-    private final LRUCacheService<Integer, String> cache;
-    private final CategoryService categoryService;
+/**
+ * The type Lru controller.
+ */
+public class LruController {
+    private LRUCacheService<Integer, String> cache;
 
-    public AssignmentController() {
-        this.cache = new LRUCacheService<>(3);
-        this.categoryService = new CategoryService("Amazon");
+    /**
+     * Instantiates a new Lru controller.
+     */
+    public LruController() {
+        this.cache = new LRUCacheService<>(5);
     }
 
-    public void LruCacheOperation() {
+    /**
+     * Start.
+     */
+    public void start() {
+        runDemo();
         System.out.println("----------LRU_CACHE_OPERATIONS----------");
+        System.out.println("enter the size of the cache (default:5): ");
         Scanner sc = new Scanner(System.in);
+        int size= sc.nextInt();
+        if(size<0){
+            System.out.println("Cache size must be a positive integer. Exiting...");
+            return;
+        }
+        this.cache=new LRUCacheService<>(size);
         while (true) {
             printLruMenu();
             Integer choice = readInteger(sc, "Choose an option: ");
@@ -58,8 +72,6 @@ public class AssignmentController {
                 System.out.println("Invalid input: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Unexpected error while performing cache operation: " + e.getMessage());
-            } finally{
-                sc.close();
             }
         }
     }
@@ -190,42 +202,16 @@ public class AssignmentController {
         return sc.nextLine();
     }
 
+    /**
+     * Run demo.
+     */
     public void runDemo() {
-        // Cache Operations
         System.out.println("=== LRU Cache Demo (Capacity: 3) ===");
         cache.put(1, "Electronics");
         cache.put(2, "Books");
         cache.put(3, "Clothing");
-        System.out.println("Cache Get ID 1: " + cache.get(1));  // Access ID 1 (makes it MRU)
+        cache.put(4, "Home & Kitchen");
+        cache.put(5, "Sports");
 
-        cache.put(4, "Home & Kitchen");  // This evicts ID 2 (LRU)
-        System.out.println("Cache Get ID 2 (after eviction): " + cache.get(2));  // Should be null
-        System.out.println("Cache Get ID 3: " + cache.get(3));  // Should exist
-
-        cache.put(5, "Sports");  // This evicts ID 4 (LRU)
-        System.out.println("Cache Get ID 4 (after eviction): " + cache.get(4));  // Should be null
-        System.out.println("Cache Get ID 5: " + cache.get(5));  // Should exist
-
-        // Category Operations
-        System.out.println("\n=== Category Hierarchy Demo ===");
-        categoryService.addSubCategory("Amazon", "Electronics");
-        categoryService.addSubCategory("Amazon", "Books");
-        categoryService.addSubCategory("Amazon", "Clothing");
-
-        categoryService.addSubCategory("Electronics", "Laptops");
-        categoryService.addSubCategory("Electronics", "Smartphones");
-        categoryService.addSubCategory("Electronics", "Tablets");
-
-        categoryService.addSubCategory("Books", "Fiction");
-        categoryService.addSubCategory("Books", "Non-Fiction");
-        categoryService.addSubCategory("Books", "Technical");
-
-        categoryService.addSubCategory("Laptops", "Dell");
-        categoryService.addSubCategory("Laptops", "HP");
-        categoryService.addSubCategory("Smartphones", "Apple");
-        categoryService.addSubCategory("Smartphones", "Samsung");
-
-        categoryService.printHierarchy(categoryService.getRoot(), 0);
     }
 }
-
