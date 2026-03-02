@@ -25,16 +25,7 @@ public class LruController {
     public void start() {
         runDemo();
         System.out.println("----------LRU_CACHE_OPERATIONS----------");
-        Integer size = readInteger(sc, "enter the size of the cache (default:5): ");
-        if (size == null) {
-            System.out.println("\nInput stream closed. Exiting...");
-            return;
-        }
-        if (size <= 0) {
-            System.out.println("Cache size must be a positive integer. Exiting...");
-            return;
-        }
-        this.cache = new LRUCacheService<>(size);
+        System.out.println("----------LRU default capacity is 5-----");
         while (true) {
             printLruMenu();
             Integer choice = readInteger(sc, "Choose an option: ");
@@ -64,7 +55,7 @@ public class LruController {
                         handleRemoveEntry(sc);
                         break;
                     case 7:
-                        System.out.println("Exiting...");
+                        System.out.println("Back to Main Menu.");
                         return;
                     default:
                         System.out.println("Invalid option. Please try again.");
@@ -87,7 +78,7 @@ public class LruController {
         System.out.println("4. Remove from tail of LRU Cache");
         System.out.println("5. Get value by key from LRU Cache");
         System.out.println("6.remove entry from LRU Cache");
-        System.out.println("7. Exit");
+        System.out.println("7. Back to Main Menu");
     }
 
     private void handlePrintFullCache() {
@@ -210,12 +201,10 @@ public class LruController {
      * Run demo.
      */
     public void runDemo() {
-        System.out.println("=== LRU Cache Demo (Capacity: 3) ===");
         cache.put(1, "Electronics");
         cache.put(2, "Books");
         cache.put(3, "Clothing");
         cache.put(4, "Home & Kitchen");
         cache.put(5, "Sports");
-
     }
 }

@@ -141,7 +141,6 @@ public class HierarchyService {
      * @param prodName the prod name
      * @return the boolean
      */
-// 8. Delete Product (Global Search)
     public boolean deleteProduct(String prodName) {
         String key = prodName.toLowerCase();
         for (Category cat : rootCategories.values()) {

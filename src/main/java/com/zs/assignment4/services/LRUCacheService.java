@@ -4,11 +4,22 @@ import com.zs.assignment4.models.CacheEntry;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The type Lru cache service.
+ *
+ * @param <K> the type parameter
+ * @param <V> the type parameter
+ */
 public class LRUCacheService<K, V> {
     private final int capacity;
     private final Map<K, CacheEntry<K, V>> map;
     private final CacheEntry<K, V> head, tail;
 
+    /**
+     * Instantiates a new Lru cache service.
+     *
+     * @param capacity the capacity
+     */
     public LRUCacheService(int capacity) {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be greater than 0.");
@@ -21,7 +32,12 @@ public class LRUCacheService<K, V> {
         tail.prev = head;
     }
 
-    // Get value by key, if key exists move entry to head (most recently used)
+    /**
+     * Get v.
+     *
+     * @param key the key
+     * @return the v
+     */
     public V get(K key) {
         CacheEntry<K, V> entry = map.get(key);
         if (entry == null) {
@@ -32,7 +48,12 @@ public class LRUCacheService<K, V> {
         return entry.value;
     }
 
-    //put key-value pair in cache, if key exists update value and move to head, if cache is full remove LRU entry
+    /**
+     * Put.
+     *
+     * @param key   the key
+     * @param value the value
+     */
     public void put(K key, V value) {
         validateKeyAndValue(key, value);
         CacheEntry<K, V> existing = map.get(key);
@@ -52,12 +73,21 @@ public class LRUCacheService<K, V> {
         map.put(key, newEntry);
     }
 
-    // Add or move a key-value entry to MRU position
+    /**
+     * Add to head.
+     *
+     * @param key   the key
+     * @param value the value
+     */
     public void addToHead(K key, V value) {
         put(key, value);
     }
 
-    // Remove and return LRU entry
+    /**
+     * Remove from tail cache entry.
+     *
+     * @return the cache entry
+     */
     public CacheEntry<K, V> removeFromTail() {
         if (isEmpty()) {
             return null;
@@ -70,7 +100,12 @@ public class LRUCacheService<K, V> {
         return lru;
     }
 
-    // Remove a specific entry by key
+    /**
+     * Remove entry cache entry.
+     *
+     * @param key the key
+     * @return the cache entry
+     */
     public CacheEntry<K, V> removeEntry(K key) {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null.");
@@ -88,6 +123,11 @@ public class LRUCacheService<K, V> {
         return entry;
     }
 
+    /**
+     * Gets cache display.
+     *
+     * @return the cache display
+     */
     public String getCacheDisplay() {
         if (isEmpty()) {
             return "Cache is empty.";
@@ -104,11 +144,15 @@ public class LRUCacheService<K, V> {
         return sb.toString();
     }
 
+    /**
+     * Is empty boolean.
+     *
+     * @return the boolean
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
-    // Remove entry from the list
     private void removeNode(CacheEntry<K, V> entry) {
         if (entry == null || entry == head || entry == tail) {
             return;
@@ -117,7 +161,6 @@ public class LRUCacheService<K, V> {
         entry.next.prev = entry.prev;
     }
 
-    // Add entry to the head of the list (most recently used)
     private void addNodeToHead(CacheEntry<K, V> entry) {
         entry.next = head.next;
         entry.next.prev = entry;

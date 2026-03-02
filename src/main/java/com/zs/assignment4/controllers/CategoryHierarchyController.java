@@ -45,7 +45,10 @@ public class CategoryHierarchyController {
                     case "6" -> deleteSubCategory();
                     case "7" -> addProduct();
                     case "8" -> deleteProduct();
-                    case "0" -> exit = true;
+                    case "0" -> {
+                        System.out.println("Back to Main Menu.");
+                        exit = true;
+                    }
                     default -> System.out.println("Invalid choice. Try again.");
                 }
             } catch (NoSuchElementException e) {
@@ -136,8 +139,6 @@ public class CategoryHierarchyController {
      * Run demo.
      */
     public void runDemo() {
-        System.out.println("=== Category Hierarchy Demo ===");
-
         String[] categories = {"Electronics", "Fashion", "Home"};
         String[][] subCategories = {
                 {"Mobiles", "Laptops"},
@@ -159,8 +160,6 @@ public class CategoryHierarchyController {
                 }
             }
         }
-
-        service.displayHierarchy();
     }
 
 
