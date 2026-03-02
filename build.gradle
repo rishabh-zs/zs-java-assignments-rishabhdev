@@ -3,26 +3,24 @@ plugins {
     id 'application'
 }
 
-group = 'com.zs'
-version = '1.0'
+group = 'com.zs.assignment3'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    // Add any dependencies here if needed
-}
-
 application {
-    mainClass = 'com.zs.assignment4.Main'
+    mainClass = 'com.zs.assignment3.Main'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+tasks.named('run') {
+    standardInput = System.in
 }
 
-compileJava {
-    options.encoding = 'UTF-8'
-}
