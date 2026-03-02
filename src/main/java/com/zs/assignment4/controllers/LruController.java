@@ -9,11 +9,13 @@ import java.util.Scanner;
  */
 public class LruController {
     private LRUCacheService<Integer, String> cache;
+    private final Scanner sc;
 
     /**
      * Instantiates a new Lru controller.
      */
-    public LruController() {
+    public LruController(Scanner sc) {
+        this.sc = sc;
         this.cache = new LRUCacheService<>(5);
     }
 
@@ -23,14 +25,16 @@ public class LruController {
     public void start() {
         runDemo();
         System.out.println("----------LRU_CACHE_OPERATIONS----------");
-        System.out.println("enter the size of the cache (default:5): ");
-        Scanner sc = new Scanner(System.in);
-        int size= sc.nextInt();
-        if(size<0){
+        Integer size = readInteger(sc, "enter the size of the cache (default:5): ");
+        if (size == null) {
+            System.out.println("\nInput stream closed. Exiting...");
+            return;
+        }
+        if (size <= 0) {
             System.out.println("Cache size must be a positive integer. Exiting...");
             return;
         }
-        this.cache=new LRUCacheService<>(size);
+        this.cache = new LRUCacheService<>(size);
         while (true) {
             printLruMenu();
             Integer choice = readInteger(sc, "Choose an option: ");

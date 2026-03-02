@@ -1,6 +1,7 @@
 package com.zs.assignment4.controllers;
 
 import com.zs.assignment4.services.HierarchyService;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -8,7 +9,11 @@ import java.util.Scanner;
  */
 public class CategoryHierarchyController {
     private final HierarchyService service = new HierarchyService();
-    private final Scanner sc = new Scanner(System.in);
+    private final Scanner sc;
+
+    public CategoryHierarchyController(Scanner sc) {
+        this.sc = sc;
+    }
 
     /**
      * Start.
@@ -29,9 +34,8 @@ public class CategoryHierarchyController {
             System.out.println("0. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            String choice = sc.nextLine().trim();
-
             try {
+                String choice = sc.nextLine().trim();
                 switch (choice) {
                     case "1" -> service.displayHierarchy();
                     case "2" -> searchCategory();
@@ -44,6 +48,9 @@ public class CategoryHierarchyController {
                     case "0" -> exit = true;
                     default -> System.out.println("Invalid choice. Try again.");
                 }
+            } catch (NoSuchElementException e) {
+                System.out.println("\nInput stream closed. Exiting...");
+                return;
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }

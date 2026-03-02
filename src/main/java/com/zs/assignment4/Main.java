@@ -11,10 +11,22 @@ public class Main {
         System.out.println("1. LRU Cache Operations");
         System.out.println("2. Category Hierarchy Operations");
         System.out.println("0. Exit");
-        Scanner sc=new Scanner(System.in);
-        int choice= sc.nextInt();
-        LruController controller1 = new LruController();
-        CategoryHierarchyController controller2 = new CategoryHierarchyController();
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextLine()) {
+            System.out.println("No input provided. Exiting...");
+            return;
+        }
+
+        int choice;
+        try {
+            choice = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid choice. Exiting...");
+            return;
+        }
+
+        LruController controller1 = new LruController(sc);
+        CategoryHierarchyController controller2 = new CategoryHierarchyController(sc);
         switch (choice) {
             case 1: controller1.start();
                 break;
