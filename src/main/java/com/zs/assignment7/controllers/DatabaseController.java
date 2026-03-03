@@ -6,11 +6,17 @@ import com.zs.assignment7.services.DatabaseService;
 import com.zs.assignment7.services.ExportService;
 import java.util.List;
 
+/**
+ * The type Database controller.
+ */
 public class DatabaseController {
     private final DataGenerationService dataGenService = new DataGenerationService();
     private final DatabaseService dbService = new DatabaseService();
     private final ExportService exportService = new ExportService();
 
+    /**
+     * Execute assignment.
+     */
     public void executeAssignment() {
         try {
             System.out.println("Starting Assignment 7 execution...");

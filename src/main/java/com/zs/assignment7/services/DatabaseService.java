@@ -4,17 +4,30 @@ import com.zs.assignment7.models.Student;
 import java.sql.*;
 import java.util.List;
 
+/**
+ * The type Database service.
+ */
 @SuppressWarnings({"SqlNoDataSourceInspection", "SqlResolve"})
 public class DatabaseService {
-    // Ensure these match your Docker/Rancher setup
     private final String url = "jdbc:postgresql://localhost:5432/postgres";
     private final String user = "postgres";
     private final String password = "User#2026";
 
+    /**
+     * Gets connection.
+     *
+     * @return the connection
+     * @throws SQLException the sql exception
+     */
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
 
+    /**
+     * Sets schema.
+     *
+     * @throws SQLException the sql exception
+     */
     public void setupSchema() throws SQLException {
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             System.out.println("Setting up database schema...");
@@ -37,6 +50,12 @@ public class DatabaseService {
         }
     }
 
+    /**
+     * Batch insert students.
+     *
+     * @param students the students
+     * @throws SQLException the sql exception
+     */
     public void batchInsertStudents(List<Student> students) throws SQLException {
         String sql = "INSERT INTO students (first_name, last_name, mobile) VALUES (?, ?, ?)";
         System.out.println("Starting batch insert of " + students.size() + " records...");
@@ -60,6 +79,11 @@ public class DatabaseService {
         }
     }
 
+    /**
+     * Assign random departments.
+     *
+     * @throws SQLException the sql exception
+     */
     public void assignRandomDepartments() throws SQLException {
         String sql = "INSERT INTO student_dept_mapping (student_id, dept_id) " +
                 "SELECT id, (floor(random() * 3) + 1) FROM students;";

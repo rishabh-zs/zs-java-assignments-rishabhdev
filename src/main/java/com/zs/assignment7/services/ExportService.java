@@ -4,8 +4,17 @@ import java.io.*;
 import java.sql.*;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * The type Export service.
+ */
 @SuppressWarnings({"SqlNoDataSourceInspection", "SqlResolve"})
 public class ExportService {
+    /**
+     * Export data compressed.
+     *
+     * @param conn     the conn
+     * @param fileName the file name
+     */
     public void exportDataCompressed(Connection conn, String fileName) {
         String query = "SELECT s.id, s.first_name, s.last_name, d.dept_name " +
                 "FROM students s " +
