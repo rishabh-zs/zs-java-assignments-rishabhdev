@@ -23,7 +23,7 @@ public class Category {
     /**
      * Gets name.
      *
-     * @return the name
+     * @return the Category name
      */
     public String getName() {
         return name;
@@ -32,7 +32,7 @@ public class Category {
     /**
      * Gets sub categories.
      *
-     * @return the sub categories
+     * @return the sub categories LinkedHashMap
      */
     public Map<String, SubCategory> getSubCategories() {
         return subCategories;

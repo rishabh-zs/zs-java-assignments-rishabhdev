@@ -151,6 +151,6 @@ public class HierarchyService {
                 }
             }
         }
-        return false; // Not found anywhere
+        return false;
     }
 }

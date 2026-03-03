@@ -8,7 +8,7 @@ import java.util.Scanner;
  * The type Lru controller.
  */
 public class LruController {
-    private LRUCacheService<Integer, String> cache;
+    private final LRUCacheService<Integer, String> cache;
     private final Scanner sc;
 
     /**
@@ -77,7 +77,7 @@ public class LruController {
         System.out.println("3. Add to head of LRU Cache");
         System.out.println("4. Remove from tail of LRU Cache");
         System.out.println("5. Get value by key from LRU Cache");
-        System.out.println("6.remove entry from LRU Cache");
+        System.out.println("6. Remove entry from LRU Cache");
         System.out.println("7. Back to Main Menu");
     }
 
@@ -204,7 +204,7 @@ public class LruController {
         cache.put(1, "Electronics");
         cache.put(2, "Books");
         cache.put(3, "Clothing");
-        cache.put(4, "Home & Kitchen");
+        cache.put(4, "Home");
         cache.put(5, "Sports");
     }
 }

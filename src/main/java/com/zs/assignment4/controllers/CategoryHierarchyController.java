@@ -66,7 +66,7 @@ public class CategoryHierarchyController {
         if (service.searchCategory(name)) {
             System.out.println("Category '" + name + "' exists in the hierarchy.");
         } else {
-            System.out.println("Category '" + name + "' NOT found.");
+            System.out.println("Category '" + name + "' does not exists in hierarchy.");
         }
     }
 
@@ -97,7 +97,7 @@ public class CategoryHierarchyController {
         String subName = sc.nextLine().trim();
 
         if (service.addSubCategory(catName, subName)) {
-            System.out.println("SubCategory added successfully.");
+            System.out.println("SubCategory added successfully under Parent Category."+ catName);
         } else {
             System.out.println("Parent Category not found.");
         }
@@ -122,7 +122,7 @@ public class CategoryHierarchyController {
         String prodName = sc.nextLine().trim();
 
         service.addProduct(catName, subName, prodName);
-        System.out.println("Product added successfully.");
+        System.out.println("Product added successfully under." + catName + "->" + subName + "->" + prodName);
     }
 
     private void deleteProduct() {
@@ -155,12 +155,11 @@ public class CategoryHierarchyController {
             service.addCategory(categories[i]);
             for (int j = 0; j < subCategories[i].length; j++) {
                 service.addSubCategory(categories[i], subCategories[i][j]);
-                for (String product : products[i][j]) {
+                for (int k=0;k<products[i][j].length;k++) {
+                    String product = products[i][j][k];
                     service.addProduct(categories[i], subCategories[i][j], product);
                 }
             }
         }
     }
-
-
 }

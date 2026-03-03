@@ -11,17 +11,21 @@ public class CacheEntry<K, V> {
      * The Key.
      */
     public K key;
+
     /**
      * The Value.
      */
     public V value;
+
     /**
      * The Prev.
      */
-    public CacheEntry<K, V> prev, /**
+    public CacheEntry<K, V> prev;
+
+    /**
      * The Next.
      */
-    next;
+    public CacheEntry<K,V> next;
 
     /**
      * Instantiates a new Cache entry.

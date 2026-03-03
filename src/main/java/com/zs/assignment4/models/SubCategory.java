@@ -8,7 +8,6 @@ import java.util.Map;
  */
 public class SubCategory {
     private final String name;
-    // Using LinkedHashMap to maintain insertion order while giving O(1) search/delete
     private final Map<String, Product> products;
 
     /**
@@ -24,7 +23,7 @@ public class SubCategory {
     /**
      * Gets name.
      *
-     * @return the name
+     * @return the Subcategory name
      */
     public String getName() {
         return name;
