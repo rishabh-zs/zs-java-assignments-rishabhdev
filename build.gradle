@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.zs.assignment7'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    implementation 'org.postgresql:postgresql:42.7.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClass = 'com.zs.assignment7.Main'
+}
+
+tasks.named('run') {
+    standardInput = System.in
+}
