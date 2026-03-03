@@ -114,6 +114,72 @@ public class GitLogService {
     }
 
     /**
+     * Gets daily commits per developer since the provided date.
+     *
+     * @param commits the commits
+     * @param since   the since date (inclusive)
+     * @return map of developer -> (date -> commit count)
+     */
+    public Map<String, Map<LocalDate, Long>> getDailyCommitsPerDevSince(List<Commit> commits, LocalDate since) {
+        return commits.stream()
+                .filter(c -> !c.date().isBefore(since))
+                .collect(Collectors.groupingBy(
+                        Commit::developer,
+                        TreeMap::new,
+                        Collectors.groupingBy(
+                                Commit::date,
+                                TreeMap::new,
+                                Collectors.counting()
+                        )));
+    }
+
+    /**
+     * Gets developers who have at least one 2-day consecutive no-commit streak
+     * within the provided date range [fromDate, toDate].
+     *
+     * @param commits   the commits
+     * @param fromDate  start date (inclusive)
+     * @param toDate    end date (inclusive)
+     * @return list of developers with a 2-day no-commit streak
+     */
+    public List<String> getDevelopersWithTwoDayNoCommitGap(List<Commit> commits, LocalDate fromDate, LocalDate toDate) {
+        if (fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("fromDate cannot be after toDate");
+        }
+
+        Map<String, Set<LocalDate>> commitsByDevByDate = commits.stream()
+                .collect(Collectors.groupingBy(
+                        Commit::developer,
+                        Collectors.mapping(Commit::date, Collectors.toSet())));
+
+        List<String> developersWithGap = new ArrayList<>();
+
+        for (Map.Entry<String, Set<LocalDate>> entry : commitsByDevByDate.entrySet()) {
+            Set<LocalDate> commitDatesInRange = entry.getValue().stream()
+                    .filter(d -> !d.isBefore(fromDate) && !d.isAfter(toDate))
+                    .collect(Collectors.toSet());
+
+            int missingStreak = 0;
+            LocalDate current = fromDate;
+            while (!current.isAfter(toDate)) {
+                if (commitDatesInRange.contains(current)) {
+                    missingStreak = 0;
+                } else {
+                    missingStreak++;
+                    if (missingStreak >= 2) {
+                        developersWithGap.add(entry.getKey());
+                        break;
+                    }
+                }
+                current = current.plusDays(1);
+            }
+        }
+
+        Collections.sort(developersWithGap);
+        return developersWithGap;
+    }
+
+    /**
      * Gets inactive developers.
      *
      * @param commits the commits
