@@ -12,6 +12,7 @@ public class Main {
      * @param args the input arguments
      */
     public static void main(String[] args) {
+        System.out.println("-----Starting Git Log Analysis--------");
         String filePath = (args.length > 0) ? args[0] : "src/packages/sample_git.log";
         String dateStr = (args.length > 1) ? args[1] : "2026-02-20";
 

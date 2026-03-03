@@ -3,8 +3,11 @@ package com.zs.assignment5.services;
 import com.zs.assignment5.models.Commit;
 import com.zs.assignment5.exceptions.*;
 import com.zs.assignment5.annotations.ParserInfo;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -25,13 +28,17 @@ public class GitLogService {
      */
     public List<Commit> parseGitLog(String filePath) throws GitLogException, IOException {
         File file = new File(filePath);
-        if (!file.exists()) throw new FileNotFoundException("Log file not found at: " + filePath);
+        if (!file.exists()){
+            throw new FileNotFoundException("Log file not found at: " + filePath);
+        }
 
         List<Commit> commits = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
 
                 if (!line.startsWith("commit")) {
                     throw new FileFormatEntryException("Invalid Format: Expected 'commit' but found: " + line);
@@ -79,7 +86,7 @@ public class GitLogService {
     }
 
     private LocalDate extractDate(String dateLine) throws GitLogException {
-        String dateStr = dateLine.substring(5).trim(); // Remove "Date:" and trim whitespace
+        String dateStr = dateLine.substring(5).trim();
 
         if (dateStr.isEmpty()) {
             throw new GitLogException("Date is missing");
@@ -113,13 +120,15 @@ public class GitLogService {
      * @return the inactive developers
      */
     public List<String> getInactiveDevelopers(List<Commit> commits) {
-        Map<String, List<Commit>> commitsByDev = commits.stream()
+        Map<String, List<Commit>> commitsByDev = commits
+                .stream()
                 .collect(Collectors.groupingBy(Commit::developer));
 
         List<String> inactiveDevelopers = new ArrayList<>();
 
         for (Map.Entry<String, List<Commit>> entry : commitsByDev.entrySet()) {
-            List<LocalDate> dates = entry.getValue().stream()
+            List<LocalDate> dates = entry.getValue()
+                    .stream()
                     .map(Commit::date)
                     .sorted()
                     .toList();
