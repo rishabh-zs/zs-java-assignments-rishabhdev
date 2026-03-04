@@ -5,17 +5,17 @@ package com.zs.assignment7.models;
  */
 public class Department {
     private int id;
-    private String deptName;
+    private String name;
 
     /**
      * Instantiates a new Department.
      *
-     * @param id       the id
-     * @param deptName the dept name
+     * @param id   the id
+     * @param name the name
      */
-    public Department(int id, String deptName) {
+    public Department(int id, String name) {
         this.id = id;
-        this.deptName = deptName;
+        this.name = name;
     }
 
     /**
@@ -28,11 +28,11 @@ public class Department {
     }
 
     /**
-     * Gets dept name.
+     * Gets name.
      *
-     * @return the dept name
+     * @return the name
      */
-    public String getDeptName() {
-        return deptName;
+    public String getName() {
+        return name;
     }
 }

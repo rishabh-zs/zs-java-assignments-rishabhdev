@@ -13,6 +13,6 @@ public class Main {
      */
     public static void main(String[] args) {
         DatabaseController dbController = new DatabaseController();
-        dbController.executeAssignment();
+        dbController.executeFlow();
     }
 }

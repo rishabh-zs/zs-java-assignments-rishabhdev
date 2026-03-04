@@ -1,44 +1,63 @@
 package com.zs.assignment7.services;
 
-import java.io.*;
-import java.sql.*;
+import com.zs.assignment7.repositories.AssignmentRepository;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.zip.GZIPOutputStream;
 
 /**
  * The type Export service.
  */
-@SuppressWarnings({"SqlNoDataSourceInspection", "SqlResolve"})
 public class ExportService {
+    private final AssignmentRepository repository = new AssignmentRepository();
+
     /**
-     * Export data compressed.
+     * Export data to compressed file.
      *
-     * @param conn     the conn
-     * @param fileName the file name
+     * @param filePath the file path
      */
-    public void exportDataCompressed(Connection conn, String fileName) {
-        String query = "SELECT s.id, s.first_name, s.last_name, d.dept_name " +
+    public void exportDataToCompressedFile(String filePath) {
+        System.out.println("Starting extraction to compressed file: " + filePath);
+
+        String sql = "SELECT s.id, s.first_name, s.last_name, d.name AS department_name " +
                 "FROM students s " +
-                "JOIN student_dept_mapping m ON s.id = m.student_id " +
-                "JOIN departments d ON d.id = m.dept_id";
+                "JOIN student_dept_mapping sd ON s.id = sd.student_id " +
+                "JOIN departments d ON sd.dept_id = d.id";
 
-        System.out.println("Extracting and compressing data to " + fileName + "...");
+        try (Connection conn = repository.getExportConnection()) {
+            // Required for fetch size to work in Postgres
+            conn.setAutoCommit(false);
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query);
-             FileOutputStream fos = new FileOutputStream(fileName);
-             GZIPOutputStream gzos = new GZIPOutputStream(fos);
-             PrintWriter writer = new PrintWriter(gzos)) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // IMPORTANT: This must be set BEFORE executeQuery()
+                stmt.setFetchSize(10000);
 
-            writer.println("ID,First_Name,Last_Name,Department");
-            while (rs.next()) {
-                writer.printf("%d,%s,%s,%s%n",
-                        rs.getInt("id"), rs.getString("first_name"),
-                        rs.getString("last_name"), rs.getString("dept_name"));
+                try (ResultSet rs = stmt.executeQuery();
+                     FileOutputStream fos = new FileOutputStream(filePath);
+                     GZIPOutputStream gzipOS = new GZIPOutputStream(fos);
+                     OutputStreamWriter osw = new OutputStreamWriter(gzipOS, StandardCharsets.UTF_8);
+                     BufferedWriter writer = new BufferedWriter(osw)) {
+
+                    writer.write("ID,FirstName,LastName,Department\n");
+
+                    int rowCount = 0;
+                    while (rs.next()) {
+                        writer.write(rs.getInt("id") + "," +
+                                rs.getString("first_name") + "," +
+                                rs.getString("last_name") + "," +
+                                rs.getString("department_name") + "\n");
+                        rowCount++;
+                    }
+                    System.out.println("Extraction complete. " + rowCount + " rows written and compressed.");
+                }
             }
-            System.out.println("Data extraction and compression complete.");
-
-        } catch (SQLException | IOException e) {
-            System.err.println("Error during export: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error during extraction: " + e.getMessage());
             e.printStackTrace();
         }
     }

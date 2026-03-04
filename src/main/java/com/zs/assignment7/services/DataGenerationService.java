@@ -15,18 +15,14 @@ public class DataGenerationService {
      * @return the list
      */
     public List<Student> generateStudents(int count) {
-        System.out.println("Generating " + count + " student records in memory...");
-
+        System.out.println("------Generating " + count + " student records in memory------");
         List<Student> students = new ArrayList<>(count);
         for (int i = 1; i <= count; i++) {
-            students.add(new Student(
-                    "FirstName" + i,
-                    "LastName" + i,
-                    String.format("9%09d", i % 1000000000)
-            ));
+            String firstName = "First" + i;
+            String lastName = "Last" + i;
+            String mobile = "9" + String.format("%09d", i % 1000000000);
+            students.add(new Student(i, firstName, lastName, mobile));
         }
-
-        System.out.println("Data generation complete.");
         return students;
     }
 }
