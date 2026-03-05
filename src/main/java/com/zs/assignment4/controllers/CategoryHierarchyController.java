@@ -7,52 +7,62 @@ import com.zs.assignment4.models.SubCategory;
 
 import java.util.Scanner;
 
+/**
+ * The type Category hierarchy controller.
+ */
 public class CategoryHierarchyController {
     private HierarchyService service;
     private final Scanner sc = new Scanner(System.in);
 
+    /**
+     * Start.
+     */
     public void start() {
+        System.out.println("---Default capacity for LRU Cache is set to 5.---");
         int capacity = 5;
         service = new HierarchyService(capacity);
         demo();
 
         boolean exit = false;
+        try {
+            while (!exit) {
+                System.out.println("\n=== LRU Category Hierarchy Menu ===");
+                System.out.println("1. Display Hierarchy");
+                System.out.println("2. Search a Category");
+                System.out.println("3. Delete a Category");
+                System.out.println("4. Add a Category");
+                System.out.println("5. Add a SubCategory");
+                System.out.println("6. Delete a SubCategory");
+                System.out.println("7. Add a Product");
+                System.out.println("8. Delete a Product");
+                System.out.println("9. Search a SubCategory");
+                System.out.println("10. Search a Product");
+                System.out.println("0. Exit");
+                System.out.print("Choose an option: ");
 
-        while (!exit) {
-            System.out.println("\n=== LRU Category Hierarchy Menu ===");
-            System.out.println("1. Display Hierarchy");
-            System.out.println("2. Search a Category");
-            System.out.println("3. Delete a Category");
-            System.out.println("4. Add a Category");
-            System.out.println("5. Add a SubCategory");
-            System.out.println("6. Delete a SubCategory");
-            System.out.println("7. Add a Product");
-            System.out.println("8. Delete a Product");
-            System.out.println("9. Search a SubCategory");
-            System.out.println("10. Search a Product");
-            System.out.println("0. Exit");
-            System.out.print("Choose an option: ");
+                String choice = sc.nextLine().trim();
 
-            String choice = sc.nextLine().trim();
-
-            try {
-                switch (choice) {
-                    case "1" -> service.displayHierarchy();
-                    case "2" -> searchCategory();
-                    case "3" -> deleteCategory();
-                    case "4" -> addCategory();
-                    case "5" -> addSubCategory();
-                    case "6" -> deleteSubCategory();
-                    case "7" -> addProduct();
-                    case "8" -> deleteProduct();
-                    case "9" -> searchSubCategory();
-                    case "10" -> searchProduct();
-                    case "0" -> exit = true;
-                    default -> System.out.println("Invalid choice. Try again.");
+                try {
+                    switch (choice) {
+                        case "1" -> service.displayHierarchy();
+                        case "2" -> searchCategory();
+                        case "3" -> deleteCategory();
+                        case "4" -> addCategory();
+                        case "5" -> addSubCategory();
+                        case "6" -> deleteSubCategory();
+                        case "7" -> addProduct();
+                        case "8" -> deleteProduct();
+                        case "9" -> searchSubCategory();
+                        case "10" -> searchProduct();
+                        case "0" -> exit = true;
+                        default -> System.out.println("Invalid choice. Try again.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
             }
+        } finally {
+            sc.close();
         }
     }
 

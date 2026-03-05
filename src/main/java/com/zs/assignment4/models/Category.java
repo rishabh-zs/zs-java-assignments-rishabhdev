@@ -7,8 +7,8 @@ import java.util.Map;
  * The type Category.
  */
 public class Category {
-    private String name;
-    private Map<String, SubCategory> subCategories;
+    private final String name;
+    private final Map<String, SubCategory> subCategories;
 
     /**
      * Instantiates a new Category.
@@ -25,14 +25,18 @@ public class Category {
      *
      * @return the name
      */
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
     /**
      * Gets sub categories.
      *
      * @return the sub categories
      */
-    public Map<String, SubCategory> getSubCategories() { return subCategories; }
+    public Map<String, SubCategory> getSubCategories() {
+        return subCategories;
+    }
 
     /**
      * Add sub category.

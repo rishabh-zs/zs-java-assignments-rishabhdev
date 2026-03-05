@@ -4,7 +4,7 @@ package com.zs.assignment4.models;
  * The type Product.
  */
 public class Product {
-    private String name;
+    private final String name;
 
     /**
      * Instantiates a new Product.
