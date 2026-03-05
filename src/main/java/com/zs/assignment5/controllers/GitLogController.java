@@ -2,6 +2,7 @@ package com.zs.assignment5.controllers;
 
 import com.zs.assignment5.exceptions.GitLogException;
 import com.zs.assignment5.models.Commit;
+import com.zs.assignment5.repositories.FileGitLogRepository;
 import com.zs.assignment5.services.GitLogService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -10,18 +11,29 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * The type Git log controller.
+ */
 public class GitLogController {
 
-    private final GitLogService gitLogService = new GitLogService();
+    private final GitLogService gitLogService;
 
     /**
-     * Entry point for the controller. Handles user input and arguments.
+     * Instantiates a new Git log controller.
+     */
+    public GitLogController() {
+        this.gitLogService = new GitLogService(new FileGitLogRepository());
+    }
+
+    /**
+     * Start.
+     *
+     * @param args the args
      */
     public void start(String[] args) {
         String filePath = "";
         LocalDate d = null;
 
-        // Take f and d from arguments if provided, else take from Scanner
         if (args.length >= 2) {
             filePath = args[0];
             try {
@@ -32,7 +44,6 @@ public class GitLogController {
             }
         } else {
             Scanner scanner = new Scanner(System.in);
-
             System.out.print("Enter Git log file path (e.g., src/main/resources/log.txt): ");
             filePath = scanner.nextLine().trim();
 
@@ -54,19 +65,15 @@ public class GitLogController {
     private void processGitLog(String filePath, LocalDate sinceDate) {
         try {
             System.out.println("\nParsing Git Log file: " + filePath);
-            List<Commit> commits = gitLogService.parseLog(filePath);
+            List<Commit> commits = gitLogService.getCommits(filePath);
 
             System.out.println("✅ Successfully parsed " + commits.size() + " commits.\n");
 
-            // 1. Total Commits
             System.out.println("--- 1. Total Commits by Developer Since " + sinceDate + " ---");
             Map<String, Long> totalCommits = gitLogService.getTotalCommitsSince(commits, sinceDate);
-            if (totalCommits.isEmpty()) {
-                System.out.println("No commits found since this date.");
-            }
+            if (totalCommits.isEmpty()) System.out.println("No commits found since this date.");
             totalCommits.forEach((dev, count) -> System.out.println(dev + " : " + count + " commits"));
 
-            // 2. Daily Commits
             System.out.println("\n--- 2. Daily Commits by Developer Since " + sinceDate + " ---");
             Map<String, Map<LocalDate, Long>> dailyCommits = gitLogService.getDailyCommitsSince(commits, sinceDate);
             if (dailyCommits.isEmpty()) System.out.println("No commits found since this date.");
@@ -75,7 +82,6 @@ public class GitLogController {
                 dates.forEach((date, count) -> System.out.println("  " + date + " -> " + count + " commits"));
             });
 
-            // 3. Developers with 2 consecutive days of inactivity overall
             System.out.println("\n--- 3. Developers with >2 Successive Days of No Commits (Overall) ---");
             List<String> devsWithGaps = gitLogService.getDevelopersWithInactivity(commits);
             if (devsWithGaps.isEmpty()) {
@@ -84,7 +90,6 @@ public class GitLogController {
                 devsWithGaps.forEach(dev -> System.out.println("- " + dev));
             }
 
-            // 4. Active Developers
             LocalDate windowEnd = sinceDate.plusDays(2);
             System.out.println("\n--- 4. Active Developers (At least 1 commit between " + sinceDate + " and " + windowEnd + ") ---");
             Set<String> activeDevs = gitLogService.getActiveDevelopers(commits, sinceDate);
@@ -94,7 +99,6 @@ public class GitLogController {
                 activeDevs.forEach(dev -> System.out.println("- " + dev));
             }
 
-            // 5. Inactive Developers
             System.out.println("\n--- 5. InActive Developers (0 commits between " + sinceDate + " and " + windowEnd + ") ---");
             Set<String> inactiveDevs = gitLogService.getInactiveDevelopers(commits, sinceDate);
             if (inactiveDevs.isEmpty()) {
