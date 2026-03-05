@@ -8,11 +8,11 @@ import java.sql.Statement;
 import java.util.List;
 
 /**
- * Handles all direct database interactions.
+ * The type Assignment repository.
  */
 public class AssignmentRepository {
 
-    public void createSchema() {
+    private void createSchema() {
         String createStudents = "CREATE TABLE IF NOT EXISTS students (" +
                 "id SERIAL PRIMARY KEY, " +
                 "first_name VARCHAR(50), " +
@@ -28,7 +28,7 @@ public class AssignmentRepository {
                 "student_id INT REFERENCES students(id), " +
                 "PRIMARY KEY (student_id, dept_id))";
 
-        try (Connection conn = DatabaseConnectionManager.getConnection();
+        try (Connection conn = DatabaseConnectionManager.Connect();
              Statement stmt = conn.createStatement()) {
 
             // Clean up existing tables for re-runs
@@ -45,9 +45,17 @@ public class AssignmentRepository {
         }
     }
 
-    public void insertDepartments() {
+    /**
+     * Call create schema.
+     */
+    public void callCreateSchema() {
+        createSchema();
+    }
+
+
+    private void insertDepartments() {
         String sql = "INSERT INTO departments (id, name) VALUES (1, 'CS'), (2, 'EE'), (3, 'Mech') ON CONFLICT DO NOTHING";
-        try (Connection conn = DatabaseConnectionManager.getConnection();
+        try (Connection conn = DatabaseConnectionManager.Connect();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
             System.out.println("----Departments inserted----");
@@ -56,10 +64,18 @@ public class AssignmentRepository {
         }
     }
 
-    public void batchInsertStudents(List<Student> students) {
+    /**
+     * Call insert departments.
+     */
+    public void callInsertDepartments() {
+        insertDepartments();
+    }
+
+
+    private void batchInsertStudents(List<Student> students) {
         String sql = "INSERT INTO students (id, first_name, last_name, mobile) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseConnectionManager.getConnection()) {
+        try (Connection conn = DatabaseConnectionManager.Connect();) {
             // Disable auto-commit for fast batch processing
             conn.setAutoCommit(false);
 
@@ -89,12 +105,22 @@ public class AssignmentRepository {
         }
     }
 
-    public void mapStudentsToDepartmentsRandomly() {
+    /**
+     * Call batch insert students.
+     *
+     * @param students the students
+     */
+    public void callBatchInsertStudents(List<Student> students) {
+        batchInsertStudents(students);
+    }
+
+
+    private void mapStudentsToDepartmentsRandomly() {
         // Performing the random mapping completely inside SQL is vastly faster
         // than fetching 1 million records into Java and mapping them.
         String sql = "INSERT INTO student_dept_mapping (dept_id,student_id) " +
                 "SELECT floor(random() * 3 + 1)::int, id FROM students";
-        try (Connection conn = DatabaseConnectionManager.getConnection();
+        try (Connection conn = DatabaseConnectionManager.Connect();
              Statement stmt = conn.createStatement()) {
             System.out.println("----Mapping students to departments randomly in DB----");
             stmt.execute(sql);
@@ -104,7 +130,20 @@ public class AssignmentRepository {
         }
     }
 
+    /**
+     * Call map students to departments randomly.
+     */
+    public void callMapStudentsToDepartmentsRandomly() {
+        mapStudentsToDepartmentsRandomly();
+    }
+
+    /**
+     * Gets export connection.
+     *
+     * @return the export connection
+     * @throws SQLException the sql exception
+     */
     public Connection getExportConnection() throws SQLException {
-        return DatabaseConnectionManager.getConnection();
+        return DatabaseConnectionManager.Connect();
     }
 }

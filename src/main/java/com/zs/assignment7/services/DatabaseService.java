@@ -16,9 +16,9 @@ public class DatabaseService {
      * @param students the students
      */
     public void initializeDatabase(List<Student> students) {
-        repository.createSchema();
-        repository.insertDepartments();
-        repository.batchInsertStudents(students);
-        repository.mapStudentsToDepartmentsRandomly();
+        repository.callCreateSchema();
+        repository.callInsertDepartments();
+        repository.callBatchInsertStudents(students);
+        repository.callMapStudentsToDepartmentsRandomly();
     }
 }

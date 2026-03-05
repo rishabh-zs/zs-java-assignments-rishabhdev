@@ -16,12 +16,7 @@ import java.util.zip.GZIPOutputStream;
 public class ExportService {
     private final AssignmentRepository repository = new AssignmentRepository();
 
-    /**
-     * Export data to compressed file.
-     *
-     * @param filePath the file path
-     */
-    public void exportDataToCompressedFile(String filePath) {
+    private void exportDataToCompressedFile(String filePath) {
         System.out.println("Starting extraction to compressed file: " + filePath);
 
         String sql = "SELECT s.id, s.first_name, s.last_name, d.name AS department_name " +
@@ -60,5 +55,14 @@ public class ExportService {
             System.err.println("Error during extraction: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Call export data to compressed file.
+     *
+     * @param filePath the file path
+     */
+    public void callExportDataToCompressedFile(String filePath) {
+        exportDataToCompressedFile(filePath);
     }
 }

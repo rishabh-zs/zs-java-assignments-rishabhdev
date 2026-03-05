@@ -21,13 +21,13 @@ public class DatabaseController {
         long startTime = System.currentTimeMillis();
 
         // 1. Generate records
-        List<Student> students = dataGenerationService.generateStudents(1000000);
+        List<Student> students = dataGenerationService.callGenerateStudents(1000000);
 
         // 2 & 3 & 4. Load schema, departments, students, and map them
         dbService.initializeDatabase(students);
 
         // 5 & 6. Extract data to a size-reduced file (.gz)
-        exportService.exportDataToCompressedFile("student_departments.csv.gz");
+        exportService.callExportDataToCompressedFile("student_departments.csv.gz");
 
         long endTime = System.currentTimeMillis();
         System.out.println("Total Execution Time: " + (endTime - startTime) / 1000 + " seconds.");
