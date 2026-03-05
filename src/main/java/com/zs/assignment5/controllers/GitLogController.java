@@ -1,55 +1,111 @@
 package com.zs.assignment5.controllers;
 
-import com.zs.assignment5.services.GitLogService;
+import com.zs.assignment5.exceptions.GitLogException;
 import com.zs.assignment5.models.Commit;
+import com.zs.assignment5.services.GitLogService;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
-/**
- * The type Git log controller.
- */
 public class GitLogController {
-    private final GitLogService service = new GitLogService();
+
+    private final GitLogService gitLogService = new GitLogService();
 
     /**
-     * Process git stats.
-     *
-     * @param filePath the file path
-     * @param dateStr  the date str
+     * Entry point for the controller. Handles user input and arguments.
      */
-    public void processGitStats(String filePath, String dateStr) {
-        processGitStats(filePath, dateStr, dateStr, dateStr);
+    public void start(String[] args) {
+        String filePath = "";
+        LocalDate d = null;
+
+        // Take f and d from arguments if provided, else take from Scanner
+        if (args.length >= 2) {
+            filePath = args[0];
+            try {
+                d = LocalDate.parse(args[1]);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format in arguments. Expected YYYY-MM-DD.");
+                return;
+            }
+        } else {
+            Scanner scanner = new Scanner(System.in);
+
+            System.out.print("Enter Git log file path (e.g., src/main/resources/log.txt): ");
+            filePath = scanner.nextLine().trim();
+
+            System.out.print("Enter starting date 'd' (YYYY-MM-DD): ");
+            String dateInput = scanner.nextLine().trim();
+            try {
+                d = LocalDate.parse(dateInput);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+                return;
+            } finally {
+                scanner.close();
+            }
+        }
+
+        processGitLog(filePath, d);
     }
 
-    /**
-     * Process git stats.
-     *
-     * @param filePath    the file path
-     * @param dateStr     the since date for commit counting
-     * @param fromDateStr the start date for inactivity analysis
-     * @param toDateStr   the end date for inactivity analysis
-     */
-    public void processGitStats(String filePath, String dateStr, String fromDateStr, String toDateStr) {
+    private void processGitLog(String filePath, LocalDate sinceDate) {
         try {
-            LocalDate sinceDate = LocalDate.parse(dateStr);
-            LocalDate fromDate = LocalDate.parse(fromDateStr);
-            LocalDate toDate = LocalDate.parse(toDateStr);
-            List<Commit> commits = service.parseGitLog(filePath);
+            System.out.println("\nParsing Git Log file: " + filePath);
+            List<Commit> commits = gitLogService.parseLog(filePath);
 
-            System.out.println("Total Commits: " + service.getTotalCommitsPerDev(commits, sinceDate));
-            System.out.println("Daily Commits per Developer since " + sinceDate + ": "
-                    + service.getDailyCommitsPerDevSince(commits, sinceDate));
-            System.out.println("Developers with 2-day no-commit streak between " + fromDate + " and " + toDate + ": "
-                    + service.getDevelopersWithTwoDayNoCommitGap(commits, fromDate, toDate));
-            System.out.println("Considering Active Developers since: " + sinceDate);
-            System.out.println("Active Developers (without 2-day gaps): " + service.getActiveDevelopers(commits));
-            System.out.println("InActive Developers (with 2-day gays): " + service.getInactiveDevelopers(commits));
+            System.out.println("✅ Successfully parsed " + commits.size() + " commits.\n");
 
-        } catch (Exception e) {
-            System.err.println("Error processing git log: " + e.getMessage());
-        } finally {
-            System.out.println();
-            System.out.println("-----FINISHED PROCESSING GIT LOG--------");
+            // 1. Total Commits
+            System.out.println("--- 1. Total Commits by Developer Since " + sinceDate + " ---");
+            Map<String, Long> totalCommits = gitLogService.getTotalCommitsSince(commits, sinceDate);
+            if (totalCommits.isEmpty()) {
+                System.out.println("No commits found since this date.");
+            }
+            totalCommits.forEach((dev, count) -> System.out.println(dev + " : " + count + " commits"));
+
+            // 2. Daily Commits
+            System.out.println("\n--- 2. Daily Commits by Developer Since " + sinceDate + " ---");
+            Map<String, Map<LocalDate, Long>> dailyCommits = gitLogService.getDailyCommitsSince(commits, sinceDate);
+            if (dailyCommits.isEmpty()) System.out.println("No commits found since this date.");
+            dailyCommits.forEach((dev, dates) -> {
+                System.out.println("Developer: " + dev);
+                dates.forEach((date, count) -> System.out.println("  " + date + " -> " + count + " commits"));
+            });
+
+            // 3. Developers with 2 consecutive days of inactivity overall
+            System.out.println("\n--- 3. Developers with >2 Successive Days of No Commits (Overall) ---");
+            List<String> devsWithGaps = gitLogService.getDevelopersWithInactivity(commits);
+            if (devsWithGaps.isEmpty()) {
+                System.out.println("All developers have been active without a 2-day gap.");
+            } else {
+                devsWithGaps.forEach(dev -> System.out.println("- " + dev));
+            }
+
+            // 4. Active Developers
+            LocalDate windowEnd = sinceDate.plusDays(2);
+            System.out.println("\n--- 4. Active Developers (At least 1 commit between " + sinceDate + " and " + windowEnd + ") ---");
+            Set<String> activeDevs = gitLogService.getActiveDevelopers(commits, sinceDate);
+            if (activeDevs.isEmpty()) {
+                System.out.println("No developers were active during this 2-day period.");
+            } else {
+                activeDevs.forEach(dev -> System.out.println("- " + dev));
+            }
+
+            // 5. Inactive Developers
+            System.out.println("\n--- 5. InActive Developers (0 commits between " + sinceDate + " and " + windowEnd + ") ---");
+            Set<String> inactiveDevs = gitLogService.getInactiveDevelopers(commits, sinceDate);
+            if (inactiveDevs.isEmpty()) {
+                System.out.println("All historical developers were active during this 2-day period!");
+            } else {
+                inactiveDevs.forEach(dev -> System.out.println("- " + dev));
+            }
+
+        } catch (GitLogException e) {
+            System.err.println("\n❌ Processing Error: " + e.getClass().getSimpleName());
+            System.err.println("Message: " + e.getMessage());
         }
     }
 }
