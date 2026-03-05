@@ -1,28 +1,25 @@
 package com.zs.assignment4.controllers;
 
 import com.zs.assignment4.services.HierarchyService;
-import java.util.NoSuchElementException;
+import com.zs.assignment4.models.Category;
+import com.zs.assignment4.models.Product;
+import com.zs.assignment4.models.SubCategory;
+
 import java.util.Scanner;
 
-/**
- * The type Category hierarchy controller.
- */
 public class CategoryHierarchyController {
-    private final HierarchyService service = new HierarchyService();
-    private final Scanner sc;
+    private HierarchyService service;
+    private final Scanner sc = new Scanner(System.in);
 
-    public CategoryHierarchyController(Scanner sc) {
-        this.sc = sc;
-    }
-
-    /**
-     * Start.
-     */
     public void start() {
-        runDemo();
+        int capacity = 5;
+        service = new HierarchyService(capacity);
+        demo();
+
         boolean exit = false;
+
         while (!exit) {
-            System.out.println("\n=== Category Hierarchy Menu ===");
+            System.out.println("\n=== LRU Category Hierarchy Menu ===");
             System.out.println("1. Display Hierarchy");
             System.out.println("2. Search a Category");
             System.out.println("3. Delete a Category");
@@ -31,11 +28,14 @@ public class CategoryHierarchyController {
             System.out.println("6. Delete a SubCategory");
             System.out.println("7. Add a Product");
             System.out.println("8. Delete a Product");
-            System.out.println("0. Back to Main Menu");
+            System.out.println("9. Search a SubCategory");
+            System.out.println("10. Search a Product");
+            System.out.println("0. Exit");
             System.out.print("Choose an option: ");
 
+            String choice = sc.nextLine().trim();
+
             try {
-                String choice = sc.nextLine().trim();
                 switch (choice) {
                     case "1" -> service.displayHierarchy();
                     case "2" -> searchCategory();
@@ -45,28 +45,77 @@ public class CategoryHierarchyController {
                     case "6" -> deleteSubCategory();
                     case "7" -> addProduct();
                     case "8" -> deleteProduct();
-                    case "0" -> {
-                        System.out.println("Back to Main Menu.");
-                        exit = true;
-                    }
+                    case "9" -> searchSubCategory();
+                    case "10" -> searchProduct();
+                    case "0" -> exit = true;
                     default -> System.out.println("Invalid choice. Try again.");
                 }
-            } catch (NoSuchElementException e) {
-                System.out.println("\nInput stream closed. Exiting...");
-                return;
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
         }
     }
 
+    private void demo() {
+        service.addCategory("Electronics");
+        service.addSubCategory("Electronics", "Mobiles");
+        service.addSubCategory("Electronics", "Laptops");
+        service.addProduct("Electronics", "Mobiles", "iPhone");
+        service.addProduct("Electronics", "Mobiles", "Cell Phone");
+        service.addProduct("Electronics", "Mobiles", "Phone");
+        service.addProduct("Electronics", "Laptops", "Professional Laptop");
+        service.addProduct("Electronics", "Laptops", "Gaming Laptop");
+        service.addProduct("Electronics", "Laptops", "Normal Laptop");
+
+        service.addCategory("Fashion");
+        service.addSubCategory("Fashion", "Men");
+        service.addSubCategory("Fashion", "Women");
+        service.addProduct("Fashion", "Men", "T-Shirt");
+        service.addProduct("Fashion", "Men", "Jeans");
+        service.addProduct("Fashion", "Men", "Jacket");
+        service.addProduct("Fashion", "Women", "Dress");
+        service.addProduct("Fashion", "Women", "Top");
+        service.addProduct("Fashion", "Women", "Skirt");
+
+        service.addCategory("Groceries");
+        service.addSubCategory("Groceries", "Fruits");
+        service.addSubCategory("Groceries", "Vegetables");
+        service.addProduct("Groceries", "Fruits", "Apple");
+        service.addProduct("Groceries", "Fruits", "Banana");
+        service.addProduct("Groceries", "Fruits", "Orange");
+        service.addProduct("Groceries", "Vegetables", "Carrot");
+        service.addProduct("Groceries", "Vegetables", "Potato");
+        service.addProduct("Groceries", "Vegetables", "Tomato");
+
+        service.addCategory("Books");
+        service.addSubCategory("Books", "Fiction");
+        service.addSubCategory("Books", "NonFiction");
+        service.addProduct("Books", "Fiction", "1984");
+        service.addProduct("Books", "Fiction", "Dune");
+        service.addProduct("Books", "Fiction", "Hamlet");
+        service.addProduct("Books", "NonFiction", "Sapiens");
+        service.addProduct("Books", "NonFiction", "Educated");
+        service.addProduct("Books", "NonFiction", "Atomic Habits");
+
+        service.addCategory("Sports");
+        service.addSubCategory("Sports", "Fitness");
+        service.addSubCategory("Sports", "Outdoor");
+        service.addProduct("Sports", "Fitness", "Dumbbell");
+        service.addProduct("Sports", "Fitness", "Yoga Mat");
+        service.addProduct("Sports", "Fitness", "Treadmill");
+        service.addProduct("Sports", "Outdoor", "Football");
+        service.addProduct("Sports", "Outdoor", "Cricket Bat");
+        service.addProduct("Sports", "Outdoor", "Tennis Racket");
+    }
+
     private void searchCategory() {
         System.out.print("Enter Category name to search: ");
         String name = sc.nextLine().trim();
-        if (service.searchCategory(name)) {
-            System.out.println("Category '" + name + "' exists in the hierarchy.");
+        Category cat = service.searchCategory(name);
+        if (cat != null) {
+            System.out.println("Category '" + cat.getName() + "' found. (Moved to MRU)");
         } else {
-            System.out.println("Category '" + name + "' does not exists in hierarchy.");
+            System.out.println("Category NOT found.");
         }
     }
 
@@ -84,9 +133,9 @@ public class CategoryHierarchyController {
         System.out.print("Enter new Category name: ");
         String name = sc.nextLine().trim();
         if (service.addCategory(name)) {
-            System.out.println("Category added.");
+            System.out.println("Category added. (Set as MRU)");
         } else {
-            System.out.println("Category already exists.");
+            System.out.println("Category already exists. (Moved to MRU)");
         }
     }
 
@@ -97,7 +146,7 @@ public class CategoryHierarchyController {
         String subName = sc.nextLine().trim();
 
         if (service.addSubCategory(catName, subName)) {
-            System.out.println("SubCategory added successfully under Parent Category."+ catName);
+            System.out.println("SubCategory added. (Parent Category moved to MRU)");
         } else {
             System.out.println("Parent Category not found.");
         }
@@ -107,7 +156,7 @@ public class CategoryHierarchyController {
         System.out.print("Enter SubCategory name to delete: ");
         String name = sc.nextLine().trim();
         if (service.deleteSubCategory(name)) {
-            System.out.println("SubCategory deleted successfully.");
+            System.out.println("SubCategory deleted.");
         } else {
             System.out.println("SubCategory not found.");
         }
@@ -122,44 +171,38 @@ public class CategoryHierarchyController {
         String prodName = sc.nextLine().trim();
 
         service.addProduct(catName, subName, prodName);
-        System.out.println("Product added successfully under." + catName + "->" + subName + "->" + prodName);
+        System.out.println("Product added. (Parent Category moved to MRU)");
     }
 
     private void deleteProduct() {
         System.out.print("Enter Product name to delete: ");
         String name = sc.nextLine().trim();
         if (service.deleteProduct(name)) {
-            System.out.println("Product deleted successfully.");
+            System.out.println("Product deleted.");
         } else {
             System.out.println("Product not found.");
         }
     }
 
-    /**
-     * Run demo.
-     */
-    public void runDemo() {
-        String[] categories = {"Electronics", "Fashion", "Home"};
-        String[][] subCategories = {
-                {"Mobiles", "Laptops"},
-                {"Men", "Women"},
-                {"Kitchen", "Furniture"}
-        };
-        String[][][] products = {
-                {{"iPhone 16", "Samsung S25", "OnePlus 13"}, {"MacBook Air", "Dell XPS", "Lenovo ThinkPad"}},
-                {{"Shirt", "Jeans", "Jacket"}, {"Dress", "Top", "Skirt"}},
-                {{"Mixer", "Cooker", "Microwave"}, {"Sofa", "Table", "Chair"}}
-        };
+    private void searchSubCategory() {
+        System.out.print("Enter SubCategory name to search: ");
+        String name = sc.nextLine().trim();
+        SubCategory subCat = service.searchSubCategory(name);
+        if (subCat != null) {
+            System.out.println("SubCategory '" + subCat.getName() + "' found. (Parent Category moved to MRU)");
+        } else {
+            System.out.println("SubCategory NOT found.");
+        }
+    }
 
-        for (int i = 0; i < categories.length; i++) {
-            service.addCategory(categories[i]);
-            for (int j = 0; j < subCategories[i].length; j++) {
-                service.addSubCategory(categories[i], subCategories[i][j]);
-                for (int k=0;k<products[i][j].length;k++) {
-                    String product = products[i][j][k];
-                    service.addProduct(categories[i], subCategories[i][j], product);
-                }
-            }
+    private void searchProduct() {
+        System.out.print("Enter Product name to search: ");
+        String name = sc.nextLine().trim();
+        Product prod = service.searchProduct(name);
+        if (prod != null) {
+            System.out.println("Product '" + prod.getName() + "' found. (Parent Category moved to MRU)");
+        } else {
+            System.out.println("Product NOT found.");
         }
     }
 }

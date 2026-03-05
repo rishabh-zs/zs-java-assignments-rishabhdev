@@ -7,8 +7,9 @@ import java.util.Map;
  * The type Sub category.
  */
 public class SubCategory {
-    private final String name;
-    private final Map<String, Product> products;
+    private String name;
+    // LinkedHashMap preserves insertion order for products
+    private Map<String, Product> products;
 
     /**
      * Instantiates a new Sub category.
@@ -23,20 +24,16 @@ public class SubCategory {
     /**
      * Gets name.
      *
-     * @return the Subcategory name
+     * @return the name
      */
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     /**
      * Gets products.
      *
      * @return the products
      */
-    public Map<String, Product> getProducts() {
-        return products;
-    }
+    public Map<String, Product> getProducts() { return products; }
 
     /**
      * Add product.
@@ -45,5 +42,14 @@ public class SubCategory {
      */
     public void addProduct(Product p) {
         products.put(p.getName().toLowerCase(), p);
+    }
+
+    /**
+     * Remove product.
+     *
+     * @param name the name
+     */
+    public void removeProduct(String name) {
+        products.remove(name.toLowerCase());
     }
 }

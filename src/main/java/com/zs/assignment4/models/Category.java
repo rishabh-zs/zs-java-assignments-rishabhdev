@@ -7,8 +7,8 @@ import java.util.Map;
  * The type Category.
  */
 public class Category {
-    private final String name;
-    private final Map<String, SubCategory> subCategories;
+    private String name;
+    private Map<String, SubCategory> subCategories;
 
     /**
      * Instantiates a new Category.
@@ -23,20 +23,16 @@ public class Category {
     /**
      * Gets name.
      *
-     * @return the Category name
+     * @return the name
      */
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     /**
      * Gets sub categories.
      *
-     * @return the sub categories LinkedHashMap
+     * @return the sub categories
      */
-    public Map<String, SubCategory> getSubCategories() {
-        return subCategories;
-    }
+    public Map<String, SubCategory> getSubCategories() { return subCategories; }
 
     /**
      * Add sub category.
@@ -45,5 +41,14 @@ public class Category {
      */
     public void addSubCategory(SubCategory sc) {
         subCategories.put(sc.getName().toLowerCase(), sc);
+    }
+
+    /**
+     * Remove sub category.
+     *
+     * @param name the name
+     */
+    public void removeSubCategory(String name) {
+        subCategories.remove(name.toLowerCase());
     }
 }
