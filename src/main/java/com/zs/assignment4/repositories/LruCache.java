@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The type Lru cache repository.
+ * The type Lru cache.
  */
-public class LruCacheRepository {
+public class LruCache {
     private final int capacity;
     private final Map<String, CacheEntry> cache;
 
@@ -18,11 +18,11 @@ public class LruCacheRepository {
     private CacheEntry tail;
 
     /**
-     * Instantiates a new Lru cache repository.
+     * Instantiates a new Lru cache.
      *
      * @param capacity the capacity
      */
-    public LruCacheRepository(int capacity) {
+    public LruCache(int capacity) {
         this.capacity = capacity;
         this.cache = new HashMap<>();
     }
@@ -59,16 +59,6 @@ public class LruCacheRepository {
     }
 
     /**
-     * Contains key boolean.
-     *
-     * @param key the key
-     * @return the boolean
-     */
-    public boolean containsKey(String key) {
-        return cache.containsKey(key.toLowerCase());
-    }
-
-    /**
      * Get category.
      *
      * @param key the key
@@ -92,39 +82,43 @@ public class LruCacheRepository {
      */
     public void put(String key, Category category) {
         String lowerKey = key.toLowerCase();
-        CacheEntry newNode = new CacheEntry(lowerKey, category);
-        cache.put(lowerKey, newNode);
-        addToHead(newNode);
 
-        if (cache.size() > capacity) {
-            cache.remove(tail.key);
-            removeNode(tail);
+        if (cache.containsKey(lowerKey)) {
+            CacheEntry node = cache.get(lowerKey);
+            node.value = category;
+            moveToHead(node);
+        } else {
+            CacheEntry newNode = new CacheEntry(lowerKey, category);
+            cache.put(lowerKey, newNode);
+            addToHead(newNode);
+
+            if (cache.size() > capacity) {
+                cache.remove(tail.key);
+                removeNode(tail);
+            }
         }
     }
 
     /**
-     * Remove boolean.
+     * Remove.
      *
      * @param key the key
-     * @return the boolean
      */
-    public boolean remove(String key) {
+    public void remove(String key) {
         String lowerKey = key.toLowerCase();
         if (cache.containsKey(lowerKey)) {
             CacheEntry node = cache.get(lowerKey);
             removeNode(node);
             cache.remove(lowerKey);
-            return true;
         }
-        return false;
     }
 
     /**
-     * Gets all categories.
+     * Gets cached categories.
      *
-     * @return the all categories
+     * @return the cached categories
      */
-    public List<Category> getAllCategories() {
+    public List<Category> getCachedCategories() {
         List<Category> categories = new ArrayList<>();
         CacheEntry current = head;
         while (current != null) {

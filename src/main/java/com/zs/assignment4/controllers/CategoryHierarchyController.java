@@ -7,10 +7,16 @@ import com.zs.assignment4.models.SubCategory;
 
 import java.util.Scanner;
 
+/**
+ * The type Category hierarchy controller.
+ */
 public class CategoryHierarchyController {
     private HierarchyService service;
     private final Scanner sc = new Scanner(System.in);
 
+    /**
+     * Start.
+     */
     public void start() {
         System.out.println("---Default capacity for LRU Cache is set to 5.---");
         int capacity = 5;
