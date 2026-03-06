@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.zs.assignment9'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // JUnit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+
+    // Needed by IntelliJ sometimes for running tests
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Mockito
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+
+    // Mockito + JUnit5 support
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+}
+
+test {
+    useJUnitPlatform()
+    failOnNoDiscoveredTests = false
+    // Keep test output clean on newer JDKs when Mockito/ByteBuddy instrumentation is used.
+    jvmArgs '-XX:+EnableDynamicAgentLoading', '-Xshare:off'
+}
+
+application {
+    mainClass = 'com.zs.assignment9.Main'
+}
+
+tasks.named('run') {
+    standardInput = System.in
+}
