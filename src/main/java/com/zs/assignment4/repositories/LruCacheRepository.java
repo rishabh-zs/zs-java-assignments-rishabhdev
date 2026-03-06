@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The type Hierarchy repository.
+ * The type Lru cache repository.
  */
-public class HierarchyRepository {
+public class LruCacheRepository {
     private final int capacity;
     private final Map<String, CacheEntry> cache;
 
@@ -18,11 +18,11 @@ public class HierarchyRepository {
     private CacheEntry tail;
 
     /**
-     * Instantiates a new Hierarchy repository.
+     * Instantiates a new Lru cache repository.
      *
      * @param capacity the capacity
      */
-    public HierarchyRepository(int capacity) {
+    public LruCacheRepository(int capacity) {
         this.capacity = capacity;
         this.cache = new HashMap<>();
     }
@@ -30,13 +30,13 @@ public class HierarchyRepository {
     private void removeNode(CacheEntry node) {
         if (node.prev != null) {
             node.prev.next = node.next;
-        }else{
+        } else {
             head = node.next;
         }
 
         if (node.next != null) {
             node.next.prev = node.prev;
-        }else{
+        } else {
             tail = node.prev;
         }
     }
@@ -44,11 +44,11 @@ public class HierarchyRepository {
     private void addToHead(CacheEntry node) {
         node.next = head;
         node.prev = null;
-        if (head != null){
+        if (head != null) {
             head.prev = node;
         }
         head = node;
-        if (tail == null){
+        if (tail == null) {
             tail = head;
         }
     }

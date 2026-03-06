@@ -3,13 +3,13 @@ package com.zs.assignment4.services;
 import com.zs.assignment4.models.Category;
 import com.zs.assignment4.models.Product;
 import com.zs.assignment4.models.SubCategory;
-import com.zs.assignment4.repositories.HierarchyRepository;
+import com.zs.assignment4.repositories.LruCacheRepository;
 
 /**
  * The type Hierarchy service.
  */
 public class HierarchyService {
-    private final HierarchyRepository repository;
+    private final LruCacheRepository repository;
 
     /**
      * Instantiates a new Hierarchy service.
@@ -17,7 +17,7 @@ public class HierarchyService {
      * @param capacity the capacity
      */
     public HierarchyService(int capacity) {
-        this.repository = new HierarchyRepository(capacity);
+        this.repository = new LruCacheRepository(capacity);
     }
 
     /**
@@ -36,7 +36,7 @@ public class HierarchyService {
     }
 
     /**
-     * Search category.
+     * Search category category.
      *
      * @param name the name
      * @return the category
@@ -64,7 +64,7 @@ public class HierarchyService {
      */
     public boolean addSubCategory(String catName, String subCatName) {
         Category cat = repository.get(catName);
-        if (cat == null){
+        if (cat == null) {
             return false;
         }
 
@@ -102,12 +102,14 @@ public class HierarchyService {
      */
     public boolean addProduct(String catName, String subCatName, String prodName) {
         Category cat = repository.get(catName);
-        if (cat == null){
+        if (cat == null) {
             throw new IllegalArgumentException("Category not found.");
         }
 
         SubCategory subCat = cat.getSubCategories().get(subCatName.toLowerCase());
-        if (subCat == null) throw new IllegalArgumentException("SubCategory not found.");
+        if (subCat == null) {
+            throw new IllegalArgumentException("SubCategory not found.");
+        }
 
         if (subCat.getProducts().containsKey(prodName.toLowerCase())) {
             throw new IllegalArgumentException("Product already exists.");
@@ -154,7 +156,7 @@ public class HierarchyService {
     }
 
     /**
-     * Search product.
+     * Search product product.
      *
      * @param prodName the prod name
      * @return the product
