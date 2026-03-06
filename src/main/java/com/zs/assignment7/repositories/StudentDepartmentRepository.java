@@ -1,18 +1,24 @@
 package com.zs.assignment7.repositories;
 
+import com.zs.assignment7.models.Department;
 import com.zs.assignment7.models.Student;
+import com.zs.assignment7.models.StudentDepartmentMapping;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Random;
 
 /**
  * The type Assignment repository.
  */
-public class AssignmentRepository {
+public class StudentDepartmentRepository {
 
-    private void createSchema() {
+    /**
+     * Create schema.
+     */
+    public void createSchema() {
         String createStudents = "CREATE TABLE IF NOT EXISTS students (" +
                 "id SERIAL PRIMARY KEY, " +
                 "first_name VARCHAR(50), " +
@@ -31,7 +37,6 @@ public class AssignmentRepository {
         try (Connection conn = DatabaseConnectionManager.Connect();
              Statement stmt = conn.createStatement()) {
 
-            // Clean up existing tables for re-runs
             stmt.execute("DROP TABLE IF EXISTS student_dept_mapping");
             stmt.execute("DROP TABLE IF EXISTS departments");
             stmt.execute("DROP TABLE IF EXISTS students");
@@ -46,18 +51,18 @@ public class AssignmentRepository {
     }
 
     /**
-     * Call create schema.
+     * Insert departments.
      */
-    public void callCreateSchema() {
-        createSchema();
-    }
-
-
-    private void insertDepartments() {
-        String sql = "INSERT INTO departments (id, name) VALUES (1, 'CS'), (2, 'EE'), (3, 'Mech') ON CONFLICT DO NOTHING";
+    public void insertDepartments(List<Department> departments) {
+        String sql = "INSERT INTO departments (id, name) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (Connection conn = DatabaseConnectionManager.Connect();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (Department department : departments) {
+                pstmt.setInt(1, department.getId());
+                pstmt.setString(2, department.getName());
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
             System.out.println("----Departments inserted----");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,18 +70,14 @@ public class AssignmentRepository {
     }
 
     /**
-     * Call insert departments.
+     * Batch insert students.
+     *
+     * @param students the students
      */
-    public void callInsertDepartments() {
-        insertDepartments();
-    }
-
-
-    private void batchInsertStudents(List<Student> students) {
+    public void batchInsertStudents(List<Student> students) {
         String sql = "INSERT INTO students (id, first_name, last_name, mobile) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnectionManager.Connect();) {
-            // Disable auto-commit for fast batch processing
             conn.setAutoCommit(false);
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -88,14 +89,13 @@ public class AssignmentRepository {
                     pstmt.setString(4, s.getMobile());
                     pstmt.addBatch();
 
-                    // Execute batch every 50,000 records to prevent memory overflow
                     if (++count % 50000 == 0) {
                         pstmt.executeBatch();
                         conn.commit();
                         System.out.println("Inserted " + count + " records...");
                     }
                 }
-                pstmt.executeBatch(); // insert remaining records
+                pstmt.executeBatch();
                 conn.commit();
             }
             conn.setAutoCommit(true);
@@ -106,24 +106,31 @@ public class AssignmentRepository {
     }
 
     /**
-     * Call batch insert students.
-     *
-     * @param students the students
+     * Map students to departments randomly.
      */
-    public void callBatchInsertStudents(List<Student> students) {
-        batchInsertStudents(students);
-    }
-
-
-    private void mapStudentsToDepartmentsRandomly() {
-        // Performing the random mapping completely inside SQL is vastly faster
-        // than fetching 1 million records into Java and mapping them.
-        String sql = "INSERT INTO student_dept_mapping (dept_id,student_id) " +
-                "SELECT floor(random() * 3 + 1)::int, id FROM students";
+    public void mapStudentsToDepartmentsRandomly(List<Student> students, List<Department> departments) {
+        String sql = "INSERT INTO student_dept_mapping (dept_id, student_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnectionManager.Connect();
-             Statement stmt = conn.createStatement()) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
+            Random random = new Random();
             System.out.println("----Mapping students to departments randomly in DB----");
-            stmt.execute(sql);
+            int count = 0;
+            for (Student student : students) {
+                Department department = departments.get(random.nextInt(departments.size()));
+                StudentDepartmentMapping mapping = new StudentDepartmentMapping(student.getId(), department.getId());
+                pstmt.setInt(1, mapping.getDept_id());
+                pstmt.setInt(2, mapping.getStudent_id());
+                pstmt.addBatch();
+
+                if (++count % 50000 == 0) {
+                    pstmt.executeBatch();
+                    conn.commit();
+                }
+            }
+            pstmt.executeBatch();
+            conn.commit();
+            conn.setAutoCommit(true);
             System.out.println("----Mapping complete----");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -131,17 +138,10 @@ public class AssignmentRepository {
     }
 
     /**
-     * Call map students to departments randomly.
-     */
-    public void callMapStudentsToDepartmentsRandomly() {
-        mapStudentsToDepartmentsRandomly();
-    }
-
-    /**
      * Gets export connection.
      *
      * @return the export connection
-     * @throws SQLException the sql exception
+     * @throws SQLException the SQL exception
      */
     public Connection getExportConnection() throws SQLException {
         return DatabaseConnectionManager.Connect();

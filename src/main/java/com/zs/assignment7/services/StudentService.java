@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * The type Data generation service.
  */
-public class DataGenerationService {
-    private List<Student> generateStudents(int count) {
+public class StudentService {
+    public List<Student> generateStudents(int count) {
         System.out.println("------Generating " + count + " student records in memory------");
         List<Student> students = new ArrayList<>(count);
         for (int i = 1; i <= count; i++) {
@@ -18,15 +18,5 @@ public class DataGenerationService {
             students.add(new Student(i, firstName, lastName, mobile));
         }
         return students;
-    }
-
-    /**
-     * Call generate students list.
-     *
-     * @param count the count
-     * @return the list
-     */
-    public List<Student> callGenerateStudents(int count) {
-        return generateStudents(count);
     }
 }

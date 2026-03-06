@@ -1,6 +1,6 @@
 package com.zs.assignment7.services;
 
-import com.zs.assignment7.repositories.AssignmentRepository;
+import com.zs.assignment7.repositories.StudentDepartmentRepository;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -11,12 +11,17 @@ import java.sql.ResultSet;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * The type Export service.
+ * The type File export service.
  */
-public class ExportService {
-    private final AssignmentRepository repository = new AssignmentRepository();
+public class FileExportService {
+    private final StudentDepartmentRepository repository = new StudentDepartmentRepository();
 
-    private void exportDataToCompressedFile(String filePath) {
+    /**
+     * Export data to compressed file.
+     *
+     * @param filePath the file path
+     */
+    public void exportDataToCompressedFile(String filePath) {
         System.out.println("Starting extraction to compressed file: " + filePath);
 
         String sql = "SELECT s.id, s.first_name, s.last_name, d.name AS department_name " +
@@ -25,11 +30,9 @@ public class ExportService {
                 "JOIN departments d ON sd.dept_id = d.id";
 
         try (Connection conn = repository.getExportConnection()) {
-            // Required for fetch size to work in Postgres
             conn.setAutoCommit(false);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                // IMPORTANT: This must be set BEFORE executeQuery()
                 stmt.setFetchSize(10000);
 
                 try (ResultSet rs = stmt.executeQuery();
@@ -55,14 +58,5 @@ public class ExportService {
             System.err.println("Error during extraction: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Call export data to compressed file.
-     *
-     * @param filePath the file path
-     */
-    public void callExportDataToCompressedFile(String filePath) {
-        exportDataToCompressedFile(filePath);
     }
 }

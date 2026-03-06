@@ -1,18 +1,18 @@
 package com.zs.assignment7.controllers;
 
 import com.zs.assignment7.models.Student;
-import com.zs.assignment7.services.DataGenerationService;
-import com.zs.assignment7.services.DatabaseService;
-import com.zs.assignment7.services.ExportService;
+import com.zs.assignment7.services.StudentService;
+import com.zs.assignment7.services.StudentDepartmentMappingService;
+import com.zs.assignment7.services.FileExportService;
 import java.util.List;
 
 /**
  * The type Database controller.
  */
 public class DatabaseController {
-    private final DataGenerationService dataGenerationService = new DataGenerationService();
-    private final DatabaseService dbService = new DatabaseService();
-    private final ExportService exportService = new ExportService();
+    private final StudentService studentService = new StudentService();
+    private final StudentDepartmentMappingService studentDepartmentMappingService = new StudentDepartmentMappingService();
+    private final FileExportService fileExportService = new FileExportService();
 
     /**
      * Execute flow.
@@ -20,14 +20,11 @@ public class DatabaseController {
     public void executeFlow() {
         long startTime = System.currentTimeMillis();
 
-        // 1. Generate records
-        List<Student> students = dataGenerationService.callGenerateStudents(1000000);
+        List<Student> students = studentService.generateStudents(1000000);
 
-        // 2 & 3 & 4. Load schema, departments, students, and map them
-        dbService.initializeDatabase(students);
+        studentDepartmentMappingService.initializeDatabase(students);
 
-        // 5 & 6. Extract data to a size-reduced file (.gz)
-        exportService.callExportDataToCompressedFile("student_departments.csv.gz");
+        fileExportService.exportDataToCompressedFile("student_departments.csv.gz");
 
         long endTime = System.currentTimeMillis();
         System.out.println("Total Execution Time: " + (endTime - startTime) / 1000 + " seconds.");
