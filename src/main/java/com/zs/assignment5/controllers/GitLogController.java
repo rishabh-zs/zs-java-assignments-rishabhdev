@@ -2,7 +2,6 @@ package com.zs.assignment5.controllers;
 
 import com.zs.assignment5.exceptions.GitLogException;
 import com.zs.assignment5.models.Commit;
-import com.zs.assignment5.repositories.FileGitLogRepository;
 import com.zs.assignment5.services.GitLogService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -12,7 +11,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
- * The type Git log controller.
+ * GitLogController serves as the main entry point for the application, handling user interaction and orchestrating the processing of Git log data.
  */
 public class GitLogController {
 
@@ -20,13 +19,15 @@ public class GitLogController {
 
     /**
      * Instantiates a new Git log controller.
+     *
+     * @param gitLogService service used to parse and analyze Git log data
      */
-    public GitLogController() {
-        this.gitLogService = new GitLogService(new FileGitLogRepository());
+    public GitLogController(GitLogService gitLogService) {
+        this.gitLogService = gitLogService;
     }
 
     /**
-     * Start.
+     * start the application, either using command-line arguments or interactive prompts.
      *
      * @param args the args
      */

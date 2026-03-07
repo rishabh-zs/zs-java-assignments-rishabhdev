@@ -1,7 +1,7 @@
 package com.zs.assignment5.services;
 
 import com.zs.assignment5.exceptions.FileFormatException;
-import com.zs.assignment5.exceptions.FileInformationIncompeleteException;
+import com.zs.assignment5.exceptions.FileInformationIncompleteException;
 import com.zs.assignment5.exceptions.FileNotFoundException;
 import com.zs.assignment5.models.Commit;
 import com.zs.assignment5.repositories.FileGitLogRepository;
@@ -33,9 +33,9 @@ public class GitLogService {
      * @return the commits
      * @throws FileNotFoundException               the file not found exception
      * @throws FileFormatException                 the file format exception
-     * @throws FileInformationIncompeleteException the file information incompelete exception
+     * @throws FileInformationIncompleteException the file information incompelete exception
      */
-    public List<Commit> getCommits(String source) throws FileNotFoundException, FileFormatException, FileInformationIncompeleteException {
+    public List<Commit> getCommits(String source) throws FileNotFoundException, FileFormatException, FileInformationIncompleteException {
         return repository.fetchAllCommits(source);
     }
 
