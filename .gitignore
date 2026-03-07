@@ -24,13 +24,11 @@ hs_err_pid*
 replay_pid*
 
 .idea
-.run
 .gradle
 build
 
 gradlew
 gradlew.bat
 
-run_assignment5.sh
-test.sh
 zs-java-assignments-rishabhdev.iml
+.run/
