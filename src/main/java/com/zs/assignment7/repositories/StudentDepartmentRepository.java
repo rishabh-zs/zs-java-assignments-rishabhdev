@@ -16,7 +16,7 @@ import java.util.Random;
 public class StudentDepartmentRepository {
 
     /**
-     * Create schema for students,Department and StudentDepartmentMapping.
+     * Create the schema for students,Department and StudentDepartmentMapping.
      */
     public void createSchema() {
         String createStudents = "CREATE TABLE IF NOT EXISTS students (" +

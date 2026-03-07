@@ -7,7 +7,7 @@ import com.zs.assignment7.services.FileExportService;
 import java.util.List;
 
 /**
- * Database controller to manage the flow of data generation, database initialization, and file export.
+ * Database controller to manage the flow of data generation, database initialization, and file export .
  */
 public class DatabaseController {
     private final StudentService studentService = new StudentService();
