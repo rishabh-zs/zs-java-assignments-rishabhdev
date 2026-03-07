@@ -1,6 +1,5 @@
 package com.zs.assignment9.controller;
 
-import com.zs.assignment9.dao.StudentDaoClass;
 import com.zs.assignment9.model.Student;
 import com.zs.assignment9.service.StudentService;
 
@@ -14,8 +13,8 @@ public class StudentController {
     /**
      * Instantiates a new Student controller.
      */
-    public StudentController() {
-        this.studentService = new StudentService(new StudentDaoClass());
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
     }
 
     /**
@@ -54,7 +53,7 @@ public class StudentController {
     }
 
     /**
-     * Start.
+     * Start the program.
      */
     public void start() {
         System.out.println("--- Student_Testing---\n");

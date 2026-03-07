@@ -4,9 +4,9 @@ package com.zs.assignment9.model;
  * The type Student.
  */
 public class Student {
-    private Integer id;
-    private String firstName;
-    private String lastName;
+    private final Integer id;
+    private final String firstName;
+    private final String lastName;
 
     /**
      * Instantiates a new Student.
