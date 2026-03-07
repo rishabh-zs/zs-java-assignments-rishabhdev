@@ -4,10 +4,17 @@ import com.zs.assignment7.models.Student;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * The type Data generation service.
+ * The type Student service.
  */
 public class StudentService {
+    /**
+     * Generate students list.
+     *
+     * @param count the count
+     * @return the list
+     */
     public List<Student> generateStudents(int count) {
         System.out.println("------Generating " + count + " student records in memory------");
         List<Student> students = new ArrayList<>(count);

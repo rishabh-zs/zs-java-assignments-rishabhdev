@@ -3,7 +3,7 @@ package com.zs.assignment7;
 import com.zs.assignment7.controllers.DatabaseController;
 
 /**
- * The type Main.
+ * Main class to run the application.
  */
 public class Main {
     /**
