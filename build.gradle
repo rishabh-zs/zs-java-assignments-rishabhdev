@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group = 'com.zs.assignment9'
+group = 'com.zs.assignment10'
 version = '1.0.0'
 
 java {
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    // PostgreSQL JDBC driver for Assignment 10
+    // PostgresSQL JDBC driver for Assignment 10
     implementation 'org.postgresql:postgresql:42.7.7'
 
     // JUnit 5
