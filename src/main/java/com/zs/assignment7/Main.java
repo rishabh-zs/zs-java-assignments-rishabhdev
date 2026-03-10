@@ -9,10 +9,12 @@ import com.zs.assignment7.models.Student;
 
 import java.util.List;
 
+
 /**
- * Main class to run the application.
+ * The type Main.
  */
 public class Main {
+
     /**
      * The entry point of application.
      *

@@ -5,14 +5,26 @@ import com.zs.assignment7.repositories.DepartmentRepository;
 
 import java.util.List;
 
+/**
+ * The type Department service.
+ */
 public class DepartmentService {
+    /**
+     * The Department repository.
+     */
     DepartmentRepository departmentRepository;
 
+    /**
+     * Instantiates a new Department service.
+     */
     public DepartmentService(){
         this.departmentRepository=new DepartmentRepository();
     }
 
 
+    /**
+     * Create department schema.
+     */
     public void createDepartmentSchema(){
         try {
             departmentRepository.createDepartmentSchema();
@@ -22,6 +34,11 @@ public class DepartmentService {
         }
     }
 
+    /**
+     * Insert department list.
+     *
+     * @return the list
+     */
     public List<Department> insertDepartment(){
         List<Department> departments = List.of(
                 new Department(1, "CS"),

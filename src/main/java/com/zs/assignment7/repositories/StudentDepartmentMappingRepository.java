@@ -12,10 +12,12 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Random;
 
+
 /**
- * The type Assignment repository.
+ * The type Student department mapping repository.
  */
 public class StudentDepartmentMappingRepository {
+
     /**
      * Create student department mapping schema.
      */
@@ -36,6 +38,9 @@ public class StudentDepartmentMappingRepository {
 
     /**
      * Map students to departments randomly.
+     *
+     * @param students    the students
+     * @param departments the departments
      */
     public void mapStudentsToDepartmentsRandomly(List<Student> students, List<Department> departments) {
         String sql = "INSERT INTO student_dept_mapping (dept_id, student_id) VALUES (?, ?)";

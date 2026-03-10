@@ -9,8 +9,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+/**
+ * The type Student repository.
+ */
 public class StudentRepository {
 
+    /**
+     * Create student schema.
+     */
     public void createStudentSchema() {
         String createStudents = "CREATE TABLE IF NOT EXISTS students (" +
                 "id SERIAL PRIMARY KEY, " +
@@ -31,6 +37,11 @@ public class StudentRepository {
         }
     }
 
+    /**
+     * Batch insert students.
+     *
+     * @param students the students
+     */
     public void batchInsertStudents(List<Student> students) {
         String sql = "INSERT INTO students (id, first_name, last_name, mobile) VALUES (?, ?, ?, ?)";
 

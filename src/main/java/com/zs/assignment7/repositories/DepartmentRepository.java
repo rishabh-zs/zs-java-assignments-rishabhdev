@@ -9,9 +9,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+/**
+ * The type Department repository.
+ */
 public class DepartmentRepository {
 
 
+    /**
+     * Create department schema.
+     */
     public void createDepartmentSchema() {
         String createDepartments = "CREATE TABLE IF NOT EXISTS departments (" +
                 "id SERIAL PRIMARY KEY, " +
@@ -29,6 +35,11 @@ public class DepartmentRepository {
         }
     }
 
+    /**
+     * Insert departments.
+     *
+     * @param departments the departments
+     */
     public void insertDepartments(List<Department> departments) {
         String sql = "INSERT INTO departments (id, name) VALUES (?, ?) ON CONFLICT DO NOTHING";
         try (Connection conn = DatabaseConnectionManager.Connect();

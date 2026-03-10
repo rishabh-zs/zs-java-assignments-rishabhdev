@@ -10,8 +10,16 @@ import java.sql.ResultSet;
 import java.util.zip.GZIPOutputStream;
 import com.zs.assignment7.utils.DatabaseConnectionManager;
 
+/**
+ * The type File export repository.
+ */
 public class FileExportRepository {
 
+    /**
+     * Export data to compressed file.
+     *
+     * @param filePath the file path
+     */
     public void exportDataToCompressedFile(String filePath) {
         System.out.println("Starting extraction to compressed file: " + filePath);
 

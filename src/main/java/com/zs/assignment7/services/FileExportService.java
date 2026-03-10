@@ -8,11 +8,19 @@ import com.zs.assignment7.repositories.FileExportRepository;
 public class FileExportService {
     private final FileExportRepository fileExportRepository;
 
+    /**
+     * Instantiates a new File export service.
+     */
     public FileExportService() {
         this.fileExportRepository = new FileExportRepository();
 
     }
 
+    /**
+     * Export data to compressed file.
+     *
+     * @param filePath the file path
+     */
     public void exportDataToCompressedFile(String filePath){
         try {
             fileExportRepository.exportDataToCompressedFile(filePath);

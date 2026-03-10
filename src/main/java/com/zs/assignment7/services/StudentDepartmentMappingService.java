@@ -6,21 +6,24 @@ import com.zs.assignment7.repositories.StudentDepartmentMappingRepository;
 import java.util.List;
 
 /**
- * The type Database service.
+ * The type Student department mapping service.
  */
 public class StudentDepartmentMappingService {
     private final StudentDepartmentMappingRepository studentDepartmentMappingRepository;
 
+    /**
+     * Instantiates a new Student department mapping service.
+     */
     public StudentDepartmentMappingService(){
         this.studentDepartmentMappingRepository = new StudentDepartmentMappingRepository();
     }
 
     /**
-     * Initialize database.
+     * Map student to department.
      *
-     * @param students the students
+     * @param students    the students
+     * @param departments the departments
      */
-
     public void MapStudentToDepartment(List<Student> students, List<Department> departments) {
         studentDepartmentMappingRepository.createStudentDepartmentMappingSchema();
         studentDepartmentMappingRepository.mapStudentsToDepartmentsRandomly(students, departments);

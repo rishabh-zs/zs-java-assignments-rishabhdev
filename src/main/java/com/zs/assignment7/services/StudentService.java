@@ -11,11 +11,18 @@ import java.util.List;
  */
 public class StudentService {
     private List<Student> list=new ArrayList<>();
+    /**
+     * The Student repository.
+     */
     StudentRepository studentRepository;
 
+    /**
+     * Instantiates a new Student service.
+     */
     public StudentService() {
         this.studentRepository=new StudentRepository();
     }
+
     /**
      * Generate students list.
      *
@@ -35,6 +42,9 @@ public class StudentService {
         return students;
     }
 
+    /**
+     * Create student schema.
+     */
     public void createStudentSchema(){
         try {
             studentRepository.createStudentSchema();
@@ -44,6 +54,9 @@ public class StudentService {
         }
     }
 
+    /**
+     * Insert students.
+     */
     public void InsertStudents() {
         try {
             studentRepository.batchInsertStudents(list);
