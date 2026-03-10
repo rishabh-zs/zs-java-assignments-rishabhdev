@@ -1,4 +1,4 @@
-package com.zs.assignment7.repositories;
+package com.zs.assignment7.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,17 +13,8 @@ public class DatabaseConnectionManager {
     private static final String USER = "postgres";
     private static final String PASSWORD = "User#2026";
 
-    private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
-    }
 
-    /**
-     * Connect connection.
-     *
-     * @return the connection
-     * @throws SQLException the sql exception
-     */
     public static Connection Connect() throws SQLException {
-        return getConnection();
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
