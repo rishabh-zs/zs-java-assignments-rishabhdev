@@ -65,52 +65,70 @@ public class GitLogController {
 
     private void processGitLog(String filePath, LocalDate sinceDate) {
         try {
-            System.out.println("\nParsing Git Log file: " + filePath);
-            List<Commit> commits = gitLogService.getCommits(filePath);
-
-            System.out.println("✅ Successfully parsed " + commits.size() + " commits.\n");
-
-            System.out.println("--- 1. Total Commits by Developer Since " + sinceDate + " ---");
-            Map<String, Long> totalCommits = gitLogService.getTotalCommitsSince(commits, sinceDate);
-            if (totalCommits.isEmpty()) System.out.println("No commits found since this date.");
-            totalCommits.forEach((dev, count) -> System.out.println(dev + " : " + count + " commits"));
-
-            System.out.println("\n--- 2. Daily Commits by Developer Since " + sinceDate + " ---");
-            Map<String, Map<LocalDate, Long>> dailyCommits = gitLogService.getDailyCommitsSince(commits, sinceDate);
-            if (dailyCommits.isEmpty()) System.out.println("No commits found since this date.");
-            dailyCommits.forEach((dev, dates) -> {
-                System.out.println("Developer: " + dev);
-                dates.forEach((date, count) -> System.out.println("  " + date + " -> " + count + " commits"));
-            });
-
-            System.out.println("\n--- 3. Developers with >2 Successive Days of No Commits (Overall) ---");
-            List<String> devsWithGaps = gitLogService.getDevelopersWithInactivity(commits);
-            if (devsWithGaps.isEmpty()) {
-                System.out.println("All developers have been active without a 2-day gap.");
-            } else {
-                devsWithGaps.forEach(dev -> System.out.println("- " + dev));
-            }
-
+            List<Commit> commits = parseCommits(filePath);
+            printTotalCommits(commits, sinceDate);
+            printDailyCommits(commits, sinceDate);
+            printDevelopersWithInactivity(commits);
             LocalDate windowEnd = sinceDate.plusDays(2);
-            System.out.println("\n--- 4. Active Developers (At least 1 commit between " + sinceDate + " and " + windowEnd + ") ---");
-            Set<String> activeDevs = gitLogService.getActiveDevelopers(commits, sinceDate);
-            if (activeDevs.isEmpty()) {
-                System.out.println("No developers were active during this 2-day period.");
-            } else {
-                activeDevs.forEach(dev -> System.out.println("- " + dev));
-            }
-
-            System.out.println("\n--- 5. InActive Developers (0 commits between " + sinceDate + " and " + windowEnd + ") ---");
-            Set<String> inactiveDevs = gitLogService.getInactiveDevelopers(commits, sinceDate);
-            if (inactiveDevs.isEmpty()) {
-                System.out.println("All historical developers were active during this 2-day period!");
-            } else {
-                inactiveDevs.forEach(dev -> System.out.println("- " + dev));
-            }
-
+            printActiveDevelopers(commits, sinceDate, windowEnd);
+            printInactiveDevelopers(commits, sinceDate, windowEnd);
         } catch (GitLogException e) {
             System.err.println("\n❌ Processing Error: " + e.getClass().getSimpleName());
             System.err.println("Message: " + e.getMessage());
+        }
+    }
+
+    private List<Commit> parseCommits(String filePath) throws GitLogException {
+        System.out.println("\nParsing Git Log file: " + filePath);
+        List<Commit> commits = gitLogService.getCommits(filePath);
+        System.out.println("✅ Successfully parsed " + commits.size() + " commits.\n");
+        return commits;
+    }
+
+    private void printTotalCommits(List<Commit> commits, LocalDate sinceDate) {
+        System.out.println("--- 1. Total Commits by Developer Since " + sinceDate + " ---");
+        Map<String, Long> totalCommits = gitLogService.getTotalCommitsSince(commits, sinceDate);
+        if (totalCommits.isEmpty()) System.out.println("No commits found since this date.");
+        totalCommits.forEach((dev, count) -> System.out.println(dev + " : " + count + " commits"));
+    }
+
+    private void printDailyCommits(List<Commit> commits, LocalDate sinceDate) {
+        System.out.println("\n--- 2. Daily Commits by Developer Since " + sinceDate + " ---");
+        Map<String, Map<LocalDate, Long>> dailyCommits = gitLogService.getDailyCommitsSince(commits, sinceDate);
+        if (dailyCommits.isEmpty()) System.out.println("No commits found since this date.");
+        dailyCommits.forEach((dev, dates) -> {
+            System.out.println("Developer: " + dev);
+            dates.forEach((date, count) -> System.out.println("  " + date + " -> " + count + " commits"));
+        });
+    }
+
+    private void printDevelopersWithInactivity(List<Commit> commits) {
+        System.out.println("\n--- 3. Developers with >2 Successive Days of No Commits (Overall) ---");
+        List<String> devsWithGaps = gitLogService.getDevelopersWithInactivity(commits);
+        if (devsWithGaps.isEmpty()) {
+            System.out.println("All developers have been active without a 2-day gap.");
+        } else {
+            devsWithGaps.forEach(dev -> System.out.println("- " + dev));
+        }
+    }
+
+    private void printActiveDevelopers(List<Commit> commits, LocalDate sinceDate, LocalDate windowEnd) {
+        System.out.println("\n--- 4. Active Developers (At least 1 commit between " + sinceDate + " and " + windowEnd + ") ---");
+        Set<String> activeDevs = gitLogService.getActiveDevelopers(commits, sinceDate);
+        if (activeDevs.isEmpty()) {
+            System.out.println("No developers were active during this 2-day period.");
+        } else {
+            activeDevs.forEach(dev -> System.out.println("- " + dev));
+        }
+    }
+
+    private void printInactiveDevelopers(List<Commit> commits, LocalDate sinceDate, LocalDate windowEnd) {
+        System.out.println("\n--- 5. InActive Developers (0 commits between " + sinceDate + " and " + windowEnd + ") ---");
+        Set<String> inactiveDevs = gitLogService.getInactiveDevelopers(commits, sinceDate);
+        if (inactiveDevs.isEmpty()) {
+            System.out.println("All historical developers were active during this 2-day period!");
+        } else {
+            inactiveDevs.forEach(dev -> System.out.println("- " + dev));
         }
     }
 }
