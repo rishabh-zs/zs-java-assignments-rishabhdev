@@ -29,29 +29,30 @@ public class HierarchyService {
         if (cat != null) {
             return cat;
         }
-
         cat = repository.findByName(name);
-        if (cat != null) {
+        if(cat != null){
             cache.put(name, cat);
+            return cat;
+        }else{
+            return null;
         }
-        return cat;
     }
 
     /**
-     * Add category boolean.
+     * Add category category.
      *
      * @param name the name
-     * @return the boolean
+     * @return the category
      */
-    public boolean addCategory(String name) {
-        if (repository.existsByName(name)) {
-            getCategory(name);
-            return false;
+    public Category addCategory(String name) {
+        if (getCategory(name)!=null) {
+            return null;
+        }else{
+            Category newCat = new Category(name);
+            repository.save(newCat);
+            cache.put(name, newCat);
+            return newCat;
         }
-        Category newCat = new Category(name);
-        repository.save(newCat);
-        cache.put(name, newCat);
-        return true;
     }
 
     /**
@@ -85,10 +86,10 @@ public class HierarchyService {
      * @param subCatName the sub cat name
      * @return the boolean
      */
-    public boolean addSubCategory(String catName, String subCatName) {
+    public SubCategory addSubCategory(String catName, String subCatName) {
         Category cat = getCategory(catName);
         if (cat == null) {
-            return false;
+            return null;
         }
 
         if (cat.getSubCategories().containsKey(subCatName.toLowerCase())) {
@@ -96,7 +97,7 @@ public class HierarchyService {
         }
         cat.addSubCategory(new SubCategory(subCatName));
         cache.put(catName, cat);
-        return true;
+        return cat.getSubCategories().get(subCatName.toLowerCase());
     }
 
     /**
@@ -124,24 +125,24 @@ public class HierarchyService {
      * @param prodName   the prod name
      * @return the boolean
      */
-    public boolean addProduct(String catName, String subCatName, String prodName) {
+    public Product addProduct(String catName, String subCatName, String prodName) {
         Category cat = getCategory(catName);
         if (cat == null) {
-            throw new IllegalArgumentException("Category not found.");
+            return null;
         }
 
         SubCategory subCat = cat.getSubCategories().get(subCatName.toLowerCase());
         if (subCat == null) {
-            throw new IllegalArgumentException("SubCategory not found.");
+            return null;
         }
 
         if (subCat.getProducts().containsKey(prodName.toLowerCase())) {
-            throw new IllegalArgumentException("Product already exists.");
+            return null;
         }
 
         subCat.addProduct(new Product(prodName));
         cache.put(catName, cat);
-        return true;
+        return subCat.getProducts().get(prodName.toLowerCase());
     }
 
     /**

@@ -168,7 +168,7 @@ public class CategoryHierarchyController {
     public void addCategory() {
         System.out.print("Enter new Category name: ");
         String name = sc.nextLine().trim();
-        if (service.addCategory(name)) {
+        if (service.addCategory(name)!=null) {
             System.out.println("Category added. (Set as MRU): "+ name);
         } else {
             System.out.println("Category already exists. (Moved to MRU)");
@@ -184,7 +184,7 @@ public class CategoryHierarchyController {
         System.out.print("Enter new SubCategory name: ");
         String subName = sc.nextLine().trim();
 
-        if (service.addSubCategory(catName, subName)) {
+        if (service.addSubCategory(catName, subName) != null) {
             System.out.println("SubCategory added. (Parent Category moved to MRU):" +subName);
         } else {
             System.out.println("Parent Category not found.");
@@ -215,8 +215,11 @@ public class CategoryHierarchyController {
         System.out.print("Enter Product name: ");
         String prodName = sc.nextLine().trim();
 
-        service.addProduct(catName, subName, prodName);
-        System.out.println("Product added. (Parent Category moved to MRU): " + prodName);
+        if(service.addProduct(catName, subName, prodName)!=null){
+            System.out.println("Product added. (Parent Category moved to MRU): " + prodName);
+        }else{
+            System.out.println("Product not added.");
+        }
     }
 
     /**
