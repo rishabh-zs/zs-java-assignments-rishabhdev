@@ -11,15 +11,19 @@ public class DatabaseConnectionManager {
     private static final String URL = "jdbc:postgresql://localhost:5435/postgres";
     private static final String USER = "postgres";
     private static final String PASSWORD = "User#2026";
+    private static Connection connection;
 
 
     /**
      * Connect connection.
      *
      * @return the connection
-     * @throws SQLException the sql exception
+     * @throws SQLException the SQL exception
      */
-    public static Connection Connect() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+    public static synchronized Connection Connect() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        }
+        return connection;
     }
 }
