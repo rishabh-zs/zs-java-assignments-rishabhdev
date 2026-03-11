@@ -26,15 +26,10 @@ replay_pid*
 .idea
 .gradle
 build
+qodana.yaml
+Main.run.xml
 
 gradlew
 gradlew.bat
-
-run_assignment5.sh
-test.sh
-
+gradle.properties
 zs-java-assignments-rishabhdev.iml
-
-
-
-

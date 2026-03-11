@@ -17,7 +17,7 @@ repositories {
 }
 
 application {
-    mainClass = 'com.zs.assignment3.Main'
+    mainClass = 'com.zs.assignment4.Main'
 }
 
 tasks.named('run') {
