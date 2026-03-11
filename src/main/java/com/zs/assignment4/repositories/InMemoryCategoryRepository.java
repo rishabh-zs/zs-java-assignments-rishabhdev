@@ -23,8 +23,8 @@ public class InMemoryCategoryRepository implements CategoryRepository {
     }
 
     @Override
-    public boolean deleteByName(String name) {
-        return data.remove(name.toLowerCase()) != null;
+    public Category deleteByName(String name) {
+        return data.remove(name.toLowerCase());
     }
 
     @Override

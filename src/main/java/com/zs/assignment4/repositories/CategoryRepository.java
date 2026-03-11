@@ -23,12 +23,12 @@ public interface CategoryRepository {
     Category findByName(String name);
 
     /**
-     * Delete by name boolean.
+     * Delete by name.
      *
      * @param name the name
-     * @return the boolean
+     * @return the deleted category
      */
-    boolean deleteByName(String name);
+    Category deleteByName(String name);
 
     /**
      * Find all list.

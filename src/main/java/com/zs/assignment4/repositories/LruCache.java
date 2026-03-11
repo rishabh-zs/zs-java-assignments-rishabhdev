@@ -12,10 +12,10 @@ import java.util.Map;
  */
 public class LruCache {
     private final int capacity;
-    private final Map<String, CacheEntry> cache;
+    private final Map<String, CacheEntry<String, Category>> cache;
 
-    private CacheEntry head;
-    private CacheEntry tail;
+    private CacheEntry<String, Category> head;
+    private CacheEntry<String, Category> tail;
 
     /**
      * Instantiates a new Lru cache.
@@ -27,7 +27,7 @@ public class LruCache {
         this.cache = new HashMap<>();
     }
 
-    private void removeNode(CacheEntry node) {
+    private void removeNode(CacheEntry<String, Category> node) {
         if (node.prev != null) {
             node.prev.next = node.next;
         } else {
@@ -41,7 +41,7 @@ public class LruCache {
         }
     }
 
-    private void addToHead(CacheEntry node) {
+    private void addToHead(CacheEntry<String, Category> node) {
         node.next = head;
         node.prev = null;
         if (head != null) {
@@ -53,7 +53,7 @@ public class LruCache {
         }
     }
 
-    private void moveToHead(CacheEntry node) {
+    private void moveToHead(CacheEntry<String, Category> node) {
         removeNode(node);
         addToHead(node);
     }
@@ -67,7 +67,7 @@ public class LruCache {
     public Category get(String key) {
         String lowerKey = key.toLowerCase();
         if (cache.containsKey(lowerKey)) {
-            CacheEntry node = cache.get(lowerKey);
+            CacheEntry<String, Category> node = cache.get(lowerKey);
             moveToHead(node);
             return node.value;
         }
@@ -84,11 +84,11 @@ public class LruCache {
         String lowerKey = key.toLowerCase();
 
         if (cache.containsKey(lowerKey)) {
-            CacheEntry node = cache.get(lowerKey);
+            CacheEntry<String, Category> node = cache.get(lowerKey);
             node.value = category;
             moveToHead(node);
         } else {
-            CacheEntry newNode = new CacheEntry(lowerKey, category);
+            CacheEntry<String, Category> newNode = new CacheEntry<>(lowerKey, category);
             cache.put(lowerKey, newNode);
             addToHead(newNode);
 
@@ -107,7 +107,7 @@ public class LruCache {
     public void remove(String key) {
         String lowerKey = key.toLowerCase();
         if (cache.containsKey(lowerKey)) {
-            CacheEntry node = cache.get(lowerKey);
+            CacheEntry<String, Category> node = cache.get(lowerKey);
             removeNode(node);
             cache.remove(lowerKey);
         }
@@ -120,7 +120,7 @@ public class LruCache {
      */
     public List<Category> getCachedCategories() {
         List<Category> categories = new ArrayList<>();
-        CacheEntry current = head;
+        CacheEntry<String, Category> current = head;
         while (current != null) {
             categories.add(current.value);
             current = current.next;

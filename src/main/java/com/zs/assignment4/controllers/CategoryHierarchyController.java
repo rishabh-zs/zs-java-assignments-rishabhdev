@@ -11,34 +11,28 @@ import java.util.Scanner;
  * The type Category hierarchy controller.
  */
 public class CategoryHierarchyController {
+    private Integer capacity=5;
     private HierarchyService service;
     private final Scanner sc = new Scanner(System.in);
+
+    /**
+     * Instantiates a new Category hierarchy controller.
+     */
+    public CategoryHierarchyController() {
+        this.service=new HierarchyService(capacity);
+    }
 
     /**
      * Start.
      */
     public void start() {
         System.out.println("---Default capacity for LRU Cache is set to 5.---");
-        int capacity = 5;
-        service = new HierarchyService(capacity);
-        demo();
+        Initialize();
 
         boolean exit = false;
         try {
             while (!exit) {
-                System.out.println("\n=== LRU Category Hierarchy Menu ===");
-                System.out.println("1. Display Hierarchy");
-                System.out.println("2. Search a Category");
-                System.out.println("3. Delete a Category");
-                System.out.println("4. Add a Category");
-                System.out.println("5. Add a SubCategory");
-                System.out.println("6. Delete a SubCategory");
-                System.out.println("7. Add a Product");
-                System.out.println("8. Delete a Product");
-                System.out.println("9. Search a SubCategory");
-                System.out.println("10. Search a Product");
-                System.out.println("0. Exit");
-                System.out.print("Choose an option: ");
+                printMenu();
 
                 String choice = sc.nextLine().trim();
 
@@ -66,7 +60,29 @@ public class CategoryHierarchyController {
         }
     }
 
-    private void demo() {
+    /**
+     * Print menu.
+     */
+    public void printMenu(){
+        System.out.println("\n=== LRU Category Hierarchy Menu ===");
+        System.out.println("1. Display Hierarchy");
+        System.out.println("2. Search a Category");
+        System.out.println("3. Delete a Category");
+        System.out.println("4. Add a Category");
+        System.out.println("5. Add a SubCategory");
+        System.out.println("6. Delete a SubCategory");
+        System.out.println("7. Add a Product");
+        System.out.println("8. Delete a Product");
+        System.out.println("9. Search a SubCategory");
+        System.out.println("10. Search a Product");
+        System.out.println("0. Exit");
+        System.out.print("Choose an option: ");
+    }
+
+    /**
+     * Initialize.
+     */
+    public void Initialize() {
         service.addCategory("Electronics");
         service.addSubCategory("Electronics", "Mobiles");
         service.addSubCategory("Electronics", "Laptops");
@@ -118,7 +134,10 @@ public class CategoryHierarchyController {
         service.addProduct("Sports", "Outdoor", "Tennis Racket");
     }
 
-    private void searchCategory() {
+    /**
+     * Search category.
+     */
+    public void searchCategory() {
         System.out.print("Enter Category name to search: ");
         String name = sc.nextLine().trim();
         Category cat = service.searchCategory(name);
@@ -129,50 +148,66 @@ public class CategoryHierarchyController {
         }
     }
 
-    private void deleteCategory() {
+    /**
+     * Delete category.
+     */
+    public void deleteCategory() {
         System.out.print("Enter Category name to delete: ");
         String name = sc.nextLine().trim();
-        if (service.deleteCategory(name)) {
-            System.out.println("Category deleted successfully.");
+        Category cat=service.deleteCategory(name);
+        if (cat != null) {
+            System.out.println("Category deleted successfully: "+ cat.getName());
         } else {
             System.out.println("Category not found.");
         }
     }
 
-    private void addCategory() {
+    /**
+     * Add category.
+     */
+    public void addCategory() {
         System.out.print("Enter new Category name: ");
         String name = sc.nextLine().trim();
         if (service.addCategory(name)) {
-            System.out.println("Category added. (Set as MRU)");
+            System.out.println("Category added. (Set as MRU): "+ name);
         } else {
             System.out.println("Category already exists. (Moved to MRU)");
         }
     }
 
-    private void addSubCategory() {
+    /**
+     * Add sub category.
+     */
+    public void addSubCategory() {
         System.out.print("Enter the Parent Category name: ");
         String catName = sc.nextLine().trim();
         System.out.print("Enter new SubCategory name: ");
         String subName = sc.nextLine().trim();
 
         if (service.addSubCategory(catName, subName)) {
-            System.out.println("SubCategory added. (Parent Category moved to MRU)");
+            System.out.println("SubCategory added. (Parent Category moved to MRU):" +subName);
         } else {
             System.out.println("Parent Category not found.");
         }
     }
 
-    private void deleteSubCategory() {
+    /**
+     * Delete sub category.
+     */
+    public void deleteSubCategory() {
         System.out.print("Enter SubCategory name to delete: ");
         String name = sc.nextLine().trim();
-        if (service.deleteSubCategory(name)) {
-            System.out.println("SubCategory deleted.");
+        if (service.deleteSubCategory(name) != null) {
+            System.out.println("SubCategory deleted:" + name);
         } else {
             System.out.println("SubCategory not found.");
         }
     }
 
-    private void addProduct() {
+    /**
+     * Add product.
+     */
+    public void addProduct() {
         System.out.print("Enter the Category name: ");
         String catName = sc.nextLine().trim();
         System.out.print("Enter the SubCategory name: ");
@@ -181,20 +216,26 @@ public class CategoryHierarchyController {
         String prodName = sc.nextLine().trim();
 
         service.addProduct(catName, subName, prodName);
-        System.out.println("Product added. (Parent Category moved to MRU)");
+        System.out.println("Product added. (Parent Category moved to MRU): " + prodName);
     }
 
-    private void deleteProduct() {
+    /**
+     * Delete product.
+     */
+    public void deleteProduct() {
         System.out.print("Enter Product name to delete: ");
         String name = sc.nextLine().trim();
-        if (service.deleteProduct(name)) {
-            System.out.println("Product deleted.");
+        if (service.deleteProduct(name) != null) {
+            System.out.println("Product deleted: " + name);
         } else {
             System.out.println("Product not found.");
         }
     }
 
-    private void searchSubCategory() {
+    /**
+     * Search sub category.
+     */
+    public void searchSubCategory() {
         System.out.print("Enter SubCategory name to search: ");
         String name = sc.nextLine().trim();
         SubCategory subCat = service.searchSubCategory(name);
@@ -205,7 +246,10 @@ public class CategoryHierarchyController {
         }
     }
 
-    private void searchProduct() {
+    /**
+     * Search product.
+     */
+    public void searchProduct() {
         System.out.print("Enter Product name to search: ");
         String name = sc.nextLine().trim();
         Product prod = service.searchProduct(name);

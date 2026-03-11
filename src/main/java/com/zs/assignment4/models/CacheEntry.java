@@ -4,23 +4,23 @@ package com.zs.assignment4.models;
 /**
  * The type Cache entry.
  */
-public class CacheEntry {
+public class CacheEntry<K, V> {
     /**
      * The Key.
      */
-    public String key;
+    public K key;
     /**
      * The Value.
      */
-    public Category value;
+    public V value;
     /**
      * The Prev.
      */
-    public CacheEntry prev;
+    public CacheEntry<K, V> prev;
     /**
      * The Next.
      */
-    public CacheEntry next;
+    public CacheEntry<K, V> next;
 
     /**
      * Instantiates a new Cache entry.
@@ -28,7 +28,7 @@ public class CacheEntry {
      * @param key   the key
      * @param value the value
      */
-    public CacheEntry(String key, Category value) {
+    public CacheEntry(K key, V value) {
         this.key = key;
         this.value = value;
     }

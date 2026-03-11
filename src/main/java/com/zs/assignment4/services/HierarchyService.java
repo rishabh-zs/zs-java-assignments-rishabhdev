@@ -24,7 +24,7 @@ public class HierarchyService {
         this.repository = new InMemoryCategoryRepository();
     }
 
-    private Category getCategoryThroughCache(String name) {
+    private Category getCategory(String name) {
         Category cat = cache.get(name);
         if (cat != null) {
             return cat;
@@ -45,7 +45,7 @@ public class HierarchyService {
      */
     public boolean addCategory(String name) {
         if (repository.existsByName(name)) {
-            getCategoryThroughCache(name);
+            getCategory(name);
             return false;
         }
         Category newCat = new Category(name);
@@ -61,21 +61,21 @@ public class HierarchyService {
      * @return the category
      */
     public Category searchCategory(String name) {
-        return getCategoryThroughCache(name);
+        return getCategory(name);
     }
 
     /**
-     * Delete category boolean.
+     * Delete category.
      *
      * @param name the name
-     * @return the boolean
+     * @return the deleted category
      */
-    public boolean deleteCategory(String name) {
-        if (repository.deleteByName(name)) {
+    public Category deleteCategory(String name) {
+        Category deleted = repository.deleteByName(name);
+        if (deleted != null) {
             cache.remove(name);
-            return true;
         }
-        return false;
+        return deleted;
     }
 
     /**
@@ -86,7 +86,7 @@ public class HierarchyService {
      * @return the boolean
      */
     public boolean addSubCategory(String catName, String subCatName) {
-        Category cat = getCategoryThroughCache(catName);
+        Category cat = getCategory(catName);
         if (cat == null) {
             return false;
         }
@@ -105,15 +105,15 @@ public class HierarchyService {
      * @param subCatName the sub cat name
      * @return the boolean
      */
-    public boolean deleteSubCategory(String subCatName) {
+    public SubCategory deleteSubCategory(String subCatName) {
         String key = subCatName.toLowerCase();
         for (Category cat : repository.findAll()) {
             if (cat.getSubCategories().containsKey(key)) {
                 cat.removeSubCategory(key);
-                return true;
+                return cat.getSubCategories().get(key);
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -125,7 +125,7 @@ public class HierarchyService {
      * @return the boolean
      */
     public boolean addProduct(String catName, String subCatName, String prodName) {
-        Category cat = getCategoryThroughCache(catName);
+        Category cat = getCategory(catName);
         if (cat == null) {
             throw new IllegalArgumentException("Category not found.");
         }
@@ -150,17 +150,17 @@ public class HierarchyService {
      * @param prodName the prod name
      * @return the boolean
      */
-    public boolean deleteProduct(String prodName) {
+    public Product deleteProduct(String prodName) {
         String key = prodName.toLowerCase();
         for (Category cat : repository.findAll()) {
             for (SubCategory subCat : cat.getSubCategories().values()) {
                 if (subCat.getProducts().containsKey(key)) {
                     subCat.removeProduct(key);
-                    return true;
+                    return subCat.getProducts().get(key);
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -173,7 +173,7 @@ public class HierarchyService {
         String key = subCatName.toLowerCase();
         for (Category cat : repository.findAll()) {
             if (cat.getSubCategories().containsKey(key)) {
-                getCategoryThroughCache(cat.getName());
+                getCategory(cat.getName());
                 return cat.getSubCategories().get(key);
             }
         }
@@ -191,7 +191,7 @@ public class HierarchyService {
         for (Category cat : repository.findAll()) {
             for (SubCategory subCat : cat.getSubCategories().values()) {
                 if (subCat.getProducts().containsKey(key)) {
-                    getCategoryThroughCache(cat.getName()); // Push parent category to MRU
+                    getCategory(cat.getName()); // Push parent category to MRU
                     return subCat.getProducts().get(key);
                 }
             }
@@ -213,7 +213,12 @@ public class HierarchyService {
         }
     }
 
-    private void printCategory(Category cat) {
+    /**
+     * Print category.
+     *
+     * @param cat the cat
+     */
+    public void printCategory(Category cat) {
         System.out.println("- " + cat.getName());
         for (SubCategory subCat : cat.getSubCategories().values()) {
             System.out.println("  |-- " + subCat.getName());
