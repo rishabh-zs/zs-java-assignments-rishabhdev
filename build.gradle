@@ -2,21 +2,25 @@ plugins {
     id 'java'
 }
 
-group = 'com.zs'
-version = '1.0'
+group = 'com.zs.assignment7'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    implementation 'org.postgresql:postgresql:42.7.2'
+}
 
 repositories {
     mavenCentral()
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-jar {
-    manifest {
-        attributes('Main-Class': 'com.zs.assignment5.Main')
-    }
+application {
+    mainClass = 'com.zs.assignment7.Main'
 }
 
 tasks.register('runAssignment5', JavaExec) {
@@ -25,4 +29,18 @@ tasks.register('runAssignment5', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.zs.assignment5.Main'
     args = ['src/main/resources/log.txt', '2026-02-20']
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes('Main-Class': 'com.zs.assignment7.Main')
+    }
+}
+
+tasks.register('runAssignment7', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 7 - Database workflow'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment7.Main'
+    standardInput = System.in
 }
