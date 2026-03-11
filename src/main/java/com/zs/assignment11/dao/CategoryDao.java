@@ -10,4 +10,5 @@ public interface CategoryDao {
     List<Category> findAllCategories();
     List<Product> findAllProductsByCategoryId(Long categoryId);
     void  addCategory(Category category);
+    void  deleteCategory(Long id);
 }

@@ -4,12 +4,14 @@ import com.zs.assignment11.dao.CategoryDao;
 import com.zs.assignment11.exception.CannotCreateCategoryTableException;
 import com.zs.assignment11.exception.CannotGetAllCategoryException;
 import com.zs.assignment11.exception.CannotGetAllProductByCategoryIdException;
+import com.zs.assignment11.exception.CategoryAlreadyExistsException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -65,10 +67,6 @@ public class CategoryService {
             throw new IllegalArgumentException("Category payload is required.");
         }
 
-        if (category.getId() == null || category.getId() <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
-
         if (category.getName() == null || category.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Category name must not be blank.");
         }
@@ -77,9 +75,28 @@ public class CategoryService {
 
         try {
             categoryDao.addCategory(category);
+            log.info("Category added successfully {}", category.getName());
+        } catch (DuplicateKeyException e) {
+            log.warn("Duplicate category name: {}", category.getName());
+            throw new CategoryAlreadyExistsException("Category already exists");
         } catch (DataAccessException e) {
             log.error("Error while adding category: {}", category.getName(), e);
             throw new RuntimeException("Failed to add category to database.", e);
+        }
+    }
+
+    public void deleteCategory(Long categoryId) {
+        if(categoryId==null || categoryId<=0){
+            throw new IllegalArgumentException("Category id must be a positive number.");
+        }
+        log.info("Request received to delete category id: {}", categoryId);
+
+        try{
+            categoryDao.deleteCategory(categoryId);
+            log.info("Deleted category id: {}", categoryId);
+        }catch(DataAccessException ex){
+            log.error("Error while deleting category id: {}", categoryId, ex);
+            throw new RuntimeException("Failed to delete category from database.", ex);
         }
     }
 }

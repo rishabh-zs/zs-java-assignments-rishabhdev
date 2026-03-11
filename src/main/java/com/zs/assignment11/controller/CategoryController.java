@@ -39,4 +39,11 @@ public class CategoryController {
         return categoryService.getProductsByCategoryId(categoryId);
     }
 
+    @DeleteMapping("/deleteCategory/{categoryId}")
+    public String handleDeleteCategory(@PathVariable Long categoryId){
+        log.debug("/deleteCategory endpoint was called");
+        categoryService.deleteCategory(categoryId);
+        return "Category deleted successfully.";
+    }
+
 }

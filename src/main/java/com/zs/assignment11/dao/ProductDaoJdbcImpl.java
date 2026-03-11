@@ -22,20 +22,28 @@ public class ProductDaoJdbcImpl implements ProductDao {
 
     @Override
     public void CreateProductTable(){
-        log.debug("Executing SQL to create product table");
+        log.debug("Checking whether product table already exists");
 
-        final String DROP_PRODUCT_TABLE_SQL = "DROP TABLE IF EXISTS product";
-        final String CREATE_PRODUCT_TABLE_SQL = "CREATE TABLE product (" +
-                "id INTEGER PRIMARY KEY, " +
-                "name VARCHAR(255) NOT NULL, " +
+        final String CHECK_PRODUCT_TABLE_EXISTS_SQL =
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'product')";
+
+        final String CREATE_PRODUCT_TABLE_SQL = "CREATE TABLE IF NOT EXISTS product (" +
+                "id SERIAL PRIMARY KEY, " +
+                "name VARCHAR(255) NOT NULL UNIQUE, " +
                 "price DOUBLE PRECISION NOT NULL CHECK (price >= 0), " +
                 "category_id INTEGER NOT NULL, " +
                 "CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE" +
                 ")";
 
         try {
-            jdbcTemplate.execute(DROP_PRODUCT_TABLE_SQL);
+            Boolean tableExists = jdbcTemplate.queryForObject(CHECK_PRODUCT_TABLE_EXISTS_SQL, Boolean.class);
+            if (Boolean.TRUE.equals(tableExists)) {
+                log.info("Product table already exists, skipping create");
+                return;
+            }
+
             jdbcTemplate.execute(CREATE_PRODUCT_TABLE_SQL);
+            log.info("Product table created successfully");
         } catch (DataAccessException ex) {
             log.error("Failed to create product table", ex);
             throw ex;
@@ -74,19 +82,18 @@ public class ProductDaoJdbcImpl implements ProductDao {
 
     @Override
     public void addProduct(Product product) {
-        log.debug("Executing SQL to add product with id: {}", product.getId());
+        log.debug("Executing SQL to add product: {}", product.getName());
 
-        final String INSERT_PRODUCT_SQL = "INSERT INTO product (id, name, price, category_id) VALUES (?, ?, ?, ?)";
+        final String INSERT_PRODUCT_SQL = "INSERT INTO product (name, price, category_id) VALUES (?, ?, ?)";
 
         int insertedRows = jdbcTemplate.update(
                 INSERT_PRODUCT_SQL,
-                product.getId(),
                 product.getName(),
                 product.getPrice(),
                 product.getCategoryId()
         );
         if (insertedRows != 1) {
-            throw new IllegalStateException("Unable to insert product with id: " + product.getId());
+            throw new IllegalStateException("Unable to insert product: " + product.getName());
         }
 
     }

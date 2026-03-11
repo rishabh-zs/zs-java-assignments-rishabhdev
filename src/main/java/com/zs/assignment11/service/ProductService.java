@@ -1,12 +1,13 @@
 package com.zs.assignment11.service;
 
 import com.zs.assignment11.dao.ProductDao;
-import com.zs.assignment11.exception.CannotCreateCategoryTableException;
 import com.zs.assignment11.exception.CannotCreateProductTableException;
+import com.zs.assignment11.exception.ProductAlreadyExistsException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -65,6 +66,9 @@ public class ProductService {
         try {
             productDao.addProduct(product);
             log.info("Product added successfully: {}", product.getName());
+        } catch (DuplicateKeyException ex) {
+            log.warn("Duplicate product name: {}", product.getName());
+            throw new ProductAlreadyExistsException(product.getName());
         } catch (DataAccessException ex) {
             log.error("Database error while adding product: {}", product.getName(), ex);
             throw new RuntimeException("Failed to add product to database.", ex);
@@ -74,9 +78,6 @@ public class ProductService {
     private void validateProduct(Product product) {
         if (product == null) {
             throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getId() == null || product.getId() <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
         }
         if (product.getName() == null || product.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name must not be blank.");

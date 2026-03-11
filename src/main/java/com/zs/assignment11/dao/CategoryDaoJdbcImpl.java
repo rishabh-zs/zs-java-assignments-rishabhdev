@@ -25,17 +25,25 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
 
     @Override
     public void CreateCategoryTable(){
-        log.debug("Executing SQL to create category table");
+        log.debug("Checking whether category table already exists");
 
-        final String DROP_CATEGORY_TABLE_SQL = "DROP TABLE IF EXISTS category CASCADE";
-        final String CREATE_CATEGORY_TABLE_SQL = "CREATE TABLE category (" +
-                "id INTEGER PRIMARY KEY, " +
-                "name VARCHAR(255) NOT NULL" +
+        final String CHECK_CATEGORY_TABLE_EXISTS_SQL =
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'category')";
+
+        final String CREATE_CATEGORY_TABLE_SQL = "CREATE TABLE IF NOT EXISTS category (" +
+                "id SERIAL PRIMARY KEY, " +
+                "name VARCHAR(255) NOT NULL UNIQUE" +
                 ")";
 
         try {
-            jdbcTemplate.execute(DROP_CATEGORY_TABLE_SQL);
+            Boolean tableExists = jdbcTemplate.queryForObject(CHECK_CATEGORY_TABLE_EXISTS_SQL, Boolean.class);
+            if (Boolean.TRUE.equals(tableExists)) {
+                log.info("Category table already exists, skipping create");
+                return;
+            }
+
             jdbcTemplate.execute(CREATE_CATEGORY_TABLE_SQL);
+            log.info("Category table created successfully");
         } catch (DataAccessException ex) {
             log.error("Failed to create category table", ex);
             throw ex;
@@ -79,11 +87,23 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
     public void addCategory(Category category) {
         log.debug("Executing SQL to insert category");
 
-        final String INSERT_CATEGORY_SQL = "INSERT INTO category (id, name) VALUES (?, ?)";
+        final String INSERT_CATEGORY_SQL = "INSERT INTO category (name) VALUES (?)";
 
-        int insertedRows = jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getId(), category.getName());
+        int insertedRows = jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getName());
         if (insertedRows != 1) {
-            throw new IllegalStateException("Unable to insert category with id: " + category.getId());
+            throw new IllegalStateException("Unable to insert category: " + category.getName());
         }
     }
+
+    @Override
+    public void deleteCategory(Long id){
+        log.debug("Executing SQL to delete category");
+        final String DELETE_CATEGORY_SQL = "DELETE FROM category WHERE id = ?";
+
+        int deletedRows=jdbcTemplate.update(DELETE_CATEGORY_SQL, id);
+        if(deletedRows!=1){
+            throw new IllegalStateException("Unable to delete category: " + id);
+        }
+    }
+
 }
