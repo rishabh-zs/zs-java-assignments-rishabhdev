@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'application'
 }
 
 group = 'com.zs.assignment7'
@@ -24,8 +23,12 @@ application {
     mainClass = 'com.zs.assignment7.Main'
 }
 
-tasks.named('run') {
-    standardInput = System.in
+tasks.register('runAssignment5', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 5 - Git Log Parser'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment5.Main'
+    args = ['src/main/resources/log.txt', '2026-02-20']
 }
 
 tasks.named('jar') {
