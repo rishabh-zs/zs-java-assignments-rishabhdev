@@ -31,5 +31,6 @@ Main.run.xml
 
 gradlew
 gradlew.bat
-gradle.properties
+
 zs-java-assignments-rishabhdev.iml
+.run/

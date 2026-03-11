@@ -1,25 +1,28 @@
 plugins {
     id 'java'
-    id 'application'
 }
 
-group = 'com.zs.assignment3'
-version = '1.0.0'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
+group = 'com.zs'
+version = '1.0'
 
 repositories {
     mavenCentral()
 }
 
-application {
-    mainClass = 'com.zs.assignment4.Main'
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+jar {
+    manifest {
+        attributes('Main-Class': 'com.zs.assignment5.Main')
+    }
 }
 
-tasks.named('run') {
-    standardInput = System.in
+tasks.register('runAssignment5', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 5 - Git Log Parser'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment5.Main'
+    args = ['src/main/resources/log.txt', '2026-02-20']
 }
