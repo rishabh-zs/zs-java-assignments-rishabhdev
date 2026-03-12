@@ -13,6 +13,10 @@ java {
     }
 }
 
+dependencies {
+    implementation 'org.postgresql:postgresql:42.7.2'
+}
+
 repositories {
     mavenCentral()
 }
@@ -60,6 +64,10 @@ application {
     mainClass = 'com.zs.assignment9.Main'
 }
 
-tasks.named('run') {
+tasks.register('runAssignment7', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 7 - Database workflow'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment7.Main'
     standardInput = System.in
 }
