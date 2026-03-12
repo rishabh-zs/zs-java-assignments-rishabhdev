@@ -1,0 +1,212 @@
+commit f393c198c67591328d9a2fdb9f46267ab54d1e01
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Mar 3 18:33:10 2026 +0530
+
+    RD | assignment 5 | Added sample_git.log file
+
+commit 9eecefc16532731930327a4020b239814c4eb796
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Mar 3 18:25:36 2026 +0530
+
+    RD | assignment 5 | Final formating and some modifications.
+
+commit e8b3615f0be35a5af2e034768962f41f8e1504e6
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Mar 3 18:12:41 2026 +0530
+
+    RD | assignment 5 | added javadocs.
+
+commit 069b014068a73e22c6d7a7ecdd260a064e6d5666
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Mar 2 21:23:22 2026 +0530
+
+    RD | assignment 5 | initial Commit
+
+commit e573acbf419e11aa23dac747a573753deab6f9f3
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Wed Feb 25 15:02:35 2026 +0530
+
+    RD | Assignment-5 | added Readme.md
+
+commit eaa7f1c20bfa8c7474c857d3a3faf7fe06e6df54
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Wed Feb 25 14:49:40 2026 +0530
+
+    RD | Assignment-5 | initial commit2
+
+commit f562d4b38c81fedf9f8da6665c1c039f8468d9c8
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Wed Feb 25 14:38:23 2026 +0530
+
+    RD | Assignment-5 | initial commit
+
+commit 15d109891511c22a89b0982b398ad68af2427d47
+Merge: 928abea 942ccd3
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Feb 24 12:46:45 2026 +0530
+
+    Merge remote-tracking branch 'origin/main'
+
+commit 928abea920635e0bd0ac401c26dedc5babf2a4f8
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Feb 24 12:46:36 2026 +0530
+
+    RD | Assignment-1 | fixed SystemInfo.java
+
+commit 942ccd3ea6498ee55ba804b95a119f3f0cdaad83
+Merge: e4e3807 e1a07dd
+Author: nilesh-zs <156167214+nilesh-zs@users.noreply.github.com>
+Date:   Mon Feb 23 15:15:09 2026 +0530
+
+    Merge pull request #8 from rishabh-zs/assignment-2-matrixOperation
+    
+    Assignment 2  | implement matrix operations
+
+commit e1a07dd58b4000260b5567fb506b170604b5f554
+Merge: 53c7e47 1b9d494
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Feb 23 15:00:32 2026 +0530
+
+    Merge remote-tracking branch 'origin/assignment-2-matrixOperation' into assignment-2-matrixOperation
+
+commit 53c7e47b74ee91553ca1c967650146c73405d529
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Feb 23 14:46:02 2026 +0530
+
+    RD | Assignment-2 | removed unused methods ,fixed print format and added options for scalar multiply and transpose of B
+
+commit 1b9d49483f8f932d859d9490b80940dd697de4ee
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Feb 23 14:46:02 2026 +0530
+
+    RD | Assignment-2 | removed unused methods ,fixed print format and added options for scalar multiply and transpose of B
+
+commit 80f39872740793c795bd5a5b676e5971b4a1ce6e
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Feb 23 13:25:13 2026 +0530
+
+    RD | Assignment-2 | removed unused methods ,fixed print format and added options for scalar multiply and transpose of B
+
+commit b8f11fae78ec298b9dc16f118bf88bab5cbf17dc
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Mon Feb 23 12:04:15 2026 +0530
+
+    RD | Assignment-2 | reverted assignment-1 changes
+
+commit 3e00b5ea3bcd1373a2707bff41392246d10858dc
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 17:18:58 2026 +0530
+
+    RD | Assignment-2 | implemented Method Overloading
+
+commit b624fe5d84cd6bec96b40e7a3a83db02c43d5796
+Merge: f90fe0d 91c0d21
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 17:16:38 2026 +0530
+
+    Merge remote-tracking branch 'origin/assignment-2-matrixOperation' into assignment-2-matrixOperation
+
+commit f90fe0d93f7a294af06a8352ce5f62db19602917
+Merge: a30b95a d9986ca
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 17:11:19 2026 +0530
+
+    Merge remote-tracking branch 'origin/assignment-2-matrixOperation' into assignment-2-matrixOperation
+
+commit 91c0d2195fc39f1e700078f7a575a0fcd0e6ee83
+Merge: a30b95a d9986ca
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 17:11:19 2026 +0530
+
+    Merge remote-tracking branch 'origin/assignment-2-matrixOperation' into assignment-2-matrixOperation
+
+commit a30b95a0bec887ecf47688ba987d4f505a6ac9b1
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 16:23:24 2026 +0530
+
+    RD | Assignment-3 | added .idea file in .gitignore
+
+commit d9986ca438bc417ce715757f9dc9c827dd2ee929
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 16:23:24 2026 +0530
+
+    RD | Assignment-3 | added .idea file in .gitignore
+
+commit c8097598825073c23dd443c2f0af5c6630becca8
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 16:22:12 2026 +0530
+
+    RD | Assignment-3 | added .idea file in .gitignore
+
+commit 38aed37661cdde99937ae2c4e0f59ac8f77ac2db
+Merge: fb1b46d e4e3807
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 15:31:26 2026 +0530
+
+    Merge remote-tracking branch 'origin/main' into assignment-2-matrixOperation
+
+commit e4e3807684853f9f8d55ef50497e3d47ad80964b
+Merge: 2879097 3feea16
+Author: nilesh-zs <156167214+nilesh-zs@users.noreply.github.com>
+Date:   Fri Feb 20 14:44:27 2026 +0530
+
+    Merge pull request #6 from rishabh-zs/origin/assignment-1-system-info
+    
+    Assignment-1 | added system information utility.
+
+commit 3feea16007030fd00d4cc8757158aca521a2f624
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Fri Feb 20 13:05:37 2026 +0530
+
+    RD | Assignment-1 | added .idea files in gitignore and changed PR description.
+
+commit fb1b46d70ae2afeecbd615a62fd1ec392fb6f1af
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Thu Feb 19 14:16:42 2026 +0530
+
+    RD | assignment-2 | Refactored controllers,services,model
+
+commit 3b0e4bc93357174c8301a8b0e5adbf0e1f3d61c5
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Thu Feb 19 13:08:26 2026 +0530
+
+    RD | assignment-2 | Added controllers,services,model
+
+commit dd6d2093b6068d4680bd056770997396840fe4de
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Thu Feb 19 11:56:55 2026 +0530
+
+    NC | assignment-1 | refactored the code for better encapsulation
+
+commit a3203527c72fc6cdd465f4640c27578ff31855d1
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Thu Feb 19 10:43:52 2026 +0530
+
+    NC | assignment-1 | created SystemInfoClass
+
+commit 28790976b6f95ae663842c4e1b9096181c1ea9fe
+Merge: f1d7152 b309881
+Author: nilesh-zs <156167214+nilesh-zs@users.noreply.github.com>
+Date:   Wed Feb 18 18:21:15 2026 +0530
+
+    Merge pull request #4 from rishabh-zs/assignment-0-generate_Branch_with_Pr_Request
+    
+    Assignment-0 | Create a demo PR
+
+commit b309881d7cc77127390f37ef4ea0405307365198
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Feb 17 15:54:39 2026 +0530
+
+    NC | Assignment 1 | Added a demo.txt
+
+commit d31b5c41ac42aed1c73c78f04cb60a1e14792c8f
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Feb 17 15:27:14 2026 +0530
+
+    Assignment 1 | Added a branch
+
+commit f1d715296a2f5c1dfde5f98cfe3ffcb08ba81477
+Author: rishabh-zs <rishabh.dev@zopsmart.com>
+Date:   Tue Feb 17 11:52:31 2026 +0530
+
+    Initial commit
