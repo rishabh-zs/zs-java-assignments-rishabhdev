@@ -37,7 +37,7 @@ class StudentServiceTest {
         String lastName = "Doe";
         Student mockSavedStudent = new Student(1, firstName, lastName);
 
-        when(studentDao.save(, any(Student.class), )).thenReturn(mockSavedStudent);
+        when(studentDao.save(firstName, lastName)).thenReturn(mockSavedStudent);
 
         Student result = studentService.createStudent(firstName, lastName);
 
@@ -45,7 +45,7 @@ class StudentServiceTest {
         assertEquals(1, result.getId());
         assertEquals("Jane", result.getFirstName());
         assertEquals("Doe", result.getLastName());
-        verify(studentDao, times(1)).save(, any(Student.class), );
+        verify(studentDao, times(1)).save(firstName, lastName);
     }
 
     /**
@@ -59,7 +59,7 @@ class StudentServiceTest {
         );
 
         assertEquals("First name cannot be empty", exception.getMessage());
-        verify(studentDao, never()).save(, any(Student.class), );
+        verify(studentDao, never()).save(any(String.class), any(String.class));
     }
 
     /**
@@ -67,12 +67,12 @@ class StudentServiceTest {
      */
     @Test
     void createStudent_NullLastName_ThrowsException() {
-        IllegalArgumentException exception=assertThrows(IllegalArgumentException.class,
-                ()->studentService.createStudent("Alice",null)
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> studentService.createStudent("Alice", null)
         );
 
         assertEquals("Last name cannot be empty", exception.getMessage());
-        verify(studentDao, never()).save(, any(Student.class), );
+        verify(studentDao, never()).save(any(String.class), any(String.class));
     }
 
     /**
@@ -80,12 +80,12 @@ class StudentServiceTest {
      */
     @Test
     void createStudent_BothNamesNull_ThrowsException() {
-        IllegalArgumentException exception=assertThrows(IllegalArgumentException.class,
-                ()->studentService.createStudent(null,null)
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> studentService.createStudent(null, null)
         );
 
         assertEquals("Both FirstName and LastName cannot be null", exception.getMessage());
-        verify(studentDao, never()).save(, any(Student.class), );
+        verify(studentDao, never()).save(any(String.class), any(String.class));
     }
 
 
@@ -107,6 +107,7 @@ class StudentServiceTest {
         assertNotNull(result);
         assertEquals(studentId, result.getId());
         assertEquals("John", result.getFirstName());
+        assertEquals("Doe", result.getLastName());
         verify(studentDao, times(1)).findById(studentId);
     }
 

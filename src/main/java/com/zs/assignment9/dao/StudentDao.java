@@ -9,8 +9,8 @@ public interface StudentDao {
     /**
      * Save student.
      *
-     * @param firstname
-     * @param lastname
+     * @param firstname the firstname
+     * @param lastname  the lastname
      * @return the student
      */
     Student save(String firstname,String lastname);
