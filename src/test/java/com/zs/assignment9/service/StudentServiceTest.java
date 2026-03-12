@@ -32,10 +32,11 @@ class StudentServiceTest {
     @InjectMocks
     private StudentService studentService;
 
-    // -------------------------------------------------------------------------
-    // createStudent
-    // -------------------------------------------------------------------------
-
+    /**
+     * Valid create student inputs stream.
+     *
+     * @return the stream
+     */
     static Stream<Arguments> validCreateStudentInputs() {
         return Stream.of(
                 arguments("Jane",  "Doe"),
@@ -61,6 +62,11 @@ class StudentServiceTest {
         verify(studentDao, times(1)).save(firstName, lastName);
     }
 
+    /**
+     * Invalid create student inputs stream.
+     *
+     * @return the stream
+     */
     static Stream<Arguments> invalidCreateStudentInputs() {
         return Stream.of(
                 arguments(null,    "Doe",  "First name cannot be empty"),
@@ -86,10 +92,11 @@ class StudentServiceTest {
         verify(studentDao, never()).save(any(String.class), any(String.class));
     }
 
-    // -------------------------------------------------------------------------
-    // getStudent
-    // -------------------------------------------------------------------------
-
+    /**
+     * Valid get student inputs stream.
+     *
+     * @return the stream
+     */
     static Stream<Arguments> validGetStudentInputs() {
         return Stream.of(
                 arguments(1, "John",  "Doe"),
@@ -130,6 +137,11 @@ class StudentServiceTest {
         verify(studentDao, times(1)).findById(studentId);
     }
 
+    /**
+     * Invalid student ids stream.
+     *
+     * @return the stream
+     */
     static Stream<Arguments> invalidStudentIds() {
         return Stream.of(
                 arguments((Object) null),
