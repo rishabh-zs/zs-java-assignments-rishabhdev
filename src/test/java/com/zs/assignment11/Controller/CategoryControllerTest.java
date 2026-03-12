@@ -43,7 +43,7 @@ class CategoryControllerTest {
 				.andExpect(jsonPath("$.length()").value(3))
 				.andExpect(jsonPath("$[0].name").value("electronics"))
 				.andExpect(jsonPath("$[1].name").value("Fashion"))
-				.andExpect(jsonPath("$[2].name").value("mobile"));
+				.andExpect(jsonPath("$[2].name").value("Sports"));
 
 		verifyNoInteractions(categoryService);
 	}
