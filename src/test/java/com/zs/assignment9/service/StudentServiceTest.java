@@ -37,7 +37,7 @@ class StudentServiceTest {
         String lastName = "Doe";
         Student mockSavedStudent = new Student(1, firstName, lastName);
 
-        when(studentDao.save(any(Student.class))).thenReturn(mockSavedStudent);
+        when(studentDao.save(, any(Student.class), )).thenReturn(mockSavedStudent);
 
         Student result = studentService.createStudent(firstName, lastName);
 
@@ -45,7 +45,7 @@ class StudentServiceTest {
         assertEquals(1, result.getId());
         assertEquals("Jane", result.getFirstName());
         assertEquals("Doe", result.getLastName());
-        verify(studentDao, times(1)).save(any(Student.class));
+        verify(studentDao, times(1)).save(, any(Student.class), );
     }
 
     /**
@@ -59,7 +59,7 @@ class StudentServiceTest {
         );
 
         assertEquals("First name cannot be empty", exception.getMessage());
-        verify(studentDao, never()).save(any(Student.class));
+        verify(studentDao, never()).save(, any(Student.class), );
     }
 
     /**
@@ -72,7 +72,7 @@ class StudentServiceTest {
         );
 
         assertEquals("Last name cannot be empty", exception.getMessage());
-        verify(studentDao, never()).save(any(Student.class));
+        verify(studentDao, never()).save(, any(Student.class), );
     }
 
     /**
@@ -85,7 +85,7 @@ class StudentServiceTest {
         );
 
         assertEquals("Both FirstName and LastName cannot be null", exception.getMessage());
-        verify(studentDao, never()).save(any(Student.class));
+        verify(studentDao, never()).save(, any(Student.class), );
     }
 
 

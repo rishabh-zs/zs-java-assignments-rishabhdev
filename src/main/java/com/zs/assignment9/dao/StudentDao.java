@@ -9,10 +9,11 @@ public interface StudentDao {
     /**
      * Save student.
      *
-     * @param student the student
+     * @param firstname
+     * @param lastname
      * @return the student
      */
-    Student save(Student student);
+    Student save(String firstname,String lastname);
 
     /**
      * Find by id student.

@@ -2,11 +2,15 @@ package com.zs.assignment9.controller;
 
 import com.zs.assignment9.model.Student;
 import com.zs.assignment9.service.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Student controller.
  */
 public class StudentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
     private final StudentService studentService;
 
@@ -24,12 +28,12 @@ public class StudentController {
      * @param lastName  the last name
      */
     public void handleCreateStudent(String firstName, String lastName) {
+        logger.info("--> Creating student: firstName='{}', lastName='{}'", firstName, lastName);
         try {
-            System.out.println("--> Request: Create student '" + firstName + " " + lastName + "'");
             Student student = studentService.createStudent(firstName, lastName);
-            System.out.println("<-- Success: " + student);
+            logger.info("<-- Student created successfully: {}", student);
         } catch (IllegalArgumentException e) {
-            System.out.println("<-- Error: " + e.getMessage());
+            logger.warn("<-- Failed to create student: {}", e.getMessage());
         }
     }
 
@@ -39,16 +43,16 @@ public class StudentController {
      * @param id the id
      */
     public void handleGetStudent(Integer id) {
+        logger.info("--> Getting student with ID: {}", id);
         try {
-            System.out.println("--> Request: Fetch student ID " + id);
             Student student = studentService.getStudent(id);
             if (student != null) {
-                System.out.println("<-- Success: " + student);
+                logger.info("<-- Success: {}", student);
             } else {
-                System.out.println("<-- Not Found: No student with ID " + id);
+                logger.warn("<-- Not Found: No student with ID {}", id);
             }
         } catch (IllegalArgumentException e) {
-            System.out.println("<-- Error: " + e.getMessage());
+            logger.warn("<-- Invalid request: {}", e.getMessage());
         }
     }
 
@@ -56,13 +60,13 @@ public class StudentController {
      * Start the program.
      */
     public void start() {
-        System.out.println("--- Student_Testing---\n");
+        logger.info("--- Student_Testing ---");
 
         this.handleCreateStudent("John", "Doe");
         this.handleCreateStudent("Alice", "");
         this.handleCreateStudent("", "Doe");
 
-        System.out.println();
+        logger.info("");
 
         this.handleGetStudent(1);
         this.handleGetStudent(2);

@@ -9,11 +9,13 @@ import java.util.Map;
  */
 public class StudentDaoClass implements StudentDao {
 
+    private int ID=0;
     private final Map<Integer, Student> database = new HashMap<>();
 
     @Override
-    public Student save(Student student) {
-        Student savedStudent = new Student(student.getId(), student.getFirstName(), student.getLastName());
+    public Student save(String firstName, String lastName) {
+        ID=ID+1;
+        Student savedStudent = new Student(ID,firstName,lastName);
 
         database.put(savedStudent.getId(), savedStudent);
         return savedStudent;
