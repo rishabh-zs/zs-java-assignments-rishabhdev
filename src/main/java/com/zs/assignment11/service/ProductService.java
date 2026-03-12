@@ -2,12 +2,10 @@ package com.zs.assignment11.service;
 
 import com.zs.assignment11.dao.ProductDao;
 import com.zs.assignment11.exception.CannotCreateProductTableException;
-import com.zs.assignment11.exception.ProductAlreadyExistsException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class ProductService {
         try {
             productDao.CreateProductTable();
         } catch (DataAccessException ex) {
-            throw new CannotCreateProductTableException("Failed to Product category table.", ex);
+            throw new CannotCreateProductTableException("Failed to Create Product table.", ex);
         }
     }
 
@@ -47,46 +45,4 @@ public class ProductService {
         return products;
     }
 
-    public void deleteProductById(Long productId) {
-        log.info("Request received to delete product by id: {}", productId);
-        if (productId == null || productId <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
-        try{
-            productDao.deleteProductById(productId);
-            log.info("Deleted product by id: {}", productId);
-        }catch(DataAccessException ex){
-            throw new RuntimeException("Failed to delete Product from database.",ex);
-        }
-    }
-
-    public void addProduct(Product product) {
-        log.info("Request received to add product");
-        validateProduct(product);
-        try {
-            productDao.addProduct(product);
-            log.info("Product added successfully: {}", product.getName());
-        } catch (DuplicateKeyException ex) {
-            log.warn("Duplicate product name: {}", product.getName());
-            throw new ProductAlreadyExistsException(product.getName());
-        } catch (DataAccessException ex) {
-            log.error("Database error while adding product: {}", product.getName(), ex);
-            throw new RuntimeException("Failed to add product to database.", ex);
-        }
-    }
-
-    private void validateProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
-        if (product.getCategoryId() == null || product.getCategoryId() <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
-    }
 }

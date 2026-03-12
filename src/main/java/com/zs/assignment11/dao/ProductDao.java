@@ -6,6 +6,4 @@ import java.util.List;
 public interface ProductDao {
     void CreateProductTable();
     List<Product> findAllProducts();
-    void deleteProductById(Long id);
-    void addProduct(Product product);
 }

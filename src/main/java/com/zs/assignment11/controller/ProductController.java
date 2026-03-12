@@ -7,6 +7,7 @@ import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,23 +20,22 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PutMapping("/addProduct")
-    public String handleAddProduct(@RequestBody Product product){
-        log.debug("/addProduct endpoint was called");
-        productService.addProduct(product);
-        return "Product added successfully.";
+
+    @GetMapping("/stubApi/GetallProducts")
+    public List<Product> stubApiGetAllProducts(){
+        log.info("/stubApi/GetallProducts endpoint was called");
+        List<Product> products=new ArrayList<>();
+        products.add(new Product(1,"laptop",1000.0,1));
+        products.add(new Product(2,"tv",2000.0,1));
+        products.add(new Product(3,"iPhone",200.0,1));
+        products.add(new Product(4,"FaceCream",4.50,2));
+        products.add(new Product(5,"faceGel",10.0,2));
+        return products;
     }
 
     @GetMapping("/GetallProducts")
     public List<Product> handleGetAllProducts(){
         log.debug("/allProducts endpoint was called");
         return productService.getAllProducts();
-    }
-
-    @DeleteMapping("/deleteProduct")
-    public String handleDeleteProductById(@RequestParam("id") Long productId){
-        log.debug("/deleteProduct endpoint was called");
-        productService.deleteProductById(productId);
-        return "Product deleted successfully.";
     }
 }

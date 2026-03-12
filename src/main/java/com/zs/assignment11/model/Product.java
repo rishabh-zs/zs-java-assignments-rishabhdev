@@ -6,6 +6,13 @@ public class Product {
     private Double price;
     private Integer categoryId;
 
+    public Product(Integer id, String name, Double price, Integer categoryId) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.categoryId = categoryId;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }

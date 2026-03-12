@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import(Initialize.class)
-public class DemoAppApplication {
+public class Main {
 	public static void main(String[] args) {
-		SpringApplication.run(DemoAppApplication.class, args);
+		SpringApplication.run(Main.class, args);
 	}
 }

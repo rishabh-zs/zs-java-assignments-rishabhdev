@@ -74,36 +74,13 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
         }
 
         return jdbcTemplate.query(FIND_PRODUCTS_BY_CATEGORY_ID_SQL, (rs, rowNum) -> {
-            Product product = new Product();
-            product.setId(rs.getInt("id"));
-            product.setName(rs.getString("name"));
-            product.setPrice(rs.getDouble("price"));
-            product.setCategoryId(rs.getInt("category_id"));
+            Integer id=rs.getInt("id");
+            String name=rs.getString("name");
+            Double price=rs.getDouble("price");
+            Integer catId=rs.getInt("category_id");
+            Product product=new Product(id,name,price,catId);
             return product;
         }, categoryId);
-    }
-
-    @Override
-    public void addCategory(Category category) {
-        log.debug("Executing SQL to insert category");
-
-        final String INSERT_CATEGORY_SQL = "INSERT INTO category (name) VALUES (?)";
-
-        int insertedRows = jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getName());
-        if (insertedRows != 1) {
-            throw new IllegalStateException("Unable to insert category: " + category.getName());
-        }
-    }
-
-    @Override
-    public void deleteCategory(Long id){
-        log.debug("Executing SQL to delete category");
-        final String DELETE_CATEGORY_SQL = "DELETE FROM category WHERE id = ?";
-
-        int deletedRows=jdbcTemplate.update(DELETE_CATEGORY_SQL, id);
-        if(deletedRows!=1){
-            throw new IllegalStateException("Unable to delete category: " + id);
-        }
     }
 
 }

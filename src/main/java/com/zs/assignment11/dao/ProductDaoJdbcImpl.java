@@ -58,43 +58,14 @@ public class ProductDaoJdbcImpl implements ProductDao {
         final String FIND_ALL_PRODUCTS_SQL = "SELECT id, name, price, category_id FROM product ORDER BY id";
 
         return jdbcTemplate.query(FIND_ALL_PRODUCTS_SQL, (rs, rowNum) -> {
-            Product product = new Product();
-            product.setId(rs.getInt("id"));
-            product.setName(rs.getString("name"));
-            product.setPrice(rs.getDouble("price"));
-            product.setCategoryId(rs.getInt("category_id"));
+
+            Integer id=rs.getInt("id");
+            String name=rs.getString("name");
+            Double price=rs.getDouble("price");
+            Integer catId=rs.getInt("category_id");
+            Product product=new Product(id,name,price,catId);
             return product;
         });
     }
 
-    @Override
-    public void deleteProductById(Long id) {
-        log.debug("Executing SQL to delete product by id {}", id);
-
-        final String DELETE_PRODUCT_BY_ID_SQL = "DELETE FROM product WHERE id = ?";
-
-        int deletedRows = jdbcTemplate.update(DELETE_PRODUCT_BY_ID_SQL, id);
-        if (deletedRows == 0) {
-            throw new ProductNotFoundException("Product not found for id: " + id);
-        }
-
-    }
-
-    @Override
-    public void addProduct(Product product) {
-        log.debug("Executing SQL to add product: {}", product.getName());
-
-        final String INSERT_PRODUCT_SQL = "INSERT INTO product (name, price, category_id) VALUES (?, ?, ?)";
-
-        int insertedRows = jdbcTemplate.update(
-                INSERT_PRODUCT_SQL,
-                product.getName(),
-                product.getPrice(),
-                product.getCategoryId()
-        );
-        if (insertedRows != 1) {
-            throw new IllegalStateException("Unable to insert product: " + product.getName());
-        }
-
-    }
 }
