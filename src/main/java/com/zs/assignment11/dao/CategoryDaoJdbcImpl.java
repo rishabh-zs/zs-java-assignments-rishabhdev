@@ -61,6 +61,45 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
     }
 
     @Override
+    public Category addCategory(Category category) {
+        log.debug("Executing SQL to insert category");
+
+        final String INSERT_CATEGORY_SQL = "INSERT INTO category (name) VALUES (?)";
+
+        int insertedRows = jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getName());
+        if (insertedRows != 1) {
+            throw new IllegalStateException("Unable to insert category: " + category.getName());
+        }
+        return new Category(category.getId(), category.getName());
+
+    }
+
+    @Override
+    public Category deleteCategory(Long id) {
+        log.debug("Executing SQL to delete category");
+        final String FIND_CATEGORY_BY_ID_SQL = "SELECT id, name FROM category WHERE id = ?";
+        final String DELETE_CATEGORY_SQL = "DELETE FROM category WHERE id = ?";
+
+        List<Category> categories = jdbcTemplate.query(
+                FIND_CATEGORY_BY_ID_SQL,
+                (rs, rowNum) -> new Category(rs.getInt("id"), rs.getString("name")),
+                id
+        );
+
+        if (categories.isEmpty()) {
+            throw new CategoryNotFoundException("Category not found for id: " + id);
+        }
+
+        Category deletedCategory = categories.get(0);
+        int deletedRows = jdbcTemplate.update(DELETE_CATEGORY_SQL, id);
+        if (deletedRows != 1) {
+            throw new IllegalStateException("Unable to delete category: " + id);
+        }
+
+        return deletedCategory;
+    }
+
+    @Override
     public List<Product> findAllProductsByCategoryId(Long categoryId) {
         log.debug("Executing SQL to fetch all products by category id");
 
@@ -83,4 +122,28 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
         }, categoryId);
     }
 
+    @Override
+    public Category updateCategory(Category category) {
+        log.debug("Executing SQL to update category");
+
+        final String FIND_CATEGORY_BY_ID_SQL = "SELECT id, name FROM category WHERE id = ?";
+        final String UPDATE_CATEGORY_SQL = "UPDATE category SET name = ? WHERE id = ?";
+
+        List<Category> existing = jdbcTemplate.query(
+                FIND_CATEGORY_BY_ID_SQL,
+                (rs, rowNum) -> new Category(rs.getInt("id"), rs.getString("name")),
+                category.getId()
+        );
+
+        if (existing.isEmpty()) {
+            throw new CategoryNotFoundException("Category not found for id: " + category.getId());
+        }
+
+        int updatedRows = jdbcTemplate.update(UPDATE_CATEGORY_SQL, category.getName(), category.getId());
+        if (updatedRows != 1) {
+            throw new IllegalStateException("Unable to update category with id: " + category.getId());
+        }
+
+        return new Category(category.getId(), category.getName());
+    }
 }

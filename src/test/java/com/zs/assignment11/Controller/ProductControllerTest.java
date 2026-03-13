@@ -1,5 +1,6 @@
 package com.zs.assignment11.Controller;
 
+import com.zs.assignment11.exception.GlobalExceptionHandler;
 import com.zs.assignment11.controller.ProductController;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
@@ -15,7 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +31,9 @@ public class ProductControllerTest {
     public void setup(){
         productService=mock(ProductService.class);
         ProductController productController=new ProductController(productService);
-        mockMvc=MockMvcBuilders.standaloneSetup(productController).build();
+        mockMvc=MockMvcBuilders.standaloneSetup(productController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
     
     @Test
@@ -61,17 +67,20 @@ public class ProductControllerTest {
                 new Product(5,"faceGel",10.0,2)));
         
         mockMvc.perform(get("/products/GetallProducts")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(5))
-                .andExpect(jsonPath("$[0].name").value("laptop"))
-                .andExpect(jsonPath("$[0].price").value(1000.0))
-                .andExpect(jsonPath("$[1].name").value("tv"))
-                .andExpect(jsonPath("$[1].price").value(2000.0))
-                .andExpect(jsonPath("$[2].name").value("iPhone"))
-                .andExpect(jsonPath("$[2].price").value(200.0))
-                .andExpect(jsonPath("$[3].name").value("FaceCream"))
-                .andExpect(jsonPath("$[3].price").value(4.50))
-                .andExpect(jsonPath("$[4].price").value(10.0))
-                .andExpect(jsonPath("$[4].name").value("faceGel"));
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.message").value("all product fetched successfully"))
+                .andExpect(jsonPath("$.products.length()").value(5))
+                .andExpect(jsonPath("$.products[0].name").value("laptop"))
+                .andExpect(jsonPath("$.products[0].price").value(1000.0))
+                .andExpect(jsonPath("$.products[1].name").value("tv"))
+                .andExpect(jsonPath("$.products[1].price").value(2000.0))
+                .andExpect(jsonPath("$.products[2].name").value("iPhone"))
+                .andExpect(jsonPath("$.products[2].price").value(200.0))
+                .andExpect(jsonPath("$.products[3].name").value("FaceCream"))
+                .andExpect(jsonPath("$.products[3].price").value(4.50))
+                .andExpect(jsonPath("$.products[4].price").value(10.0))
+                .andExpect(jsonPath("$.products[4].name").value("faceGel"))
+                .andExpect(jsonPath("$.totalProductCount").value(5));
 
         verify(productService).getAllProducts();
         verifyNoMoreInteractions(productService);
@@ -83,7 +92,9 @@ public class ProductControllerTest {
 
         mockMvc.perform(get("/products/GetallProducts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.products.length()").value(0))
+                .andExpect(jsonPath("$.totalProductCount").value(0));
 
         verify(productService).getAllProducts();
         verifyNoMoreInteractions(productService);
@@ -96,7 +107,47 @@ public class ProductControllerTest {
 
         verifyNoInteractions(productService);
     }
-    
-    
-    
+
+    @Test
+    public void handleAddProductDelegatesToService() throws Exception {
+		when(productService.addProduct(org.mockito.ArgumentMatchers.any(Product.class)))
+				.thenReturn(new Product(10, "Phone", 999.99, 1));
+
+        mockMvc.perform(post("/products/addProduct")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Phone",
+                                  "price": 999.99,
+                                  "categoryId": 1
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.message").value("Product added successfully"))
+                .andExpect(jsonPath("$.addedProduct.id").value(10))
+                .andExpect(jsonPath("$.addedProduct.name").value("Phone"))
+                .andExpect(jsonPath("$.addedProduct.price").value(999.99))
+                .andExpect(jsonPath("$.addedProduct.categoryId").value(1));
+
+        verify(productService).addProduct(org.mockito.ArgumentMatchers.any(Product.class));
+        verifyNoMoreInteractions(productService);
+    }
+
+    @Test
+    public void handleDeleteProductDelegatesToService() throws Exception {
+		when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
+
+        mockMvc.perform(delete("/products/deleteProduct/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.message").value("product deleted successfully"))
+                .andExpect(jsonPath("$.deletedProduct.id").value(1))
+                .andExpect(jsonPath("$.deletedProduct.name").value("Phone"))
+                .andExpect(jsonPath("$.deletedProduct.price").value(999.99))
+                .andExpect(jsonPath("$.deletedProduct.categoryId").value(1));
+
+        verify(productService).deleteProduct(1L);
+        verifyNoMoreInteractions(productService);
+    }
 }

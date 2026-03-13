@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,6 +36,9 @@ public class ProductDaoJdbcImplTest {
 			"CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE" +
 			")";
 	private static final String FIND_ALL_PRODUCTS_SQL = "SELECT id, name, price, category_id FROM product ORDER BY id";
+	private static final String INSERT_PRODUCT_SQL = "INSERT INTO product (name, price, category_id) VALUES (?, ?, ?) RETURNING id";
+	private static final String FIND_PRODUCT_BY_ID_SQL = "SELECT id, name, price, category_id FROM product WHERE id = ?";
+	private static final String DELETE_PRODUCT_SQL = "DELETE FROM product WHERE id = ?";
 
 	private JdbcTemplate jdbcTemplate;
 	private ProductDaoJdbcImpl productDaoJdbc;
@@ -144,5 +149,101 @@ public class ProductDaoJdbcImplTest {
 
 		assertEquals("query failed", exception.getMessage());
 		verify(jdbcTemplate, times(1)).query(eq(FIND_ALL_PRODUCTS_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any());
+	}
+
+	/**
+	 * Add product inserts row.
+	 */
+	@Test
+	void addProduct_InsertsRow() {
+		Product product = new Product(1, "Phone", 999.99, 1);
+		when(jdbcTemplate.queryForObject(
+				eq(INSERT_PRODUCT_SQL),
+				eq(Integer.class),
+				eq(product.getName()),
+				eq(product.getPrice()),
+				eq(product.getCategoryId())
+		)).thenReturn(10);
+
+		Product result = productDaoJdbc.addProduct(product);
+
+		assertNotNull(result);
+		assertEquals(10, result.getId());
+		assertEquals("Phone", result.getName());
+		assertEquals(999.99, result.getPrice());
+		assertEquals(1, result.getCategoryId());
+		verify(jdbcTemplate, times(1)).queryForObject(
+				eq(INSERT_PRODUCT_SQL),
+				eq(Integer.class),
+				eq(product.getName()),
+				eq(product.getPrice()),
+				eq(product.getCategoryId())
+		);
+	}
+
+	/**
+	 * Add product throws when insert count is not one.
+	 */
+	@Test
+	void addProduct_ThrowsWhenInsertCountIsNotOne() {
+		Product product = new Product(1, "Phone", 999.99, 1);
+		when(jdbcTemplate.queryForObject(
+				eq(INSERT_PRODUCT_SQL),
+				eq(Integer.class),
+				eq(product.getName()),
+				eq(product.getPrice()),
+				eq(product.getCategoryId())
+		)).thenReturn(null);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> productDaoJdbc.addProduct(product)
+		);
+
+		assertEquals("Unable to insert product: Phone", exception.getMessage());
+		verify(jdbcTemplate, times(1)).queryForObject(
+				eq(INSERT_PRODUCT_SQL),
+				eq(Integer.class),
+				eq(product.getName()),
+				eq(product.getPrice()),
+				eq(product.getCategoryId())
+		);
+	}
+
+	/**
+	 * Delete product deletes row.
+	 */
+	@Test
+	void deleteProduct_DeletesRow() {
+		Product storedProduct = new Product(1, "Phone", 999.99, 1);
+		when(jdbcTemplate.queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1L)))
+				.thenReturn(storedProduct);
+		when(jdbcTemplate.update(DELETE_PRODUCT_SQL, 1L)).thenReturn(1);
+
+		Product result = productDaoJdbc.deleteProduct(1L);
+
+		assertSame(storedProduct, result);
+		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1L));
+		verify(jdbcTemplate, times(1)).update(DELETE_PRODUCT_SQL, 1L);
+	}
+
+	/**
+	 * Delete product throws when delete count is not one.
+	 */
+	@Test
+	void deleteProduct_ThrowsWhenDeleteCountIsNotOne() {
+		Product storedProduct = new Product(1, "Phone", 999.99, 1);
+		when(jdbcTemplate.queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1L)))
+				.thenReturn(storedProduct);
+		when(jdbcTemplate.update(DELETE_PRODUCT_SQL, 1L)).thenReturn(0);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> productDaoJdbc.deleteProduct(1L)
+		);
+
+		assertEquals("Unable to delete product: 1", exception.getMessage());
+		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1L));
+		verify(jdbcTemplate, times(1)).update(DELETE_PRODUCT_SQL, 1L);
 	}
 }

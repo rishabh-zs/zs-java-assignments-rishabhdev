@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/categories")
@@ -31,12 +32,6 @@ public class CategoryController {
         return categories;
     }
 
-    @GetMapping("/GetallCategories")
-    public List<Category> handleGetAllCategories(){
-        log.debug("/GetallCategories endpoint was called");
-        return categoryService.getAllCategories();
-    }
-
     @GetMapping("/stubApi/{categoryId}/products")
     public List<Product>  stubsGetProductsByCategoryId(@PathVariable Long categoryId){
         log.info("/stubApi/GetProductsByCategoryId endpoint was called");
@@ -55,11 +50,68 @@ public class CategoryController {
         return null;
     }
 
-    @GetMapping("/{categoryId}/products")
-    public List<Product> handleGetAllProductByCategoryId(@PathVariable Long categoryId){
-        log.debug("/{categoryId}/products endpoint was called");
-        return categoryService.getProductsByCategoryId(categoryId);
+    @GetMapping("/GetallCategories")
+    public Map<String, Object> handleGetAllCategories(){
+        log.debug("/GetallCategories endpoint was called");
+        List<Category> categories = categoryService.getAllCategories();
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("message", "all category fetched successfully");
+        response.put("categories", categories);
+        response.put("totalCategory", categories.size());
+        response.put("totalCategoryCount", categories.size());
+        return response;
     }
 
+ 
+    @PostMapping("/addCategory")
+    public Map<String, Object> handleAddCategory(@RequestBody Category category){
+        log.debug("/addCategory endpoint was called");
+        Category addedCategory = categoryService.addCategory(category);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("message", "category added successfully with id: " + addedCategory.getId());
+        response.put("addedCategory", addedCategory);
+        return response;
+    }
+
+    @GetMapping("/{categoryId}/products")
+    public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Long categoryId){
+        log.debug("/{categoryId}/products endpoint was called");
+        List<Product> products = categoryService.getProductsByCategoryId(categoryId);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("message", "products fetched successfully for category id: " + categoryId);
+        response.put("products", products);
+        response.put("totalProductCountInCategory", products.size());
+        return response;
+    }
+
+    @DeleteMapping("/deleteCategory")
+    public Map<String, Object> handleDeleteCategory(@RequestBody Map<String, Long> body){
+        Long categoryId = body.get("categoryId");
+        log.debug("/deleteCategory endpoint was called");
+        Category deletedCategory = categoryService.deleteCategory(categoryId);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("message", "category deleted with id :" + categoryId);
+        response.put("deletedCategory", deletedCategory);
+        return response;
+    }
+
+    @PatchMapping("/updateCategory")
+    public Map<String, Object> handleUpdateCategory(@RequestBody Category category){
+        log.debug("/updateCategory endpoint was called");
+        Category updatedCategory = categoryService.updateCategory(category);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("message", "category updated with " + updatedCategory.getId());
+        return response;
+    }
 
 }

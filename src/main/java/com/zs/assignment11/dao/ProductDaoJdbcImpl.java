@@ -5,6 +5,7 @@ import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -58,14 +59,94 @@ public class ProductDaoJdbcImpl implements ProductDao {
         final String FIND_ALL_PRODUCTS_SQL = "SELECT id, name, price, category_id FROM product ORDER BY id";
 
         return jdbcTemplate.query(FIND_ALL_PRODUCTS_SQL, (rs, rowNum) -> {
-
-            Integer id=rs.getInt("id");
-            String name=rs.getString("name");
-            Double price=rs.getDouble("price");
-            Integer catId=rs.getInt("category_id");
-            Product product=new Product(id,name,price,catId);
-            return product;
+            Integer id = rs.getInt("id");
+            String name = rs.getString("name");
+            Double price = rs.getDouble("price");
+            Integer catId = rs.getInt("category_id");
+            return new Product(id, name, price, catId);
         });
+    }
+
+    @Override
+    public Product addProduct(Product product) {
+        log.debug("Executing SQL to insert product");
+
+        final String INSERT_PRODUCT_SQL =
+                "INSERT INTO product (name, price, category_id) VALUES (?, ?, ?) RETURNING id";
+
+        Integer productId = jdbcTemplate.queryForObject(
+                INSERT_PRODUCT_SQL,
+                Integer.class,
+                product.getName(),
+                product.getPrice(),
+                product.getCategoryId()
+        );
+        if (productId == null) {
+            throw new IllegalStateException("Unable to insert product: " + product.getName());
+        }
+
+        return new Product(productId, product.getName(), product.getPrice(), product.getCategoryId());
+    }
+
+    @Override
+    public Product deleteProduct(Long id) {
+        log.debug("Executing SQL to delete product");
+
+        final String FIND_PRODUCT_BY_ID_SQL = "SELECT id, name, price, category_id FROM product WHERE id = ?";
+        final String DELETE_PRODUCT_SQL = "DELETE FROM product WHERE id = ?";
+
+        Product deletedProduct;
+        try {
+            deletedProduct = jdbcTemplate.queryForObject(
+                    FIND_PRODUCT_BY_ID_SQL,
+                    (rs, rowNum) -> new Product(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("category_id")
+                    ),
+                    id
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ProductNotFoundException("Product not found for id: " + id);
+        }
+
+        int deletedRows = jdbcTemplate.update(DELETE_PRODUCT_SQL, id);
+        if (deletedRows != 1) {
+            throw new IllegalStateException("Unable to delete product: " + id);
+        }
+        return deletedProduct;
+    }
+
+    @Override
+    public Product updateProduct(Product product) {
+        log.debug("Executing SQL to update product");
+
+        final String FIND_PRODUCT_BY_ID_SQL = "SELECT id, name, price, category_id FROM product WHERE id = ?";
+        final String UPDATE_PRODUCT_SQL = "UPDATE product SET name = ?, price = ? WHERE id = ?";
+
+        Product existing;
+        try {
+            existing = jdbcTemplate.queryForObject(
+                    FIND_PRODUCT_BY_ID_SQL,
+                    (rs, rowNum) -> new Product(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getDouble("price"),
+                            rs.getInt("category_id")
+                    ),
+                    product.getId()
+            );
+        } catch (EmptyResultDataAccessException ex) {
+            throw new ProductNotFoundException("Product not found for id: " + product.getId());
+        }
+
+        int updatedRows = jdbcTemplate.update(UPDATE_PRODUCT_SQL, product.getName(), product.getPrice(), product.getId());
+        if (updatedRows != 1) {
+            throw new IllegalStateException("Unable to update product with id: " + product.getId());
+        }
+
+        return new Product(product.getId(), product.getName(), product.getPrice(), existing.getCategoryId());
     }
 
 }

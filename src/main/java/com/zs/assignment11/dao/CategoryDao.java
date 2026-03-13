@@ -9,4 +9,7 @@ public interface CategoryDao {
     void CreateCategoryTable();
     List<Category> findAllCategories();
     List<Product> findAllProductsByCategoryId(Long categoryId);
+    Category  addCategory(Category category);
+    Category  deleteCategory(Long id);
+    Category  updateCategory(Category category);
 }

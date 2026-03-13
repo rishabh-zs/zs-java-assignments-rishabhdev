@@ -4,6 +4,7 @@ import com.zs.assignment11.dao.CategoryDao;
 import com.zs.assignment11.exception.CannotCreateCategoryTableException;
 import com.zs.assignment11.exception.CannotGetAllCategoryException;
 import com.zs.assignment11.exception.CannotGetAllProductByCategoryIdException;
+import com.zs.assignment11.exception.CategoryAlreadyExistsException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.CategoryService;
@@ -114,6 +115,104 @@ public class CategoryServiceTest {
         verify(categoryDao).findAllCategories();
     }
 
+    /**
+     * Valid category payloads stream.
+     *
+     * @return the stream
+     */
+    static Stream<Category> validCategories() {
+        return Stream.of(
+                new Category(1, "electronics"),
+                new Category(2, "fashion")
+        );
+    }
+
+    /**
+     * Add category valid payload delegates to dao.
+     *
+     * @param category the category
+     */
+    @ParameterizedTest
+    @MethodSource("validCategories")
+    void addCategory_ValidPayload_DelegatesToDao(Category category) {
+		Category savedCategory = new Category(10, category.getName());
+		when(categoryDao.addCategory(category)).thenReturn(savedCategory);
+
+		Category result = categoryService.addCategory(category);
+
+		assertSame(savedCategory, result);
+        verify(categoryDao).addCategory(category);
+    }
+
+    /**
+     * Invalid categories stream.
+     *
+     * @return the stream
+     */
+    static Stream<Arguments> invalidCategories() {
+        return Stream.of(
+                arguments((Object) null, "Category payload is required."),
+                arguments(new Category(1, null), "Category name must not be blank."),
+                arguments(new Category(1, ""), "Category name must not be blank."),
+                arguments(new Category(1, "   "), "Category name must not be blank.")
+        );
+    }
+
+    /**
+     * Add category invalid payload throws exception.
+     *
+     * @param category        the category
+     * @param expectedMessage the expected message
+     */
+    @ParameterizedTest
+    @MethodSource("invalidCategories")
+    void addCategory_InvalidPayload_ThrowsException(Category category, String expectedMessage) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> categoryService.addCategory(category)
+        );
+
+        assertEquals(expectedMessage, exception.getMessage());
+        verifyNoInteractions(categoryDao);
+    }
+
+    /**
+     * Add category duplicate name throws domain exception.
+     */
+    @Test
+    void addCategory_DuplicateName_ThrowsCategoryAlreadyExistsException() {
+        Category category = new Category(1, "electronics");
+        doThrow(new org.springframework.dao.DuplicateKeyException("duplicate key"))
+                .when(categoryDao).addCategory(category);
+
+        CategoryAlreadyExistsException exception = assertThrows(
+                CategoryAlreadyExistsException.class,
+                () -> categoryService.addCategory(category)
+        );
+
+        assertEquals("Category already exists", exception.getMessage());
+        verify(categoryDao).addCategory(category);
+    }
+
+    /**
+     * Add category data access error throws runtime exception.
+     */
+    @Test
+    void addCategory_DataAccessError_ThrowsRuntimeException() {
+        Category category = new Category(1, "electronics");
+        doThrow(new DataAccessResourceFailureException("insert failed"))
+                .when(categoryDao).addCategory(category);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> categoryService.addCategory(category)
+        );
+
+        assertEquals("Failed to add category to database.", exception.getMessage());
+        assertEquals("insert failed", exception.getCause().getMessage());
+        verify(categoryDao).addCategory(category);
+    }
+
 
     /**
      * Valid category ids with products stream.
@@ -191,5 +290,66 @@ public class CategoryServiceTest {
         assertEquals("Failed to fetch all products for category id.", exception.getMessage());
         assertEquals("query failed", exception.getCause().getMessage());
         verify(categoryDao).findAllProductsByCategoryId(1L);
+    }
+
+    /**
+     * Valid category ids stream.
+     *
+     * @return the stream
+     */
+    static Stream<Long> validDeleteCategoryIds() {
+        return Stream.of(1L, 2L);
+    }
+
+    /**
+     * Delete category valid id delegates to dao.
+     *
+     * @param categoryId the category id
+     */
+    @ParameterizedTest
+    @MethodSource("validDeleteCategoryIds")
+    void deleteCategory_ValidId_DelegatesToDao(Long categoryId) {
+		Category deletedCategory = new Category(categoryId.intValue(), "electronics");
+		when(categoryDao.deleteCategory(categoryId)).thenReturn(deletedCategory);
+
+		Category result = categoryService.deleteCategory(categoryId);
+
+		assertSame(deletedCategory, result);
+        verify(categoryDao).deleteCategory(categoryId);
+    }
+
+    /**
+     * Delete category invalid id throws exception.
+     *
+     * @param categoryId the category id
+     */
+    @ParameterizedTest
+    @MethodSource("invalidCategoryIds")
+    void deleteCategory_InvalidId_ThrowsException(Long categoryId) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> categoryService.deleteCategory(categoryId)
+        );
+
+        assertEquals("Category id must be a positive number.", exception.getMessage());
+        verifyNoInteractions(categoryDao);
+    }
+
+    /**
+     * Delete category data access error throws runtime exception.
+     */
+    @Test
+    void deleteCategory_DataAccessError_ThrowsRuntimeException() {
+        doThrow(new DataAccessResourceFailureException("delete failed"))
+                .when(categoryDao).deleteCategory(1L);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> categoryService.deleteCategory(1L)
+        );
+
+        assertEquals("Failed to delete category from database.", exception.getMessage());
+        assertEquals("delete failed", exception.getCause().getMessage());
+        verify(categoryDao).deleteCategory(1L);
     }
 }

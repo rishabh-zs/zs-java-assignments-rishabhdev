@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +38,9 @@ public class CategoryDaoJdbcImplTest {
 			"name VARCHAR(255) NOT NULL UNIQUE" +
 			")";
 	private static final String FIND_ALL_CATEGORIES_SQL = "SELECT id, name FROM category ORDER BY id";
+	private static final String INSERT_CATEGORY_SQL = "INSERT INTO category (name) VALUES (?)";
+	private static final String FIND_CATEGORY_BY_ID_SQL = "SELECT id, name FROM category WHERE id = ?";
+	private static final String DELETE_CATEGORY_SQL = "DELETE FROM category WHERE id = ?";
 	private static final String CHECK_CATEGORY_EXISTS_SQL = "SELECT COUNT(1) FROM category WHERE id = ?";
 	private static final String FIND_PRODUCTS_BY_CATEGORY_ID_SQL =
 			"SELECT id, name, price, category_id FROM product WHERE category_id = ? ORDER BY id";
@@ -127,6 +131,75 @@ public class CategoryDaoJdbcImplTest {
 		assertEquals("electronics", result.get(0).getName());
 		assertEquals("fashion", result.get(1).getName());
 		verify(jdbcTemplate, times(1)).query(eq(FIND_ALL_CATEGORIES_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any());
+	}
+
+	/**
+	 * Add category inserts row.
+	 */
+	@Test
+	void addCategory_InsertsRow() {
+		Category category = new Category(1, "electronics");
+		when(jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getName())).thenReturn(1);
+
+		Category result = categoryDaoJdbc.addCategory(category);
+
+		assertEquals(1, result.getId());
+		assertEquals("electronics", result.getName());
+		verify(jdbcTemplate, times(1)).update(INSERT_CATEGORY_SQL, category.getName());
+	}
+
+	/**
+	 * Add category throws when insert count is not one.
+	 */
+	@Test
+	void addCategory_ThrowsWhenInsertCountIsNotOne() {
+		Category category = new Category(1, "electronics");
+		when(jdbcTemplate.update(INSERT_CATEGORY_SQL, category.getName())).thenReturn(0);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> categoryDaoJdbc.addCategory(category)
+		);
+
+		assertEquals("Unable to insert category: electronics", exception.getMessage());
+		verify(jdbcTemplate, times(1)).update(INSERT_CATEGORY_SQL, category.getName());
+	}
+
+	/**
+	 * Delete category deletes row.
+	 */
+	@Test
+	void deleteCategory_DeletesRow() {
+		Category storedCategory = new Category(1, "electronics");
+		when(jdbcTemplate.query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1L)))
+				.thenReturn(List.of(storedCategory));
+		when(jdbcTemplate.update(DELETE_CATEGORY_SQL, 1L)).thenReturn(1);
+
+		Category result = categoryDaoJdbc.deleteCategory(1L);
+
+		assertSame(storedCategory, result);
+		verify(jdbcTemplate, times(1)).query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1L));
+		verify(jdbcTemplate, times(1)).update(DELETE_CATEGORY_SQL, 1L);
+	}
+
+	/**
+	 * Delete category throws when delete count is not one.
+	 */
+	@Test
+	void deleteCategory_ThrowsWhenDeleteCountIsNotOne() {
+		Category storedCategory = new Category(1, "electronics");
+		when(jdbcTemplate.query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1L)))
+				.thenReturn(List.of(storedCategory));
+		when(jdbcTemplate.update(DELETE_CATEGORY_SQL, 1L)).thenReturn(0);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> categoryDaoJdbc.deleteCategory(1L)
+		);
+
+		assertEquals("Unable to delete category: 1", exception.getMessage());
+		verify(jdbcTemplate, times(1)).query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1L));
+		verify(jdbcTemplate, times(1)).update(DELETE_CATEGORY_SQL, 1L);
 	}
 
 	/**
