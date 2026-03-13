@@ -1,10 +1,12 @@
 package com.zs.assignment11.Dao;
 
 import com.zs.assignment11.dao.ProductDaoJdbcImpl;
+import com.zs.assignment11.exception.ProductNotFoundException;
 import com.zs.assignment11.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -39,6 +41,7 @@ public class ProductDaoJdbcImplTest {
 	private static final String INSERT_PRODUCT_SQL = "INSERT INTO product (name, price, category_id) VALUES (?, ?, ?) RETURNING id";
 	private static final String FIND_PRODUCT_BY_ID_SQL = "SELECT id, name, price, category_id FROM product WHERE id = ?";
 	private static final String DELETE_PRODUCT_SQL = "DELETE FROM product WHERE id = ?";
+	private static final String UPDATE_PRODUCT_SQL = "UPDATE product SET name = ?, price = ? WHERE id = ?";
 
 	private JdbcTemplate jdbcTemplate;
 	private ProductDaoJdbcImpl productDaoJdbc;
@@ -245,5 +248,67 @@ public class ProductDaoJdbcImplTest {
 		assertEquals("Unable to delete product: 1", exception.getMessage());
 		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1L));
 		verify(jdbcTemplate, times(1)).update(DELETE_PRODUCT_SQL, 1L);
+	}
+
+	/**
+	 * Update product updates row.
+	 */
+	@Test
+	void updateProduct_UpdatesRow() {
+		Product updateRequest = new Product(1, "Phone Pro", 1099.99, null);
+		Product storedProduct = new Product(1, "Phone", 999.99, 2);
+		when(jdbcTemplate.queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1)))
+				.thenReturn(storedProduct);
+		when(jdbcTemplate.update(UPDATE_PRODUCT_SQL, "Phone Pro", 1099.99, 1)).thenReturn(1);
+
+		Product result = productDaoJdbc.updateProduct(updateRequest);
+
+		assertNotNull(result);
+		assertEquals(1, result.getId());
+		assertEquals("Phone Pro", result.getName());
+		assertEquals(1099.99, result.getPrice());
+		assertEquals(2, result.getCategoryId());
+		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1));
+		verify(jdbcTemplate, times(1)).update(UPDATE_PRODUCT_SQL, "Phone Pro", 1099.99, 1);
+	}
+
+	/**
+	 * Update product throws when product missing.
+	 */
+	@Test
+	void updateProduct_ThrowsWhenProductMissing() {
+		Product updateRequest = new Product(99, "Phone Pro", 1099.99, null);
+		when(jdbcTemplate.queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(99)))
+				.thenThrow(new EmptyResultDataAccessException(1));
+
+		ProductNotFoundException exception = assertThrows(
+				ProductNotFoundException.class,
+				() -> productDaoJdbc.updateProduct(updateRequest)
+		);
+
+		assertEquals("Product not found for id: 99", exception.getMessage());
+		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(99));
+		verify(jdbcTemplate, never()).update(eq(UPDATE_PRODUCT_SQL), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+	}
+
+	/**
+	 * Update product throws when update count is not one.
+	 */
+	@Test
+	void updateProduct_ThrowsWhenUpdateCountIsNotOne() {
+		Product updateRequest = new Product(1, "Phone Pro", 1099.99, null);
+		Product storedProduct = new Product(1, "Phone", 999.99, 1);
+		when(jdbcTemplate.queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1)))
+				.thenReturn(storedProduct);
+		when(jdbcTemplate.update(UPDATE_PRODUCT_SQL, "Phone Pro", 1099.99, 1)).thenReturn(0);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> productDaoJdbc.updateProduct(updateRequest)
+		);
+
+		assertEquals("Unable to update product with id: 1", exception.getMessage());
+		verify(jdbcTemplate, times(1)).queryForObject(eq(FIND_PRODUCT_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(1));
+		verify(jdbcTemplate, times(1)).update(UPDATE_PRODUCT_SQL, "Phone Pro", 1099.99, 1);
 	}
 }

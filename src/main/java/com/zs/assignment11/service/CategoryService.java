@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * The type Category service.
+ */
 @Service
 public class CategoryService {
     private List<Category> categories = new ArrayList<>();
@@ -25,11 +28,19 @@ public class CategoryService {
     private static final Logger log = LoggerUtil.getLogger(CategoryService.class);
     private final CategoryDao categoryDao;
 
-    // Constructor Injection
+    /**
+     * Instantiates a new Category service.
+     *
+     * @param categoryDao the category dao
+     */
+// Constructor Injection
     public CategoryService(CategoryDao categoryDao) {
         this.categoryDao = categoryDao;
     }
 
+    /**
+     * Create category table.
+     */
     public void CreateCategoryTable() {
         log.info("Request received to create category table");
         try {
@@ -39,6 +50,11 @@ public class CategoryService {
         }
     }
 
+    /**
+     * Gets all categories.
+     *
+     * @return the all categories
+     */
     public List<Category> getAllCategories() {
         log.info("Request received to fetch all categories");
         try {
@@ -49,6 +65,12 @@ public class CategoryService {
         return categories;
     }
 
+    /**
+     * Add category category.
+     *
+     * @param category the category
+     * @return the category
+     */
     public Category addCategory(Category category) {
         if (category == null) {
             throw new IllegalArgumentException("Category payload is required.");
@@ -73,6 +95,12 @@ public class CategoryService {
         }
     }
 
+    /**
+     * Gets products by category id.
+     *
+     * @param categoryId the category id
+     * @return the products by category id
+     */
     public List<Product> getProductsByCategoryId(Long categoryId) {
         log.info("Request received to fetch products for category id: {}", categoryId);
         if (categoryId == null || categoryId <= 0) {
@@ -86,6 +114,12 @@ public class CategoryService {
         }
     }
 
+    /**
+     * Delete category category.
+     *
+     * @param categoryId the category id
+     * @return the category
+     */
     public Category deleteCategory(Long categoryId) {
         if (categoryId == null || categoryId <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
@@ -102,6 +136,12 @@ public class CategoryService {
         }
     }
 
+    /**
+     * Update category.
+     *
+     * @param category the category
+     * @return the category
+     */
     public Category updateCategory(Category category) {
         if (category == null) {
             throw new IllegalArgumentException("Category payload is required.");

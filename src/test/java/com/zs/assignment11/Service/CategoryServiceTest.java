@@ -352,4 +352,56 @@ public class CategoryServiceTest {
         assertEquals("delete failed", exception.getCause().getMessage());
         verify(categoryDao).deleteCategory(1L);
     }
+
+    @Test
+    void updateCategory_ValidPayload_DelegatesToDao() {
+        Category updateRequest = new Category(1, "electronics-updated");
+        Category updatedCategory = new Category(1, "electronics-updated");
+        when(categoryDao.updateCategory(updateRequest)).thenReturn(updatedCategory);
+
+        Category result = categoryService.updateCategory(updateRequest);
+
+        assertSame(updatedCategory, result);
+        verify(categoryDao).updateCategory(updateRequest);
+    }
+
+    static Stream<Arguments> invalidUpdateCategories() {
+        return Stream.of(
+                arguments((Object) null, "Category payload is required."),
+                arguments(new Category(null, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(0, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(-1, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(1, null), "Category name must not be blank."),
+                arguments(new Category(1, ""), "Category name must not be blank."),
+                arguments(new Category(1, "   "), "Category name must not be blank.")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidUpdateCategories")
+    void updateCategory_InvalidPayload_ThrowsException(Category category, String expectedMessage) {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> categoryService.updateCategory(category)
+        );
+
+        assertEquals(expectedMessage, exception.getMessage());
+        verifyNoInteractions(categoryDao);
+    }
+
+    @Test
+    void updateCategory_DataAccessError_ThrowsRuntimeException() {
+        Category updateRequest = new Category(1, "electronics-updated");
+        doThrow(new DataAccessResourceFailureException("update failed"))
+                .when(categoryDao).updateCategory(updateRequest);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> categoryService.updateCategory(updateRequest)
+        );
+
+        assertEquals("Failed to update category in database.", exception.getMessage());
+        assertEquals("update failed", exception.getCause().getMessage());
+        verify(categoryDao).updateCategory(updateRequest);
+    }
 }

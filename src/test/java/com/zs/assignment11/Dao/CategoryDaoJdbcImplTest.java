@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * The type Category dao jdbc test.
+ * The type Category dao jdbc impl test.
  */
 public class CategoryDaoJdbcImplTest {
 	private static final String CHECK_CATEGORY_TABLE_EXISTS_SQL =
@@ -41,6 +41,7 @@ public class CategoryDaoJdbcImplTest {
 	private static final String INSERT_CATEGORY_SQL = "INSERT INTO category (name) VALUES (?)";
 	private static final String FIND_CATEGORY_BY_ID_SQL = "SELECT id, name FROM category WHERE id = ?";
 	private static final String DELETE_CATEGORY_SQL = "DELETE FROM category WHERE id = ?";
+	private static final String UPDATE_CATEGORY_SQL = "UPDATE category SET name = ? WHERE id = ?";
 	private static final String CHECK_CATEGORY_EXISTS_SQL = "SELECT COUNT(1) FROM category WHERE id = ?";
 	private static final String FIND_PRODUCTS_BY_CATEGORY_ID_SQL =
 			"SELECT id, name, price, category_id FROM product WHERE category_id = ? ORDER BY id";
@@ -101,9 +102,7 @@ public class CategoryDaoJdbcImplTest {
 	}
 
 	/**
-	 * Finds all categories maps result set.
-	 *
-	 * @throws Exception the exception
+	 * Find all categories maps result set.
 	 */
 	@Test
 	void findAllCategories_MapsResultSet() {
@@ -212,7 +211,7 @@ public class CategoryDaoJdbcImplTest {
 	}
 
 	/**
-	 * Finds all products by category id throws when category missing.
+	 * Find all products by category id throws when category missing.
 	 *
 	 * @param count the count
 	 */
@@ -233,9 +232,7 @@ public class CategoryDaoJdbcImplTest {
 	}
 
 	/**
-	 * Finds all products by category id maps result set.
-	 *
-	 * @throws Exception the exception
+	 * Find all products by category id maps result set.
 	 */
 	@Test
 	void findAllProductsByCategoryId_MapsResultSet() {
@@ -277,7 +274,7 @@ public class CategoryDaoJdbcImplTest {
 	}
 
 	/**
-	 * Finds all products by category id propagates query exception.
+	 * Find all products by category id propagates query exception.
 	 */
 	@Test
 	void findAllProductsByCategoryId_PropagatesQueryException() {
@@ -294,5 +291,62 @@ public class CategoryDaoJdbcImplTest {
 		assertTrue(exception.getMessage().contains("query failed"));
 		verify(jdbcTemplate, times(1)).queryForObject(CHECK_CATEGORY_EXISTS_SQL, Integer.class, categoryId);
 		verify(jdbcTemplate, times(1)).query(eq(FIND_PRODUCTS_BY_CATEGORY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Product>>any(), eq(categoryId));
+	}
+
+	/**
+	 * Update category updates row.
+	 */
+	@Test
+	void updateCategory_UpdatesRow() {
+		Category updateRequest = new Category(1, "fashion");
+		when(jdbcTemplate.query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1)))
+				.thenReturn(List.of(new Category(1, "electronics")));
+		when(jdbcTemplate.update(UPDATE_CATEGORY_SQL, "fashion", 1)).thenReturn(1);
+
+		Category result = categoryDaoJdbc.updateCategory(updateRequest);
+
+		assertEquals(1, result.getId());
+		assertEquals("fashion", result.getName());
+		verify(jdbcTemplate, times(1)).query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1));
+		verify(jdbcTemplate, times(1)).update(UPDATE_CATEGORY_SQL, "fashion", 1);
+	}
+
+	/**
+	 * Update category throws when category missing.
+	 */
+	@Test
+	void updateCategory_ThrowsWhenCategoryMissing() {
+		Category updateRequest = new Category(99, "fashion");
+		when(jdbcTemplate.query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(99)))
+				.thenReturn(List.of());
+
+		CategoryNotFoundException exception = assertThrows(
+				CategoryNotFoundException.class,
+				() -> categoryDaoJdbc.updateCategory(updateRequest)
+		);
+
+		assertEquals("Category not found for id: 99", exception.getMessage());
+		verify(jdbcTemplate, times(1)).query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(99));
+		verify(jdbcTemplate, never()).update(eq(UPDATE_CATEGORY_SQL), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+	}
+
+	/**
+	 * Update category throws when update count is not one.
+	 */
+	@Test
+	void updateCategory_ThrowsWhenUpdateCountIsNotOne() {
+		Category updateRequest = new Category(1, "fashion");
+		when(jdbcTemplate.query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1)))
+				.thenReturn(List.of(new Category(1, "electronics")));
+		when(jdbcTemplate.update(UPDATE_CATEGORY_SQL, "fashion", 1)).thenReturn(0);
+
+		IllegalStateException exception = assertThrows(
+				IllegalStateException.class,
+				() -> categoryDaoJdbc.updateCategory(updateRequest)
+		);
+
+		assertEquals("Unable to update category with id: 1", exception.getMessage());
+		verify(jdbcTemplate, times(1)).query(eq(FIND_CATEGORY_BY_ID_SQL), org.mockito.ArgumentMatchers.<RowMapper<Category>>any(), eq(1));
+		verify(jdbcTemplate, times(1)).update(UPDATE_CATEGORY_SQL, "fashion", 1);
 	}
 }

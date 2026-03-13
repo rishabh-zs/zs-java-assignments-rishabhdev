@@ -6,22 +6,34 @@ import com.zs.assignment11.service.CategoryService;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type Category controller.
+ */
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
     private static final Logger log = LoggerUtil.getLogger(CategoryController.class);
     private final CategoryService categoryService;
 
+    /**
+     * Instantiates a new Category controller.
+     *
+     * @param categoryService the category service
+     */
     public CategoryController(CategoryService categoryService){
         this.categoryService = categoryService;
     }
 
+    /**
+     * Stubs get all categories list.
+     *
+     * @return the list
+     */
     @GetMapping("/stubApi/GetAllCategories")
     public List<Category> stubsGetAllCategories(){
         log.info("/stubApi/GetAllCategories endpoint was called");
@@ -32,6 +44,12 @@ public class CategoryController {
         return categories;
     }
 
+    /**
+     * Stubs get products by category id list.
+     *
+     * @param categoryId the category id
+     * @return the list
+     */
     @GetMapping("/stubApi/{categoryId}/products")
     public List<Product>  stubsGetProductsByCategoryId(@PathVariable Long categoryId){
         log.info("/stubApi/GetProductsByCategoryId endpoint was called");
@@ -50,6 +68,11 @@ public class CategoryController {
         return null;
     }
 
+    /**
+     * Handle get all categories map.
+     *
+     * @return the map
+     */
     @GetMapping("/GetallCategories")
     public Map<String, Object> handleGetAllCategories(){
         log.debug("/GetallCategories endpoint was called");
@@ -59,12 +82,17 @@ public class CategoryController {
         response.put("status", "success");
         response.put("message", "all category fetched successfully");
         response.put("categories", categories);
-        response.put("totalCategory", categories.size());
         response.put("totalCategoryCount", categories.size());
         return response;
     }
 
- 
+
+    /**
+     * Handle add category map.
+     *
+     * @param category the category
+     * @return the map
+     */
     @PostMapping("/addCategory")
     public Map<String, Object> handleAddCategory(@RequestBody Category category){
         log.debug("/addCategory endpoint was called");
@@ -77,6 +105,12 @@ public class CategoryController {
         return response;
     }
 
+    /**
+     * Handle get all product by category id map.
+     *
+     * @param categoryId the category id
+     * @return the map
+     */
     @GetMapping("/{categoryId}/products")
     public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Long categoryId){
         log.debug("/{categoryId}/products endpoint was called");
@@ -90,6 +124,12 @@ public class CategoryController {
         return response;
     }
 
+    /**
+     * Handle delete category map.
+     *
+     * @param body the body
+     * @return the map
+     */
     @DeleteMapping("/deleteCategory")
     public Map<String, Object> handleDeleteCategory(@RequestBody Map<String, Long> body){
         Long categoryId = body.get("categoryId");
@@ -103,6 +143,12 @@ public class CategoryController {
         return response;
     }
 
+    /**
+     * Handle update category map.
+     *
+     * @param category the category
+     * @return the map
+     */
     @PatchMapping("/updateCategory")
     public Map<String, Object> handleUpdateCategory(@RequestBody Category category){
         log.debug("/updateCategory endpoint was called");

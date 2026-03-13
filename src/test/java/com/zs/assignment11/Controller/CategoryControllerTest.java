@@ -20,16 +20,23 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * The type Category controller test.
+ */
 class CategoryControllerTest {
 
 	private MockMvc mockMvc;
 	private CategoryService categoryService;
 	private CategoryController categoryController;
 
+	/**
+	 * Sets up.
+	 */
 	@BeforeEach
 	void setUp() {
 		categoryService = mock(CategoryService.class);
@@ -39,6 +46,11 @@ class CategoryControllerTest {
 				.build();
 	}
 
+	/**
+	 * Stubs get all categories valid end point.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void stubsGetAllCategoriesValidEndPoint() throws Exception {
 		mockMvc.perform(get("/categories/stubApi/GetAllCategories"))
@@ -51,6 +63,11 @@ class CategoryControllerTest {
 		verifyNoInteractions(categoryService);
 	}
 
+	/**
+	 * Stubs get all categories invalid end point.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void stubsGetAllCategoriesInvalidEndPoint() throws Exception {
 		mockMvc.perform(get("/categoies/stubApi/InvalidApi"))
@@ -59,6 +76,11 @@ class CategoryControllerTest {
 		verifyNoInteractions(categoryService);
 	}
 
+	/**
+	 * Stubs get products by category id.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void stubsGetProductsByCategoryId() throws Exception {
 		mockMvc.perform(get("/categories/stubApi/1/products"))
@@ -93,6 +115,11 @@ class CategoryControllerTest {
 		verifyNoInteractions(categoryService);
 	}
 
+	/**
+	 * Handle get all categories return category from service.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void handleGetAllCategoriesReturnCategoryFromService() throws Exception {
 		when(categoryService.getAllCategories()).thenReturn(List.of(
@@ -107,12 +134,16 @@ class CategoryControllerTest {
 				.andExpect(jsonPath("$.categories.length()").value(2))
 				.andExpect(jsonPath("$.categories[0].name").value("electronics"))
 				.andExpect(jsonPath("$.categories[1].name").value("fashion"))
-				.andExpect(jsonPath("$.totalCategory").value(2))
 				.andExpect(jsonPath("$.totalCategoryCount").value(2));
 
 		verify(categoryService).getAllCategories();
 	}
 
+	/**
+	 * Handle add category delegates to service.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void handleAddCategoryDelegatesToService() throws Exception {
 		when(categoryService.addCategory(org.mockito.ArgumentMatchers.any(Category.class)))
@@ -136,7 +167,11 @@ class CategoryControllerTest {
 	}
 
 
-
+	/**
+	 * Handle get all product by category id returns products from service.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void handleGetAllProductByCategoryIdReturnsProductsFromService() throws Exception {
 		when(categoryService.getProductsByCategoryId(1L)).thenReturn(List.of(
@@ -182,11 +217,22 @@ class CategoryControllerTest {
 		verify(categoryService).getProductsByCategoryId(2L);
 	}
 
+	/**
+	 * Handle delete category delegates to service.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void handleDeleteCategoryDelegatesToService() throws Exception {
 		when(categoryService.deleteCategory(1L)).thenReturn(new Category(1, "electronics"));
 
-		mockMvc.perform(delete("/categories/deleteCategory/1"))
+		mockMvc.perform(delete("/categories/deleteCategory")
+						.contentType(APPLICATION_JSON)
+						.content("""
+								{
+								  "categoryId": 1
+								}
+								"""))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("success"))
 				.andExpect(jsonPath("$.message").value("category deleted with id :1"))
@@ -197,6 +243,11 @@ class CategoryControllerTest {
 		verifyNoMoreInteractions(categoryService);
 	}
 
+	/**
+	 * Handle get all product by category id returns not found when category id does not exist.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	void handleGetAllProductByCategoryIdReturnsNotFoundWhenCategoryIdDoesNotExist() throws Exception {
 		when(categoryService.getProductsByCategoryId(-1L))
@@ -208,5 +259,57 @@ class CategoryControllerTest {
 				.andExpect(jsonPath("$.message").value("category id does not exists"));
 
 		verify(categoryService).getProductsByCategoryId(-1L);
+	}
+
+	/**
+	 * Handle update category delegates to service.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	void handleUpdateCategoryDelegatesToService() throws Exception {
+		when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
+				.thenReturn(new Category(1, "electronics-updated"));
+
+		mockMvc.perform(patch("/categories/updateCategory")
+						.contentType(APPLICATION_JSON)
+						.content("""
+								{
+								  "id": 1,
+								  "name": "electronics-updated"
+								}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("success"))
+				.andExpect(jsonPath("$.message").value("category updated with 1"));
+
+		verify(categoryService).updateCategory(org.mockito.ArgumentMatchers.any(Category.class));
+		verifyNoMoreInteractions(categoryService);
+	}
+
+	/**
+	 * Handle update category returns not found for invalid id.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	void handleUpdateCategoryReturnsNotFoundForInvalidId() throws Exception {
+		when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
+				.thenThrow(new IllegalArgumentException("Category id must be a positive number."));
+
+		mockMvc.perform(patch("/categories/updateCategory")
+						.contentType(APPLICATION_JSON)
+						.content("""
+								{
+								  "id": -1,
+								  "name": "electronics-updated"
+								}
+								"""))
+				.andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.status").value("error"))
+				.andExpect(jsonPath("$.message").value("category id does not exists"));
+
+		verify(categoryService).updateCategory(org.mockito.ArgumentMatchers.any(Category.class));
+		verifyNoMoreInteractions(categoryService);
 	}
 }

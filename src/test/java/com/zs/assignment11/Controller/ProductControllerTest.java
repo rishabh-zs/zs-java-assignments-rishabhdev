@@ -19,14 +19,21 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * The type Product controller test.
+ */
 public class ProductControllerTest {
     private MockMvc mockMvc;
     private ProductService productService;
-    
+
+    /**
+     * Setup.
+     */
     @BeforeEach
     public void setup(){
         productService=mock(ProductService.class);
@@ -35,7 +42,12 @@ public class ProductControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
-    
+
+    /**
+     * Stub api get all products valid end point.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void stubApiGetAllProductsValidEndPoint() throws Exception {
         mockMvc.perform(get("/products/stubApi/GetallProducts"))
@@ -49,14 +61,24 @@ public class ProductControllerTest {
 
         verifyNoInteractions(productService);
     }
-    
+
+    /**
+     * Stub api get all products invalid end point.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void stubApiGetAllProductsInvalidEndPoint() throws Exception {
         mockMvc.perform(get("/products/stubApi/InvalidEndpoint")).andExpect(status().isNotFound());
         
         verifyNoInteractions(productService);
     }
-    
+
+    /**
+     * Gets all products from service.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getAllProductsFromService() throws Exception {
         when(productService.getAllProducts()).thenReturn(List.of(
@@ -86,6 +108,11 @@ public class ProductControllerTest {
         verifyNoMoreInteractions(productService);
     }
 
+    /**
+     * Gets all products from service empty list.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getAllProductsFromServiceEmptyList() throws Exception {
         when(productService.getAllProducts()).thenReturn(List.of());
@@ -100,6 +127,11 @@ public class ProductControllerTest {
         verifyNoMoreInteractions(productService);
     }
 
+    /**
+     * Gets all products from service invalid end point.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getAllProductsFromServiceInvalidEndPoint() throws Exception {
         mockMvc.perform(get("/products/InvalidEndpoint"))
@@ -108,6 +140,11 @@ public class ProductControllerTest {
         verifyNoInteractions(productService);
     }
 
+    /**
+     * Handle add product delegates to service.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void handleAddProductDelegatesToService() throws Exception {
 		when(productService.addProduct(org.mockito.ArgumentMatchers.any(Product.class)))
@@ -124,7 +161,7 @@ public class ProductControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.message").value("Product added successfully"))
+                .andExpect(jsonPath("$.message").value("Product with ID :10 added successfully"))
                 .andExpect(jsonPath("$.addedProduct.id").value(10))
                 .andExpect(jsonPath("$.addedProduct.name").value("Phone"))
                 .andExpect(jsonPath("$.addedProduct.price").value(999.99))
@@ -134,20 +171,85 @@ public class ProductControllerTest {
         verifyNoMoreInteractions(productService);
     }
 
+    /**
+     * Handle delete product delegates to service.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void handleDeleteProductDelegatesToService() throws Exception {
 		when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
 
-        mockMvc.perform(delete("/products/deleteProduct/1"))
+        mockMvc.perform(delete("/products/deleteProduct")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "productId": 1
+                                }
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.message").value("product deleted successfully"))
+                .andExpect(jsonPath("$.message").value("product with ID :1 deleted successfully"))
                 .andExpect(jsonPath("$.deletedProduct.id").value(1))
                 .andExpect(jsonPath("$.deletedProduct.name").value("Phone"))
                 .andExpect(jsonPath("$.deletedProduct.price").value(999.99))
                 .andExpect(jsonPath("$.deletedProduct.categoryId").value(1));
 
         verify(productService).deleteProduct(1L);
+        verifyNoMoreInteractions(productService);
+    }
+
+    /**
+     * Handle update product delegates to service.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleUpdateProductDelegatesToService() throws Exception {
+        when(productService.updateProduct(org.mockito.ArgumentMatchers.any(Product.class)))
+                .thenReturn(new Product(1, "Phone Pro", 1099.99, 1));
+
+        mockMvc.perform(patch("/products/updateProduct")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "id": 1,
+                                  "name": "Phone Pro",
+                                  "price": 1099.99
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.message").value("product with 1 updated successfully"));
+
+        verify(productService).updateProduct(org.mockito.ArgumentMatchers.any(Product.class));
+        verifyNoMoreInteractions(productService);
+    }
+
+    /**
+     * Handle update product returns not found for invalid id.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleUpdateProductReturnsNotFoundForInvalidId() throws Exception {
+        when(productService.updateProduct(org.mockito.ArgumentMatchers.any(Product.class)))
+                .thenThrow(new IllegalArgumentException("Product id must be a positive number."));
+
+        mockMvc.perform(patch("/products/updateProduct")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "id": -1,
+                                  "name": "Phone Pro",
+                                  "price": 1099.99
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("product id does not exists"));
+
+        verify(productService).updateProduct(org.mockito.ArgumentMatchers.any(Product.class));
         verifyNoMoreInteractions(productService);
     }
 }

@@ -18,7 +18,12 @@ public class CategoryDaoJdbcImpl implements CategoryDao {
     private static final Logger log = LoggerUtil.getLogger(CategoryDaoJdbcImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
-    // Constructor Injection
+    /**
+     * Instantiates a new Category dao jdbc.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
+// Constructor Injection
     public CategoryDaoJdbcImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

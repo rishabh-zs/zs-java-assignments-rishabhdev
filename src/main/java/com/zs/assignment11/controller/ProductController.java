@@ -12,17 +12,30 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type Product controller.
+ */
 @RestController
 @RequestMapping("/products")
 public class ProductController {
     private static final Logger log = LoggerUtil.getLogger(ProductController.class);
     private final ProductService productService;
 
+    /**
+     * Instantiates a new Product controller.
+     *
+     * @param productService the product service
+     */
     public ProductController(ProductService productService){
         this.productService = productService;
     }
 
 
+    /**
+     * Stub api get all products list.
+     *
+     * @return the list
+     */
     @GetMapping("/stubApi/GetallProducts")
     public List<Product> stubApiGetAllProducts(){
         log.info("/stubApi/GetallProducts endpoint was called");
@@ -35,6 +48,11 @@ public class ProductController {
         return products;
     }
 
+    /**
+     * Handle get all products map.
+     *
+     * @return the map
+     */
     @GetMapping("/GetallProducts")
     public Map<String, Object> handleGetAllProducts(){
         log.debug("/allProducts endpoint was called");
@@ -48,6 +66,12 @@ public class ProductController {
         return response;
     }
 
+    /**
+     * Handle add product map.
+     *
+     * @param product the product
+     * @return the map
+     */
     @PostMapping("/addProduct")
     public Map<String, Object> handleAddProduct(@RequestBody Product product) {
         log.debug("/addProduct endpoint was called");
@@ -61,6 +85,12 @@ public class ProductController {
         return response;
     }
 
+    /**
+     * Handle delete product map.
+     *
+     * @param body the body
+     * @return the map
+     */
     @DeleteMapping("/deleteProduct")
     public Map<String, Object> handleDeleteProduct(@RequestBody Map<String, Long> body) {
         Long productId = body.get("productId");
@@ -75,6 +105,12 @@ public class ProductController {
         return response;
     }
 
+    /**
+     * Handle update product map.
+     *
+     * @param product the product
+     * @return the map
+     */
     @PatchMapping("/updateProduct")
     public Map<String, Object> handleUpdateProduct(@RequestBody Product product) {
         log.debug("/updateProduct endpoint was called");

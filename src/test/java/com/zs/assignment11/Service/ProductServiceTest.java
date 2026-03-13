@@ -297,4 +297,58 @@ public class ProductServiceTest {
 		assertEquals("delete failed", exception.getCause().getMessage());
 		verify(productDao).deleteProduct(1L);
 	}
+
+	@Test
+	void updateProduct_ValidPayload_DelegatesToDao() {
+		Product updateRequest = new Product(1, "Phone Pro", 1099.99, null);
+		Product updatedProduct = new Product(1, "Phone Pro", 1099.99, 1);
+		when(productDao.updateProduct(updateRequest)).thenReturn(updatedProduct);
+
+		Product result = productService.updateProduct(updateRequest);
+
+		assertSame(updatedProduct, result);
+		verify(productDao).updateProduct(updateRequest);
+	}
+
+	static Stream<Arguments> invalidUpdateProducts() {
+		return Stream.of(
+				arguments((Object) null, "Product payload is required."),
+				arguments(new Product(null, "Phone", 1.0, 1), "Product id must be a positive number."),
+				arguments(new Product(0, "Phone", 1.0, 1), "Product id must be a positive number."),
+				arguments(new Product(-1, "Phone", 1.0, 1), "Product id must be a positive number."),
+				arguments(new Product(1, null, 1.0, 1), "Product name must not be blank."),
+				arguments(new Product(1, "", 1.0, 1), "Product name must not be blank."),
+				arguments(new Product(1, "   ", 1.0, 1), "Product name must not be blank."),
+				arguments(new Product(1, "Phone", null, 1), "Product price must be zero or greater."),
+				arguments(new Product(1, "Phone", -1.0, 1), "Product price must be zero or greater.")
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("invalidUpdateProducts")
+	void updateProduct_InvalidPayload_ThrowsException(Product product, String expectedMessage) {
+		IllegalArgumentException exception = assertThrows(
+				IllegalArgumentException.class,
+				() -> productService.updateProduct(product)
+		);
+
+		assertEquals(expectedMessage, exception.getMessage());
+		verifyNoInteractions(productDao);
+	}
+
+	@Test
+	void updateProduct_DataAccessError_ThrowsRuntimeException() {
+		Product updateRequest = new Product(1, "Phone Pro", 1099.99, 1);
+		when(productDao.updateProduct(updateRequest))
+				.thenThrow(new DataAccessResourceFailureException("update failed"));
+
+		RuntimeException exception = assertThrows(
+				RuntimeException.class,
+				() -> productService.updateProduct(updateRequest)
+		);
+
+		assertEquals("Failed to update product in database.", exception.getMessage());
+		assertEquals("update failed", exception.getCause().getMessage());
+		verify(productDao).updateProduct(updateRequest);
+	}
 }

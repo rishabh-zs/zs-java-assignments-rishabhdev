@@ -3,10 +3,17 @@ package com.zs.assignment11.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
- * Utility class for fetching standard SLF4J Loggers.
+ * The type Logger util.
  */
 public class LoggerUtil {
+    /**
+     * Gets logger.
+     *
+     * @param clazz the clazz
+     * @return the logger
+     */
     public static Logger getLogger(Class<?> clazz) {
         return LoggerFactory.getLogger(clazz);
     }

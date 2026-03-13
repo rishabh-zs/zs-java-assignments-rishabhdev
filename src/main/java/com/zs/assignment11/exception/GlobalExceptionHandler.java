@@ -8,29 +8,62 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * The type Global exception handler.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handle product already exists response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     @ExceptionHandler(ProductAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleProductAlreadyExists(ProductAlreadyExistsException ex) {
         return buildError(HttpStatus.CONFLICT, "Product with this name already exists");
     }
 
+    /**
+     * Handle category already exists response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     @ExceptionHandler(CategoryAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleCategoryAlreadyExists(CategoryAlreadyExistsException ex) {
         return buildError(HttpStatus.CONFLICT, "category with this name already exists");
     }
 
+    /**
+     * Handle product not found response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleProductNotFound(ProductNotFoundException ex) {
         return buildError(HttpStatus.NOT_FOUND, "product id does not exists");
     }
 
+    /**
+     * Handle category not found response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     @ExceptionHandler(CategoryNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleCategoryNotFound(CategoryNotFoundException ex) {
         return buildError(HttpStatus.NOT_FOUND, "category id does not exists");
     }
 
+    /**
+     * Handle illegal argument response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         String message = ex.getMessage();

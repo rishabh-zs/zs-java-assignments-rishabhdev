@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service handling Product business logic.
+ * The type Product service.
  */
 @Service
 public class ProductService {
@@ -22,12 +22,20 @@ public class ProductService {
     private static final Logger log = LoggerUtil.getLogger(ProductService.class);
     private final ProductDao productDao;
 
-    // Constructor Injection
+    /**
+     * Instantiates a new Product service.
+     *
+     * @param productDao the product dao
+     */
+// Constructor Injection
     public ProductService(ProductDao productDao) {
         this.productDao = productDao;
     }
 
 
+    /**
+     * Create product table.
+     */
     public void CreateProductTable() {
         log.info("Request received to create product table");
         try {
@@ -37,6 +45,11 @@ public class ProductService {
         }
     }
 
+    /**
+     * Gets all products.
+     *
+     * @return the all products
+     */
     public List<Product> getAllProducts() {
         log.info("Request received to fetch all products");
         try {
@@ -47,6 +60,12 @@ public class ProductService {
         return products;
     }
 
+    /**
+     * Add product product.
+     *
+     * @param product the product
+     * @return the product
+     */
     public Product addProduct(Product product) {
         log.info("Request received to add product");
         validateProduct(product);
@@ -63,6 +82,12 @@ public class ProductService {
         }
     }
 
+    /**
+     * Delete product product.
+     *
+     * @param productId the product id
+     * @return the product
+     */
     public Product deleteProduct(Long productId) {
         log.info("Request received to delete product by id: {}", productId);
         if (productId == null || productId <= 0) {
@@ -77,6 +102,12 @@ public class ProductService {
         }
     }
 
+    /**
+     * Update product product.
+     *
+     * @param product the product
+     * @return the product
+     */
     public Product updateProduct(Product product) {
         if (product == null) {
             throw new IllegalArgumentException("Product payload is required.");

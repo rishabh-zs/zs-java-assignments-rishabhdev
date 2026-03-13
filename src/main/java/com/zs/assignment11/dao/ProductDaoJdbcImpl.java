@@ -8,15 +8,22 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
+/**
+ * The type Product dao jdbc.
+ */
 @Repository
 public class ProductDaoJdbcImpl implements ProductDao {
     private static final Logger log = LoggerUtil.getLogger(ProductDaoJdbcImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
-    // Constructor Injection
+    /**
+     * Instantiates a new Product dao jdbc.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
+// Constructor Injection
     public ProductDaoJdbcImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
