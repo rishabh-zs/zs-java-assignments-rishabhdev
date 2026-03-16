@@ -26,6 +26,10 @@ dependencies {
     // PostgresSQL JDBC driver for Assignment 10
     implementation 'org.postgresql:postgresql:42.7.7'
 
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    runtimeOnly 'ch.qos.logback:logback-classic:1.5.16'
+
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 
@@ -41,13 +45,15 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    failOnNoDiscoveredTests = false
+    filter {
+        failOnNoMatchingTests = false
+    }
     // Keep test output clean on newer JDKs when Mockito/ByteBuddy instrumentation is used.
     jvmArgs '-XX:+EnableDynamicAgentLoading', '-Xshare:off'
 }
 
 application {
-    mainClass = 'com.zs.assignment9.Main'
+    mainClass = 'com.zs.assignment10.Main'
 }
 
 tasks.named('run') {

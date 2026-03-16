@@ -8,42 +8,38 @@ import java.util.List;
  */
 public interface ProductDao {
     /**
-     * Clean up boolean.
+     * Ensures the products table exists.
      *
      * @return the boolean
+     * @throws Exception the exception
      */
-    boolean cleanUp();
+    boolean cleanUp() throws Exception;
 
     /**
      * Find all list.
      *
      * @return the list
+     * @throws Exception the exception
      */
-    List<Product> findAll();
+    List<Product> findAll() throws Exception;
 
     /**
      * Find by id product.
      *
      * @param id the id
      * @return the product
+     * @throws Exception the exception
      */
-    Product findById(Integer id);
-
-    /**
-     * Save product.
-     *
-     * @param product the product
-     * @return the product
-     */
-    Product save(Product product);
+    Product findById(Integer id) throws Exception;
 
     /**
      * Delete by id boolean.
      *
      * @param id the id
      * @return the boolean
+     * @throws Exception the exception
      */
-    boolean deleteById(Integer id);
+    Product deleteById(Integer id) throws Exception;
 
     /**
      * Exists boolean.
@@ -52,4 +48,22 @@ public interface ProductDao {
      * @return the boolean
      */
     boolean exists(Integer id);
+
+    /**
+     * Insert product.
+     *
+     * @param product the product
+     * @return the product
+     * @throws Exception the exception
+     */
+    Product insert(Product product) throws Exception;
+
+    /**
+     * Update product.
+     *
+     * @param product the product
+     * @return the product
+     * @throws Exception the exception
+     */
+    Product update(Product product) throws Exception;
 }

@@ -10,6 +10,7 @@ import java.util.Properties;
  */
 public class DatabaseManager {
     private static final Properties properties = new Properties();
+    private static Connection connection;
 
     static {
         try (InputStream input = DatabaseManager.class.getClassLoader().getResourceAsStream("db.properties")) {
@@ -30,10 +31,9 @@ public class DatabaseManager {
      * @throws Exception the exception
      */
     public static Connection getConnection() throws Exception {
-        return DriverManager.getConnection(
-                properties.getProperty("db.url"),
-                properties.getProperty("db.user"),
-                properties.getProperty("db.password")
-        );
+        if(connection==null || connection.isClosed()){
+            connection =DriverManager.getConnection(properties.getProperty("db.url"), properties.getProperty("db.user"), properties.getProperty("db.password"));
+        }
+        return connection;
     }
 }

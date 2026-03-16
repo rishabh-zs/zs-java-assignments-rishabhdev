@@ -3,132 +3,148 @@ package com.zs.assignment10.controllers;
 import com.zs.assignment10.model.Product;
 import com.zs.assignment10.services.ProductService;
 import java.util.List;
+import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * The type Product controller.
- */
+
 public class ProductController {
 
     private final ProductService productService;
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+    private final Scanner scanner;
 
-    /**
-     * Instantiates a new Product controller.
-     *
-     * @param productService the product service
-     */
     public ProductController(ProductService productService) {
         this.productService = productService;
+        this.scanner = new Scanner(System.in);
     }
 
-    /**
-     * Display all products.
-     */
+
+    ProductController(ProductService productService, Scanner scanner) {
+        this.productService = productService;
+        this.scanner = scanner;
+    }
+
     public void displayAllProducts() {
-        System.out.println("\n--> Fetching all products...");
+        logger.info("\n--> Fetching all products...");
         List<Product> products = productService.getAllProducts();
         if (products.isEmpty()) {
-            System.out.println("<-- Database is empty.");
+            logger.info("<-- No products found!");
         } else {
-            products.forEach(p -> System.out.println("<-- " + p));
+            logger.info("<-- Found {} products", products.size());
+            products.forEach(p -> logger.info("<-- {}", p));
         }
     }
 
-    /**
-     * Display product.
-     *
-     * @param id the id
-     */
-    public void displayProduct(Integer id) {
-        try {
-            System.out.println("\n--> Fetching product ID: " + id);
-            Product product = productService.getProduct(id);
-            if (product != null) {
-                System.out.println("<-- Found: " + product);
-            } else {
-                System.out.println("<-- Not Found: No product exists with ID " + id);
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("<-- Error: " + e.getMessage());
+    public void handleDisplayProduct() {
+        System.out.print("Enter product ID to display: ");
+        int id = Integer.parseInt(scanner.nextLine().trim());
+        logger.info("\n--> Fetching product with ID: {}", id);
+        Product product = productService.getProduct(id);
+        if (product != null) {
+            logger.info("<-- Found: {}", product);
+        } else {
+            logger.info("<-- Not Found: No product exists with ID {}", id);
         }
     }
 
-    /**
-     * Handle save product.
-     *
-     * @param id    the id
-     * @param name  the name
-     * @param price the price
-     */
-    public void handleSaveProduct(Integer id, String name, Double price) {
-        try {
-            System.out.println("\n--> Saving product: '" + name + "'");
-            Product product = new Product(id, name, price);
-            Product savedProduct = productService.saveProduct(product);
-            if(savedProduct != null) {
-                System.out.println("<-- Success! Saved to DB: " + savedProduct);
-            }else{
-                System.out.println("<-- Failed to save product.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("<-- Error: " + e.getMessage());
+    public void handleDeleteProduct() {
+        System.out.print("Enter product ID to delete: ");
+        int id = Integer.parseInt(scanner.nextLine().trim());
+        logger.info("\n--> Deleting product with ID: {}", id);
+        Product deleted = productService.deleteProduct(id);
+        if (deleted != null) {
+            logger.info("<-- Success! Deleted: {}", deleted);
+        } else {
+            logger.info("<-- Failed to delete product.");
         }
     }
 
-    /**
-     * Handle delete product.
-     *
-     * @param id the id
-     */
-    public void handleDeleteProduct(Integer id) {
-        try {
-            System.out.println("\n--> Deleting product ID: " + id);
-            boolean deleted = productService.deleteProduct(id);
-            if (deleted) {
-                System.out.println("<-- Success! Product deleted.");
-            } else {
-                System.out.println("<-- Failed to delete product.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("<-- Error: " + e.getMessage());
+    public void handleInsertProduct() {
+        System.out.print("Enter product name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Enter product price: ");
+        double price = Double.parseDouble(scanner.nextLine().trim());
+        logger.info("\n--> Inserting product: {}", name);
+        Product inserted = productService.insertProduct(new Product(null, name, price));
+        if (inserted != null) {
+            logger.info("<-- Success! Inserted: {}", inserted);
+        } else {
+            logger.info("<-- Failed to insert product.");
         }
     }
 
-    /**
-     * Handle clean up boolean.
-     *
-     * @return the boolean
-     */
+    public void handleUpdateProduct() {
+        System.out.print("Enter product ID to update: ");
+        int id = Integer.parseInt(scanner.nextLine().trim());
+        System.out.print("Enter new product name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Enter new product price: ");
+        double price = Double.parseDouble(scanner.nextLine().trim());
+        logger.info("\n--> Updating product with ID: {}", id);
+        Product updated = productService.updateProduct(new Product(id, name, price));
+        if (updated != null) {
+            logger.info("<-- Success! Updated: {}", updated);
+        } else {
+            logger.info("<-- Failed to update product (product may not exist).");
+        }
+    }
+
     public boolean handleCleanUp() {
-        System.out.println("\n--> Cleaning up database...");
+        logger.info("\n--> Ensuring products table exists...");
         if (productService.cleanUp()) {
-            System.out.println("<-- Database reset successful.");
+            logger.info("<-- Products table is ready.");
             return true;
-        }else{
-            System.out.println("<-- Database reset failed.");
+        } else {
+            System.out.println("<-- Failed to prepare products table.");
             return false;
         }
     }
 
-    /**
-     * Start the program.
-     */
+    private int showMenu() {
+        System.out.println("\n========== Products Menu ==========");
+        System.out.println(" 1. Display all products");
+        System.out.println(" 2. Find a product by ID");
+        System.out.println(" 3. Insert a new product");
+        System.out.println(" 4. Update an existing product");
+        System.out.println(" 5. Delete a product");
+        System.out.println(" 0. Exit");
+        System.out.println("===================================");
+        System.out.print("Choose an option: ");
+        try {
+            return Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     public void start() {
-        if(!handleCleanUp()){
-            System.out.println("Aborting tests due to cleanup failure.");
+        if (!handleCleanUp()) {
+            System.out.println("Aborting because the products table is unavailable.");
             return;
-        };
-        System.out.println("---Integrated Testing on Products Table ---");
+        }
 
-        ProductController productController = this;
-        productController.handleSaveProduct(null, "Gaming Laptop", 1200.50);
-        productController.handleSaveProduct(null, "Wireless Mouse", 45.00);
-
-        productController.displayAllProducts();
-
-        productController.handleSaveProduct(1, "Gaming Laptop Pro", 1450.00);
-        productController.displayProduct(1);
-
-        productController.handleDeleteProduct(2);
-        productController.displayAllProducts();
+        boolean running = true;
+        while (running) {
+            int choice = showMenu();
+            try {
+                switch (choice) {
+                    case 1 -> displayAllProducts();
+                    case 2 -> handleDisplayProduct();
+                    case 3 -> handleInsertProduct();
+                    case 4 -> handleUpdateProduct();
+                    case 5 -> handleDeleteProduct();
+                    case 0 -> {
+                        logger.info("Exiting. Goodbye!");
+                        running = false;
+                    }
+                    default -> System.out.println("Invalid option. Please enter a number between 0 and 5.");
+                }
+            } catch (IllegalArgumentException e) {
+                logger.error("<-- Input error: {}", e.getMessage());
+            } catch (RuntimeException e) {
+                logger.error("<-- Unexpected error: {}", e.getMessage());
+            }
+        }
     }
 }
