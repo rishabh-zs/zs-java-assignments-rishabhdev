@@ -9,18 +9,16 @@ import java.util.Properties;
  * The type Database manager.
  */
 public class DatabaseManager {
-    private static final Properties properties = new Properties();
+    private static final Properties props = new Properties();
     private static Connection connection;
 
     static {
-        try (InputStream input = DatabaseManager.class.getClassLoader().getResourceAsStream("db.properties")) {
-            if (input == null) {
-                throw new RuntimeException("Sorry, unable to find db.properties");
-            }
-            properties.load(input);
-            Class.forName("org.postgresql.Driver");
+        try (InputStream in = DatabaseManager.class.getClassLoader()
+                .getResourceAsStream("db.properties")) {
+            if (in == null) throw new RuntimeException("db.properties not found on classpath");
+            props.load(in);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load database properties.", e);
+            throw new RuntimeException("Failed to load database properties", e);
         }
     }
 
@@ -31,8 +29,12 @@ public class DatabaseManager {
      * @throws Exception the exception
      */
     public static Connection getConnection() throws Exception {
-        if(connection==null || connection.isClosed()){
-            connection =DriverManager.getConnection(properties.getProperty("db.url"), properties.getProperty("db.user"), properties.getProperty("db.password"));
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(
+                    props.getProperty("db.url"),
+                    props.getProperty("db.user"),
+                    props.getProperty("db.password")
+            );
         }
         return connection;
     }

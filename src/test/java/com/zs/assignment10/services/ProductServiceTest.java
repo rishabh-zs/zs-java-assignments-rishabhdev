@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -58,14 +57,20 @@ class ProductServiceTest {
         List<Product> result = productService.getAllProducts();
 
         assertEquals(2, result.size());
+        assertEquals(products, result);
         verify(productDao).findAll();
+        verify(productDao, times(1)).findAll();
     }
 
     @Test
     void getAllProducts_EmptyTable_ReturnsEmptyList() throws Exception {
         when(productDao.findAll()).thenReturn(Collections.emptyList());
         List<Product> result = productService.getAllProducts();
+
         assertTrue(result.isEmpty());
+        assertEquals(Collections.emptyList(), result);
+        verify(productDao).findAll();
+        verify(productDao, times(1)).findAll();
     }
 
     @Test
@@ -84,13 +89,16 @@ class ProductServiceTest {
         Product result = productService.getProduct(1);
 
         assertNotNull(result);
+        assertEquals(result, expected);
         assertEquals("Laptop", result.getName());
+        verify(productDao,times(1)).findById(1);
     }
 
     @Test
     void getProduct_NotFound_ReturnsNull() throws Exception {
         when(productDao.findById(999)).thenReturn(null);
         assertNull(productService.getProduct(999));
+        verify(productDao,times(1)).findById(999);
     }
 
     @ParameterizedTest
@@ -117,6 +125,7 @@ class ProductServiceTest {
         Product result = productService.deleteProduct(2);
 
         assertNotNull(result);
+        assertEquals(result, deleted);
         assertEquals(2, result.getId());
         verify(productDao).deleteById(2);
     }

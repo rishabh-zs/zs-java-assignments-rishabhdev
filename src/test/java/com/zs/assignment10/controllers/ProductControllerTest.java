@@ -65,7 +65,7 @@ class ProductControllerTest {
         ));
         // No exception expected; service interaction verified
         controllerWith("").displayAllProducts();
-        verify(productService).getAllProducts();
+        verify(productService,times(1)).getAllProducts();
     }
 
     /**
@@ -75,13 +75,13 @@ class ProductControllerTest {
     void displayAllProducts_EmptyList_LogsNoProducts() {
         when(productService.getAllProducts()).thenReturn(Collections.emptyList());
         controllerWith("").displayAllProducts();
-        verify(productService).getAllProducts();
+        verify(productService,times(1)).getAllProducts();
     }
 
     // ─────────────────────────── handleDisplayProduct ───────────────
 
     /**
-     * Handle display product product found calls get product.
+     * Handle display product found calls get product.
      *
      * @param input the input
      */
@@ -93,11 +93,11 @@ class ProductControllerTest {
 
         controllerWith(input).handleDisplayProduct();
 
-        verify(productService).getProduct(id);
+        verify(productService,times(1)).getProduct(id);
     }
 
     /**
-     * Handle display product product not found does not throw.
+     * Handle display product not found does not throw.
      */
     @Test
     void handleDisplayProduct_ProductNotFound_DoesNotThrow() {
