@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'jacoco'
 }
 
 group = 'com.zs.assignment10'
@@ -16,6 +17,10 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.release = 21
+}
+
+dependencies {
+    implementation 'org.postgresql:postgresql:42.7.2'
 }
 
 repositories {
@@ -56,6 +61,10 @@ application {
     mainClass = 'com.zs.assignment10.Main'
 }
 
-tasks.named('run') {
+tasks.register('runAssignment7', JavaExec) {
+    group = 'execution'
+    description = 'Run Assignment 7 - Database workflow'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.zs.assignment7.Main'
     standardInput = System.in
 }
