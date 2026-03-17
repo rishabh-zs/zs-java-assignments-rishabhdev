@@ -38,14 +38,25 @@ dependencies {
     // JUnit 5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 
+    // JUnit platform suite support for MainTest suite class
+    testImplementation 'org.junit.platform:junit-platform-suite-api:1.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-suite-engine:1.10.2'
+
     // Needed by IntelliJ sometimes for running tests
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Mockito
     testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
 
     // Mockito + JUnit5 support
     testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.36'
+    annotationProcessor 'org.projectlombok:lombok:1.18.36'
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 }
 
 test {

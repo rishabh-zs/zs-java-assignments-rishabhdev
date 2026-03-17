@@ -3,14 +3,13 @@ package com.zs.assignment10.services;
 import com.zs.assignment10.dao.ProductDao;
 import com.zs.assignment10.model.Product;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The type Product service.
  */
+@Slf4j
 public class ProductService {
-    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductDao productDao;
 
@@ -29,11 +28,11 @@ public class ProductService {
      * @return the boolean
      */
     public boolean cleanUp() {
-        try{
-            if(productDao.cleanUp()){
+        try {
+            if (productDao.cleanUp()) {
                 return true;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error("Failed to prepare products table", e);
         }
         return false;
@@ -62,19 +61,19 @@ public class ProductService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid Product ID.");
         }
-        try{
-            Product product=productDao.findById(id);
-            if(product!=null){
+        try {
+            Product product = productDao.findById(id);
+            if (product != null) {
                 return product;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;
     }
 
     /**
-     * Delete product boolean.
+     * Delete product product.
      *
      * @param id the id
      * @return the product
@@ -86,12 +85,12 @@ public class ProductService {
         if (!productDao.exists(id)) {
             throw new IllegalArgumentException("Cannot delete: Product with ID " + id + " does not exist.");
         }
-        try{
+        try {
             Product product = productDao.deleteById(id);
-            if(product!=null){
+            if (product != null) {
                 return product;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;
@@ -103,15 +102,15 @@ public class ProductService {
      * @param product the product
      * @return the product
      */
-    public Product insertProduct(Product product){
+    public Product insertProduct(Product product) {
         if (product.getName() == null || product.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name cannot be empty.");
         }
-        if(product.getPrice() == null || product.getPrice() < 0){
+        if (product.getPrice() == null || product.getPrice() < 0) {
             throw new IllegalArgumentException("Product price must be a positive number.");
         }
-        try{
-            if(productDao.insert(product)!=null){
+        try {
+            if (productDao.insert(product) != null) {
                 return product;
             }
         } catch (Exception e) {
@@ -127,20 +126,20 @@ public class ProductService {
      * @return the product
      */
     public Product updateProduct(Product product) {
-        if(product.getId() == null || product.getId() <= 0){
+        if (product.getId() == null || product.getId() <= 0) {
             throw new IllegalArgumentException("Invalid Product ID.");
         }
-        if(product.getName() == null || product.getName().trim().isEmpty()){
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name cannot be empty.");
         }
-        if(product.getPrice() == null || product.getPrice() < 0){
+        if (product.getPrice() == null || product.getPrice() < 0) {
             throw new IllegalArgumentException("Product price must be a positive number.");
         }
-        try{
-            if(productDao.update(product)!=null){
+        try {
+            if (productDao.update(product) != null) {
                 return product;
             }
-        }catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;

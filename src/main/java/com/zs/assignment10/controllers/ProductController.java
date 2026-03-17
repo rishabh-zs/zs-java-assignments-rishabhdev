@@ -2,19 +2,20 @@ package com.zs.assignment10.controllers;
 
 import com.zs.assignment10.model.Product;
 import com.zs.assignment10.services.ProductService;
+
 import java.util.List;
 import java.util.Scanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * The type Product controller.
  */
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
-    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final Scanner scanner;
 
     /**
@@ -71,7 +72,7 @@ public class ProductController {
     /**
      * Handle delete product.
      */
-    public void handleDeleteProduct() {
+    private void handleDeleteProduct() {
         System.out.print("Enter product ID to delete: ");
         int id = Integer.parseInt(scanner.nextLine().trim());
         logger.info("\n--> Deleting product with ID: {}", id);
@@ -86,7 +87,7 @@ public class ProductController {
     /**
      * Handle insert product.
      */
-    public void handleInsertProduct() {
+    private void handleInsertProduct() {
         System.out.print("Enter product name: ");
         String name = scanner.nextLine().trim();
         System.out.print("Enter product price: ");
@@ -103,7 +104,7 @@ public class ProductController {
     /**
      * Handle update product.
      */
-    public void handleUpdateProduct() {
+    private void handleUpdateProduct() {
         System.out.print("Enter product ID to update: ");
         int id = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Enter new product name: ");

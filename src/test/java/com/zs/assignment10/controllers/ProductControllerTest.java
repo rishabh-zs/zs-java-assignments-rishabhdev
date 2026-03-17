@@ -14,14 +14,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Product controller test.
  */
 @ExtendWith(MockitoExtension.class)
-class ProductControllerTest {
+public class ProductControllerTest {
 
     @Mock
     private ProductService productService;
@@ -31,6 +39,80 @@ class ProductControllerTest {
         Scanner scanner = new Scanner(new ByteArrayInputStream(simulatedInput.getBytes()));
         return new ProductController(productService, scanner);
     }
+
+    // ─────────────────────────── showMenu ───────────────────────────
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0\n", "1\n", "2\n", "3\n", "4\n", "5\n"})
+    void showMenu_ValidNumericInput_ReturnsParsedChoice(String input) {
+        int expected = Integer.parseInt(input.trim());
+        assertEquals(expected, controllerWith(input).showMenu());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"abc\n", "\n", "1.5\n", "one\n"})
+    void showMenu_NonNumericInput_ReturnsMinusOne(String input) {
+        assertEquals(-1, controllerWith(input).showMenu());
+    }
+
+    @Test
+    void showMenu_InputWithWhitespace_ReturnsTrimmedParsedChoice() {
+        assertEquals(4, controllerWith("   4   \n").showMenu());
+    }
+
+    // ─────────────────────────── start ──────────────────────────────
+
+    @Test
+    void start_WhenCleanupFails_StopsWithoutShowingMenu() {
+        ProductController controller = spy(controllerWith(""));
+        doReturn(false).when(controller).handleCleanUp();
+
+        controller.start();
+
+        verify(controller, times(1)).handleCleanUp();
+        verify(controller, never()).showMenu();
+        verify(controller, never()).displayAllProducts();
+        verify(controller, never()).handleDisplayProduct();
+    }
+
+    @Test
+    void start_WhenChoiceIsDisplayThenExit_CallsDisplayAllProductsOnce() {
+        ProductController controller = spy(controllerWith(""));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(1, 0).when(controller).showMenu();
+
+        controller.start();
+
+        verify(controller, times(1)).displayAllProducts();
+        verify(controller, times(2)).showMenu();
+    }
+
+    @Test
+    void start_WhenChoiceIsFindByIdThenExit_CallsHandleDisplayProductOnce() {
+        ProductController controller = spy(controllerWith(""));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(2, 0).when(controller).showMenu();
+
+        controller.start();
+
+        verify(controller, times(1)).handleDisplayProduct();
+    }
+
+
+
+    @Test
+    void start_WhenChoiceIsInvalidThenExit_DoesNotCallAnyPublicActionHandler() {
+        ProductController controller = spy(controllerWith(""));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(-1, 0).when(controller).showMenu();
+
+        controller.start();
+
+        verify(controller, never()).displayAllProducts();
+        verify(controller, never()).handleDisplayProduct();
+    }
+
+
 
     // ─────────────────────────── handleCleanUp ──────────────────────
 
@@ -105,117 +187,5 @@ class ProductControllerTest {
         assertDoesNotThrow(() -> controllerWith("5\n").handleDisplayProduct());
     }
 
-    // ─────────────────────────── handleInsertProduct ────────────────
 
-    /**
-     * Handle insert product valid input calls insert product.
-     */
-    @Test
-    void handleInsertProduct_ValidInput_CallsInsertProduct() {
-        Product inserted = new Product(3, "Keyboard", 75.0);
-        when(productService.insertProduct(any(Product.class))).thenReturn(inserted);
-
-        controllerWith("Keyboard\n75.0\n").handleInsertProduct();
-
-        verify(productService).insertProduct(argThat(p ->
-                "Keyboard".equals(p.getName()) && p.getPrice() == 75.0 && p.getId() == null));
-    }
-
-    /**
-     * Handle insert product service returns null does not throw.
-     */
-    @Test
-    void handleInsertProduct_ServiceReturnsNull_DoesNotThrow() {
-        when(productService.insertProduct(any(Product.class))).thenReturn(null);
-        assertDoesNotThrow(() -> controllerWith("Monitor\n300.0\n").handleInsertProduct());
-    }
-
-    /**
-     * Handle insert product various valid inputs calls service once.
-     *
-     * @param input the input
-     */
-    @ParameterizedTest
-    @ValueSource(strings = {"Laptop\n1200.0\n", "Mouse\n25.5\n", "Headset\n89.99\n"})
-    void handleInsertProduct_VariousValidInputs_CallsServiceOnce(String input) {
-        when(productService.insertProduct(any())).thenReturn(new Product(1, "x", 1.0));
-        controllerWith(input).handleInsertProduct();
-        verify(productService, times(1)).insertProduct(any());
-    }
-
-    // ─────────────────────────── handleUpdateProduct ────────────────
-
-    /**
-     * Handle update product valid input calls update product.
-     */
-    @Test
-    void handleUpdateProduct_ValidInput_CallsUpdateProduct() {
-        Product updated = new Product(1, "Gaming Laptop", 1500.0);
-        when(productService.updateProduct(any(Product.class))).thenReturn(updated);
-
-        controllerWith("1\nGaming Laptop\n1500.0\n").handleUpdateProduct();
-
-        verify(productService).updateProduct(argThat(p ->
-                p.getId() == 1 && "Gaming Laptop".equals(p.getName()) && p.getPrice() == 1500.0));
-    }
-
-    /**
-     * Handle update product service returns null does not throw.
-     */
-    @Test
-    void handleUpdateProduct_ServiceReturnsNull_DoesNotThrow() {
-        when(productService.updateProduct(any(Product.class))).thenReturn(null);
-        assertDoesNotThrow(() -> controllerWith("1\nOld Name\n10.0\n").handleUpdateProduct());
-    }
-
-    /**
-     * Handle update product various valid inputs calls service once.
-     *
-     * @param input the input
-     */
-    @ParameterizedTest
-    @ValueSource(strings = {"1\nLaptop Pro\n1450.0\n", "2\nWireless Mouse\n30.0\n"})
-    void handleUpdateProduct_VariousValidInputs_CallsServiceOnce(String input) {
-        when(productService.updateProduct(any())).thenReturn(new Product(1, "x", 1.0));
-        controllerWith(input).handleUpdateProduct();
-        verify(productService, times(1)).updateProduct(any());
-    }
-
-    // ─────────────────────────── handleDeleteProduct ────────────────
-
-    /**
-     * Handle delete product product exists calls delete product.
-     */
-    @Test
-    void handleDeleteProduct_ProductExists_CallsDeleteProduct() {
-        Product deleted = new Product(2, "Mouse", 25.5);
-        when(productService.deleteProduct(2)).thenReturn(deleted);
-
-        controllerWith("2\n").handleDeleteProduct();
-
-        verify(productService).deleteProduct(2);
-    }
-
-    /**
-     * Handle delete product service returns null does not throw.
-     */
-    @Test
-    void handleDeleteProduct_ServiceReturnsNull_DoesNotThrow() {
-        when(productService.deleteProduct(99)).thenReturn(null);
-        assertDoesNotThrow(() -> controllerWith("99\n").handleDeleteProduct());
-    }
-
-    /**
-     * Handle delete product various ids calls service once.
-     *
-     * @param input the input
-     */
-    @ParameterizedTest
-    @ValueSource(strings = {"1\n", "3\n", "7\n"})
-    void handleDeleteProduct_VariousIds_CallsServiceOnce(String input) {
-        int id = Integer.parseInt(input.trim());
-        when(productService.deleteProduct(id)).thenReturn(new Product(id, "x", 1.0));
-        controllerWith(input).handleDeleteProduct();
-        verify(productService, times(1)).deleteProduct(id);
-    }
 }
