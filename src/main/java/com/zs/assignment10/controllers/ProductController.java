@@ -8,23 +8,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * The type Product controller.
+ */
 public class ProductController {
 
     private final ProductService productService;
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final Scanner scanner;
 
+    /**
+     * Instantiates a new Product controller.
+     *
+     * @param productService the product service
+     */
     public ProductController(ProductService productService) {
         this.productService = productService;
         this.scanner = new Scanner(System.in);
     }
 
 
+    /**
+     * Instantiates a new Product controller.
+     *
+     * @param productService the product service
+     * @param scanner        the scanner
+     */
     ProductController(ProductService productService, Scanner scanner) {
         this.productService = productService;
         this.scanner = scanner;
     }
 
+    /**
+     * Display all products.
+     */
     public void displayAllProducts() {
         logger.info("\n--> Fetching all products...");
         List<Product> products = productService.getAllProducts();
@@ -36,6 +53,9 @@ public class ProductController {
         }
     }
 
+    /**
+     * Handle display product.
+     */
     public void handleDisplayProduct() {
         System.out.print("Enter product ID to display: ");
         int id = Integer.parseInt(scanner.nextLine().trim());
@@ -48,6 +68,9 @@ public class ProductController {
         }
     }
 
+    /**
+     * Handle delete product.
+     */
     public void handleDeleteProduct() {
         System.out.print("Enter product ID to delete: ");
         int id = Integer.parseInt(scanner.nextLine().trim());
@@ -60,6 +83,9 @@ public class ProductController {
         }
     }
 
+    /**
+     * Handle insert product.
+     */
     public void handleInsertProduct() {
         System.out.print("Enter product name: ");
         String name = scanner.nextLine().trim();
@@ -74,6 +100,9 @@ public class ProductController {
         }
     }
 
+    /**
+     * Handle update product.
+     */
     public void handleUpdateProduct() {
         System.out.print("Enter product ID to update: ");
         int id = Integer.parseInt(scanner.nextLine().trim());
@@ -90,6 +119,11 @@ public class ProductController {
         }
     }
 
+    /**
+     * Handle clean up boolean.
+     *
+     * @return the boolean
+     */
     public boolean handleCleanUp() {
         logger.info("\n--> Ensuring products table exists...");
         if (productService.cleanUp()) {
@@ -101,7 +135,12 @@ public class ProductController {
         }
     }
 
-    private int showMenu() {
+    /**
+     * Show menu int.
+     *
+     * @return the int
+     */
+    public int showMenu() {
         System.out.println("\n========== Products Menu ==========");
         System.out.println(" 1. Display all products");
         System.out.println(" 2. Find a product by ID");
@@ -118,6 +157,9 @@ public class ProductController {
         }
     }
 
+    /**
+     * Start the Application.
+     */
     public void start() {
         if (!handleCleanUp()) {
             System.out.println("Aborting because the products table is unavailable.");
