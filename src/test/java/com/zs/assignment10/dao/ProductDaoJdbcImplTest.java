@@ -14,21 +14,14 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductDaoJdbcImplTest {
 
+    private final ProductDaoJdbcImpl dao = new ProductDaoJdbcImpl();
     @Mock
     private Connection connection;
     @Mock
@@ -37,8 +30,6 @@ public class ProductDaoJdbcImplTest {
     private ResultSet resultSet;
     @Mock
     private Statement statement;
-
-    private final ProductDaoJdbcImpl dao = new ProductDaoJdbcImpl();
 
     @Test
     void findAll_WhenRowsExist_ReturnsMappedProducts() throws Exception {

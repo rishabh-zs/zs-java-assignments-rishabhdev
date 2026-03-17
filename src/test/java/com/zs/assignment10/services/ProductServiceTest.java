@@ -91,14 +91,14 @@ public class ProductServiceTest {
         assertNotNull(result);
         assertEquals(result, expected);
         assertEquals("Laptop", result.getName());
-        verify(productDao,times(1)).findById(1);
+        verify(productDao, times(1)).findById(1);
     }
 
     @Test
     void getProduct_NotFound_ReturnsNull() throws Exception {
         when(productDao.findById(999)).thenReturn(null);
         assertNull(productService.getProduct(999));
-        verify(productDao,times(1)).findById(999);
+        verify(productDao, times(1)).findById(999);
     }
 
     @ParameterizedTest

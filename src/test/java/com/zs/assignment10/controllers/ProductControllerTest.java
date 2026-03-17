@@ -14,16 +14,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
  * The type Product controller test.
@@ -34,7 +27,9 @@ public class ProductControllerTest {
     @Mock
     private ProductService productService;
 
-    /** Helper – builds a controller whose Scanner reads from the given lines. */
+    /**
+     * Helper – builds a controller whose Scanner reads from the given lines.
+     */
     private ProductController controllerWith(String simulatedInput) {
         Scanner scanner = new Scanner(new ByteArrayInputStream(simulatedInput.getBytes()));
         return new ProductController(productService, scanner);
@@ -99,7 +94,6 @@ public class ProductControllerTest {
     }
 
 
-
     @Test
     void start_WhenChoiceIsInvalidThenExit_DoesNotCallAnyPublicActionHandler() {
         ProductController controller = spy(controllerWith(""));
@@ -111,7 +105,6 @@ public class ProductControllerTest {
         verify(controller, never()).displayAllProducts();
         verify(controller, never()).handleDisplayProduct();
     }
-
 
 
     // ─────────────────────────── handleCleanUp ──────────────────────
@@ -147,7 +140,7 @@ public class ProductControllerTest {
         ));
         // No exception expected; service interaction verified
         controllerWith("").displayAllProducts();
-        verify(productService,times(1)).getAllProducts();
+        verify(productService, times(1)).getAllProducts();
     }
 
     /**
@@ -157,7 +150,7 @@ public class ProductControllerTest {
     void displayAllProducts_EmptyList_LogsNoProducts() {
         when(productService.getAllProducts()).thenReturn(Collections.emptyList());
         controllerWith("").displayAllProducts();
-        verify(productService,times(1)).getAllProducts();
+        verify(productService, times(1)).getAllProducts();
     }
 
     // ─────────────────────────── handleDisplayProduct ───────────────
@@ -175,7 +168,7 @@ public class ProductControllerTest {
 
         controllerWith(input).handleDisplayProduct();
 
-        verify(productService,times(1)).getProduct(id);
+        verify(productService, times(1)).getProduct(id);
     }
 
     /**
@@ -187,5 +180,125 @@ public class ProductControllerTest {
         assertDoesNotThrow(() -> controllerWith("5\n").handleDisplayProduct());
     }
 
+    // ─────────────────────────── handleInsertProduct (via start) ────
+
+    /**
+     * Start when choice is insert and insert succeeds calls insert product.
+     */
+    @Test
+    void start_WhenChoiceIsInsertThenExit_InsertSucceeds() {
+        ProductController controller = spy(controllerWith("NewProduct\n49.99\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(3, 0).when(controller).showMenu();
+        when(productService.insertProduct(any(Product.class)))
+                .thenReturn(new Product(1, "NewProduct", 49.99));
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).insertProduct(any(Product.class));
+    }
+
+    /**
+     * Start when choice is insert and insert returns null logs failure.
+     */
+    @Test
+    void start_WhenChoiceIsInsertThenExit_InsertReturnsNull() {
+        ProductController controller = spy(controllerWith("NewProduct\n49.99\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(3, 0).when(controller).showMenu();
+        when(productService.insertProduct(any(Product.class))).thenReturn(null);
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).insertProduct(any(Product.class));
+    }
+
+    // ─────────────────────────── handleUpdateProduct (via start) ────
+
+    /**
+     * Start when choice is update and update succeeds calls update product.
+     */
+    @Test
+    void start_WhenChoiceIsUpdateThenExit_UpdateSucceeds() {
+        ProductController controller = spy(controllerWith("1\nUpdatedName\n59.99\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(4, 0).when(controller).showMenu();
+        when(productService.updateProduct(any(Product.class)))
+                .thenReturn(new Product(1, "UpdatedName", 59.99));
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).updateProduct(any(Product.class));
+    }
+
+    /**
+     * Start when choice is update and update returns null logs failure.
+     */
+    @Test
+    void start_WhenChoiceIsUpdateThenExit_UpdateReturnsNull() {
+        ProductController controller = spy(controllerWith("1\nUpdatedName\n59.99\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(4, 0).when(controller).showMenu();
+        when(productService.updateProduct(any(Product.class))).thenReturn(null);
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).updateProduct(any(Product.class));
+    }
+
+    // ─────────────────────────── handleDeleteProduct (via start) ────
+
+    /**
+     * Start when choice is delete and delete succeeds calls delete product.
+     */
+    @Test
+    void start_WhenChoiceIsDeleteThenExit_DeleteSucceeds() {
+        ProductController controller = spy(controllerWith("1\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(5, 0).when(controller).showMenu();
+        when(productService.deleteProduct(1))
+                .thenReturn(new Product(1, "Item", 10.0));
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).deleteProduct(1);
+    }
+
+    /**
+     * Start when choice is delete and delete returns null logs failure.
+     */
+    @Test
+    void start_WhenChoiceIsDeleteThenExit_DeleteReturnsNull() {
+        ProductController controller = spy(controllerWith("1\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(5, 0).when(controller).showMenu();
+        when(productService.deleteProduct(1)).thenReturn(null);
+
+        assertDoesNotThrow(() -> controller.start());
+        verify(productService, times(1)).deleteProduct(1);
+    }
+
+    // ─────────────────────────── Exception handling in start ────────
+
+    /**
+     * Start when runtime exception thrown logs error and continues.
+     */
+    @Test
+    void start_WhenRuntimeExceptionThrown_LogsErrorAndContinues() {
+        ProductController controller = spy(controllerWith(""));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(1, 0).when(controller).showMenu();
+        when(productService.getAllProducts()).thenThrow(new RuntimeException("DB error"));
+
+        assertDoesNotThrow(() -> controller.start());
+    }
+
+    /**
+     * Start when illegal argument exception thrown logs error and continues.
+     */
+    @Test
+    void start_WhenIllegalArgumentExceptionThrown_LogsErrorAndContinues() {
+        ProductController controller = spy(controllerWith("5\n"));
+        doReturn(true).when(controller).handleCleanUp();
+        doReturn(2, 0).when(controller).showMenu();
+        when(productService.getProduct(5)).thenThrow(new IllegalArgumentException("Invalid ID"));
+
+        assertDoesNotThrow(() -> controller.start());
+    }
 
 }

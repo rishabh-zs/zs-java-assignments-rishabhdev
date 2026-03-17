@@ -1,8 +1,8 @@
 package com.zs.assignment10;
 
 import com.zs.assignment10.controllers.ProductControllerTest;
-import com.zs.assignment10.services.ProductServiceTest;
 import com.zs.assignment10.dao.ProductDaoJdbcImplTest;
+import com.zs.assignment10.services.ProductServiceTest;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
