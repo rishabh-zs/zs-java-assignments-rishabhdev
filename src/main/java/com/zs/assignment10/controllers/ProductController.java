@@ -2,11 +2,10 @@ package com.zs.assignment10.controllers;
 
 import com.zs.assignment10.model.Product;
 import com.zs.assignment10.services.ProductService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Scanner;
-
-import lombok.extern.slf4j.Slf4j;
 
 
 /**
