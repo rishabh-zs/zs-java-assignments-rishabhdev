@@ -29,8 +29,6 @@ build
 qodana.yaml
 Main.run.xml
 
-gradlew
-gradlew.bat
 # Ignore Kotlin plugin data
 .kotlin
 
