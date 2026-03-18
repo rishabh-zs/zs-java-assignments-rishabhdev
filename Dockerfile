@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 # Build the JAR using the built-in gradle command (skipping tests)
-RUN gradle clean build -x test
+RUN gradle clean build -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
 
 # ==========================================
 # Stage 2: Run the application
