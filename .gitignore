@@ -31,4 +31,9 @@ Main.run.xml
 
 gradlew
 gradlew.bat
+# Ignore Kotlin plugin data
+.kotlin
+
+.run
 zs-java-assignments-rishabhdev.iml
+gradle.properties
