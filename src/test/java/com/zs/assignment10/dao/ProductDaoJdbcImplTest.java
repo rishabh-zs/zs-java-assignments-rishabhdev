@@ -14,10 +14,21 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+/**
+ * The type Product dao JDBC impl test.
+ */
 @ExtendWith(MockitoExtension.class)
 public class ProductDaoJdbcImplTest {
 
@@ -31,6 +42,11 @@ public class ProductDaoJdbcImplTest {
     @Mock
     private Statement statement;
 
+    /**
+     * Find all when rows exist returns mapped products.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findAll_WhenRowsExist_ReturnsMappedProducts() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -50,6 +66,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Find all when no rows returns empty list.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findAll_WhenNoRows_ReturnsEmptyList() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -64,6 +85,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Find all when query fails throws wrapped exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findAll_WhenQueryFails_ThrowsWrappedException() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -76,6 +102,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Clean up when create table succeeds returns true.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void cleanUp_WhenCreateTableSucceeds_ReturnsTrue() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -87,6 +118,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Clean up when create table fails returns false.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void cleanUp_WhenCreateTableFails_ReturnsFalse() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -97,6 +133,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Find by id when row exists returns product.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findById_WhenRowExists_ReturnsProduct() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -118,6 +159,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Find by id when row does not exist returns null.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findById_WhenRowDoesNotExist_ReturnsNull() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -130,6 +176,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Find by id when query fails throws wrapped exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void findById_WhenQueryFails_ThrowsWrappedException() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -142,6 +193,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Delete by id when row deleted returns deleted product.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void deleteById_WhenRowDeleted_ReturnsDeletedProduct() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -162,6 +218,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Delete by id when no row deleted returns null.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void deleteById_WhenNoRowDeleted_ReturnsNull() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -175,6 +236,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Delete by id when delete fails throws wrapped exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void deleteById_WhenDeleteFails_ThrowsWrappedException() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -188,6 +254,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Exists when row found returns true.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void exists_WhenRowFound_ReturnsTrue() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -201,6 +272,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Exists when row not found returns false.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void exists_WhenRowNotFound_ReturnsFalse() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -213,6 +289,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Exists when query fails returns false.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void exists_WhenQueryFails_ReturnsFalse() throws Exception {
         try (MockedStatic<DatabaseManager> db = mockStatic(DatabaseManager.class)) {
@@ -222,6 +303,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Insert when insert succeeds returns product with generated id.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void insert_WhenInsertSucceeds_ReturnsProductWithGeneratedId() throws Exception {
         Product product = new Product(null, "Keyboard", 75.0);
@@ -244,6 +330,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Insert when no generated id returned returns null.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void insert_WhenNoGeneratedIdReturned_ReturnsNull() throws Exception {
         Product product = new Product(null, "Keyboard", 75.0);
@@ -259,6 +350,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Insert when insert fails throws wrapped exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void insert_WhenInsertFails_ThrowsWrappedException() throws Exception {
         Product product = new Product(null, "Keyboard", 75.0);
@@ -274,6 +370,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Update when product exists and update succeeds returns updated product.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void update_WhenProductExistsAndUpdateSucceeds_ReturnsUpdatedProduct() throws Exception {
         Product product = new Product(3, "Monitor", 300.0);
@@ -311,6 +412,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Update when product does not exist returns null.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void update_WhenProductDoesNotExist_ReturnsNull() throws Exception {
         Product product = new Product(999, "Ghost", 1.0);
@@ -325,6 +431,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Update when update fails throws wrapped exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void update_WhenUpdateFails_ThrowsWrappedException() throws Exception {
         Product product = new Product(4, "Tablet", 500.0);
@@ -351,6 +462,11 @@ public class ProductDaoJdbcImplTest {
         }
     }
 
+    /**
+     * Update when update returns no row returns null.
+     *
+     * @throws Exception the exception
+     */
     @Test
     void update_WhenUpdateReturnsNoRow_ReturnsNull() throws Exception {
         Product product = new Product(6, "Pen", 2.5);

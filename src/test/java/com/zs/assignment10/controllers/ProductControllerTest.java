@@ -14,9 +14,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Product controller test.
@@ -35,8 +43,11 @@ public class ProductControllerTest {
         return new ProductController(productService, scanner);
     }
 
-    // ─────────────────────────── showMenu ───────────────────────────
-
+    /**
+     * Show menu valid numeric input returns parsed choice.
+     *
+     * @param input the input
+     */
     @ParameterizedTest
     @ValueSource(strings = {"0\n", "1\n", "2\n", "3\n", "4\n", "5\n"})
     void showMenu_ValidNumericInput_ReturnsParsedChoice(String input) {
@@ -44,19 +55,28 @@ public class ProductControllerTest {
         assertEquals(expected, controllerWith(input).showMenu());
     }
 
+    /**
+     * Show menu non-numeric input returns minus one.
+     *
+     * @param input the input
+     */
     @ParameterizedTest
     @ValueSource(strings = {"abc\n", "\n", "1.5\n", "one\n"})
     void showMenu_NonNumericInput_ReturnsMinusOne(String input) {
         assertEquals(-1, controllerWith(input).showMenu());
     }
 
+    /**
+     * Show menu input with whitespace returns trimmed parsed choice.
+     */
     @Test
     void showMenu_InputWithWhitespace_ReturnsTrimmedParsedChoice() {
         assertEquals(4, controllerWith("   4   \n").showMenu());
     }
 
-    // ─────────────────────────── start ──────────────────────────────
-
+    /**
+     * Start when cleanup fails stops without showing menu.
+     */
     @Test
     void start_WhenCleanupFails_StopsWithoutShowingMenu() {
         ProductController controller = spy(controllerWith(""));
@@ -70,6 +90,9 @@ public class ProductControllerTest {
         verify(controller, never()).handleDisplayProduct();
     }
 
+    /**
+     * Start when choice is display then exit calls display all products once.
+     */
     @Test
     void start_WhenChoiceIsDisplayThenExit_CallsDisplayAllProductsOnce() {
         ProductController controller = spy(controllerWith(""));
@@ -82,6 +105,9 @@ public class ProductControllerTest {
         verify(controller, times(2)).showMenu();
     }
 
+    /**
+     * Start when choice is found by id then exit calls handle display product once.
+     */
     @Test
     void start_WhenChoiceIsFindByIdThenExit_CallsHandleDisplayProductOnce() {
         ProductController controller = spy(controllerWith(""));
@@ -94,6 +120,9 @@ public class ProductControllerTest {
     }
 
 
+    /**
+     * Start when choice is invalid then exit does not call any public action handler.
+     */
     @Test
     void start_WhenChoiceIsInvalidThenExit_DoesNotCallAnyPublicActionHandler() {
         ProductController controller = spy(controllerWith(""));
@@ -105,9 +134,6 @@ public class ProductControllerTest {
         verify(controller, never()).displayAllProducts();
         verify(controller, never()).handleDisplayProduct();
     }
-
-
-    // ─────────────────────────── handleCleanUp ──────────────────────
 
     /**
      * Handle clean up when service succeeds returns true.
@@ -126,8 +152,6 @@ public class ProductControllerTest {
         when(productService.cleanUp()).thenReturn(false);
         assertFalse(controllerWith("").handleCleanUp());
     }
-
-    // ─────────────────────────── displayAllProducts ─────────────────
 
     /**
      * Display all products with products logs products.
@@ -153,8 +177,6 @@ public class ProductControllerTest {
         verify(productService, times(1)).getAllProducts();
     }
 
-    // ─────────────────────────── handleDisplayProduct ───────────────
-
     /**
      * Handle display product found calls get product.
      *
@@ -179,8 +201,6 @@ public class ProductControllerTest {
         when(productService.getProduct(5)).thenReturn(null);
         assertDoesNotThrow(() -> controllerWith("5\n").handleDisplayProduct());
     }
-
-    // ─────────────────────────── handleInsertProduct (via start) ────
 
     /**
      * Start when choice is insert and insert succeeds calls insert product.
@@ -211,8 +231,6 @@ public class ProductControllerTest {
         verify(productService, times(1)).insertProduct(any(Product.class));
     }
 
-    // ─────────────────────────── handleUpdateProduct (via start) ────
-
     /**
      * Start when choice is update and update succeeds calls update product.
      */
@@ -242,10 +260,8 @@ public class ProductControllerTest {
         verify(productService, times(1)).updateProduct(any(Product.class));
     }
 
-    // ─────────────────────────── handleDeleteProduct (via start) ────
-
     /**
-     * Start when choice is delete and delete succeeds calls delete product.
+     * Start when choice is deleted and delete succeeds calls delete product.
      */
     @Test
     void start_WhenChoiceIsDeleteThenExit_DeleteSucceeds() {
@@ -260,7 +276,7 @@ public class ProductControllerTest {
     }
 
     /**
-     * Start when choice is delete and delete returns null logs failure.
+     * Start when choice is deleted and delete returns null logs failure.
      */
     @Test
     void start_WhenChoiceIsDeleteThenExit_DeleteReturnsNull() {
@@ -272,8 +288,6 @@ public class ProductControllerTest {
         assertDoesNotThrow(() -> controller.start());
         verify(productService, times(1)).deleteProduct(1);
     }
-
-    // ─────────────────────────── Exception handling in start ────────
 
     /**
      * Start when runtime exception thrown logs error and continues.
