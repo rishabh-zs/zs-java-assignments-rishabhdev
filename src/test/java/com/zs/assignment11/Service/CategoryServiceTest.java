@@ -17,9 +17,17 @@ import org.springframework.dao.DataRetrievalFailureException;
 
 import java.util.List;
 import java.util.stream.Stream;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -29,6 +37,97 @@ import org.junit.jupiter.params.provider.Arguments;
 public class CategoryServiceTest {
     private CategoryDao categoryDao;
     private CategoryService categoryService;
+
+    /**
+     * Category lists stream.
+     *
+     * @return the stream
+     */
+    static Stream<List<Category>> categoryLists() {
+        return Stream.of(
+                List.of(new Category(1, "electronics"), new Category(2, "fashion")),
+                List.of(new Category(3, "sports")),
+                List.of()
+        );
+    }
+
+    /**
+     * Valid category payloads stream.
+     *
+     * @return the stream
+     */
+    static Stream<Category> validCategories() {
+        return Stream.of(
+                new Category(1, "electronics"),
+                new Category(2, "fashion")
+        );
+    }
+
+    /**
+     * Invalid categories stream.
+     *
+     * @return the stream
+     */
+    static Stream<Arguments> invalidCategories() {
+        return Stream.of(
+                arguments(null, "Category payload is required."),
+                arguments(new Category(1, null), "Category name must not be blank."),
+                arguments(new Category(1, ""), "Category name must not be blank."),
+                arguments(new Category(1, "   "), "Category name must not be blank.")
+        );
+    }
+
+    /**
+     * Valid category ids with products stream.
+     *
+     * @return the stream
+     */
+    static Stream<Arguments> validCategoryIdsWithProducts() {
+        return Stream.of(
+                arguments(1L, List.of(new Product(1, "Phone", 999.99, 1))),
+                arguments(2L, List.of(new Product(4, "FaceCream", 4.5, 2), new Product(5, "faceGel", 10.0, 2))),
+                arguments(3L, List.of())
+        );
+    }
+
+    /**
+     * Invalid category ids stream.
+     *
+     * @return the stream
+     */
+    static Stream<Arguments> invalidCategoryIds() {
+        return Stream.of(
+                arguments((Object) null),
+                arguments(0L),
+                arguments(-1L)
+        );
+    }
+
+    /**
+     * Valid category ids stream.
+     *
+     * @return the stream
+     */
+    static Stream<Long> validDeleteCategoryIds() {
+        return Stream.of(1L, 2L);
+    }
+
+    /**
+     * Invalid update categories stream.
+     *
+     * @return the stream
+     */
+    static Stream<Arguments> invalidUpdateCategories() {
+        return Stream.of(
+                arguments(null, "Category payload is required."),
+                arguments(new Category(null, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(0, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(-1, "electronics"), "Category id must be a positive number."),
+                arguments(new Category(1, null), "Category name must not be blank."),
+                arguments(new Category(1, ""), "Category name must not be blank."),
+                arguments(new Category(1, "   "), "Category name must not be blank.")
+        );
+    }
 
     /**
      * Sets up.
@@ -46,7 +145,7 @@ public class CategoryServiceTest {
     void createCategoryTableDelegatesToDao() {
         categoryService.CreateCategoryTable();
 
-        verify(categoryDao,times(1)).CreateCategoryTable();
+        verify(categoryDao, times(1)).CreateCategoryTable();
     }
 
     /**
@@ -65,20 +164,6 @@ public class CategoryServiceTest {
         assertEquals("Failed to create category table.", exception.getMessage());
         assertEquals("db down", exception.getCause().getMessage());
         verify(categoryDao).CreateCategoryTable();
-    }
-
-
-    /**
-     * Category lists stream.
-     *
-     * @return the stream
-     */
-    static Stream<List<Category>> categoryLists() {
-        return Stream.of(
-                List.of(new Category(1, "electronics"), new Category(2, "fashion")),
-                List.of(new Category(3, "sports")),
-                List.of()
-        );
     }
 
     /**
@@ -116,18 +201,6 @@ public class CategoryServiceTest {
     }
 
     /**
-     * Valid category payloads stream.
-     *
-     * @return the stream
-     */
-    static Stream<Category> validCategories() {
-        return Stream.of(
-                new Category(1, "electronics"),
-                new Category(2, "fashion")
-        );
-    }
-
-    /**
      * Add category valid payload delegates to dao.
      *
      * @param category the category
@@ -135,27 +208,13 @@ public class CategoryServiceTest {
     @ParameterizedTest
     @MethodSource("validCategories")
     void addCategory_ValidPayload_DelegatesToDao(Category category) {
-		Category savedCategory = new Category(10, category.getName());
-		when(categoryDao.addCategory(category)).thenReturn(savedCategory);
+        Category savedCategory = new Category(10, category.getName());
+        when(categoryDao.addCategory(category)).thenReturn(savedCategory);
 
-		Category result = categoryService.addCategory(category);
+        Category result = categoryService.addCategory(category);
 
-		assertSame(savedCategory, result);
+        assertSame(savedCategory, result);
         verify(categoryDao).addCategory(category);
-    }
-
-    /**
-     * Invalid categories stream.
-     *
-     * @return the stream
-     */
-    static Stream<Arguments> invalidCategories() {
-        return Stream.of(
-                arguments((Object) null, "Category payload is required."),
-                arguments(new Category(1, null), "Category name must not be blank."),
-                arguments(new Category(1, ""), "Category name must not be blank."),
-                arguments(new Category(1, "   "), "Category name must not be blank.")
-        );
     }
 
     /**
@@ -213,20 +272,6 @@ public class CategoryServiceTest {
         verify(categoryDao).addCategory(category);
     }
 
-
-    /**
-     * Valid category ids with products stream.
-     *
-     * @return the stream
-     */
-    static Stream<Arguments> validCategoryIdsWithProducts() {
-        return Stream.of(
-                arguments(1L, List.of(new Product(1, "Phone", 999.99, 1))),
-                arguments(2L, List.of(new Product(4, "FaceCream", 4.5, 2), new Product(5, "faceGel", 10.0, 2))),
-                arguments(3L, List.of())
-        );
-    }
-
     /**
      * Gets products by category id valid id returns dao data.
      *
@@ -242,19 +287,6 @@ public class CategoryServiceTest {
 
         assertSame(products, result);
         verify(categoryDao).findAllProductsByCategoryId(categoryId);
-    }
-
-    /**
-     * Invalid category ids stream.
-     *
-     * @return the stream
-     */
-    static Stream<Arguments> invalidCategoryIds() {
-        return Stream.of(
-                arguments((Object) null),
-                arguments(0L),
-                arguments(-1L)
-        );
     }
 
     /**
@@ -293,15 +325,6 @@ public class CategoryServiceTest {
     }
 
     /**
-     * Valid category ids stream.
-     *
-     * @return the stream
-     */
-    static Stream<Long> validDeleteCategoryIds() {
-        return Stream.of(1L, 2L);
-    }
-
-    /**
      * Delete category valid id delegates to dao.
      *
      * @param categoryId the category id
@@ -309,12 +332,12 @@ public class CategoryServiceTest {
     @ParameterizedTest
     @MethodSource("validDeleteCategoryIds")
     void deleteCategory_ValidId_DelegatesToDao(Long categoryId) {
-		Category deletedCategory = new Category(categoryId.intValue(), "electronics");
-		when(categoryDao.deleteCategory(categoryId)).thenReturn(deletedCategory);
+        Category deletedCategory = new Category(categoryId.intValue(), "electronics");
+        when(categoryDao.deleteCategory(categoryId)).thenReturn(deletedCategory);
 
-		Category result = categoryService.deleteCategory(categoryId);
+        Category result = categoryService.deleteCategory(categoryId);
 
-		assertSame(deletedCategory, result);
+        assertSame(deletedCategory, result);
         verify(categoryDao).deleteCategory(categoryId);
     }
 
@@ -353,6 +376,9 @@ public class CategoryServiceTest {
         verify(categoryDao).deleteCategory(1L);
     }
 
+    /**
+     * Update category valid payload delegates to dao.
+     */
     @Test
     void updateCategory_ValidPayload_DelegatesToDao() {
         Category updateRequest = new Category(1, "electronics-updated");
@@ -365,18 +391,12 @@ public class CategoryServiceTest {
         verify(categoryDao).updateCategory(updateRequest);
     }
 
-    static Stream<Arguments> invalidUpdateCategories() {
-        return Stream.of(
-                arguments((Object) null, "Category payload is required."),
-                arguments(new Category(null, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(0, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(-1, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(1, null), "Category name must not be blank."),
-                arguments(new Category(1, ""), "Category name must not be blank."),
-                arguments(new Category(1, "   "), "Category name must not be blank.")
-        );
-    }
-
+    /**
+     * Update category invalid payload throws exception.
+     *
+     * @param category        the category
+     * @param expectedMessage the expected message
+     */
     @ParameterizedTest
     @MethodSource("invalidUpdateCategories")
     void updateCategory_InvalidPayload_ThrowsException(Category category, String expectedMessage) {
@@ -389,6 +409,9 @@ public class CategoryServiceTest {
         verifyNoInteractions(categoryDao);
     }
 
+    /**
+     * Update category data access error throws runtime exception.
+     */
     @Test
     void updateCategory_DataAccessError_ThrowsRuntimeException() {
         Category updateRequest = new Category(1, "electronics-updated");

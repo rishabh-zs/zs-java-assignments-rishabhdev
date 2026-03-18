@@ -10,7 +10,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +17,6 @@ import java.util.List;
  */
 @Service
 public class ProductService {
-    private List<Product> products = new ArrayList<>();
     private static final Logger log = LoggerUtil.getLogger(ProductService.class);
     private final ProductDao productDao;
 
@@ -27,7 +25,6 @@ public class ProductService {
      *
      * @param productDao the product dao
      */
-// Constructor Injection
     public ProductService(ProductDao productDao) {
         this.productDao = productDao;
     }
@@ -52,6 +49,8 @@ public class ProductService {
      */
     public List<Product> getAllProducts() {
         log.info("Request received to fetch all products");
+        List<Product> products;
+
         try {
             products = productDao.findAllProducts();
         } catch (DataAccessException ex) {
@@ -69,10 +68,11 @@ public class ProductService {
     public Product addProduct(Product product) {
         log.info("Request received to add product");
         validateProduct(product);
+        Product addedProduct;
+
         try {
-            Product addedProduct = productDao.addProduct(product);
+            addedProduct = productDao.addProduct(product);
             log.info("Product added successfully: {}", product.getName());
-            return addedProduct;
         } catch (DuplicateKeyException ex) {
             log.warn("Duplicate product name: {}", product.getName());
             throw new ProductAlreadyExistsException(product.getName());
@@ -80,6 +80,7 @@ public class ProductService {
             log.error("Database error while adding product: {}", product.getName(), ex);
             throw new RuntimeException("Failed to add product to database.", ex);
         }
+        return addedProduct;
     }
 
     /**
@@ -93,13 +94,15 @@ public class ProductService {
         if (productId == null || productId <= 0) {
             throw new IllegalArgumentException("Product id must be a positive number.");
         }
+        Product deletedProduct;
+
         try {
-            Product deletedProduct = productDao.deleteProduct(productId);
+            deletedProduct = productDao.deleteProduct(productId);
             log.info("Deleted product by id: {}", productId);
-            return deletedProduct;
         } catch (DataAccessException ex) {
             throw new RuntimeException("Failed to delete Product from database.", ex);
         }
+        return deletedProduct;
     }
 
     /**
@@ -122,15 +125,16 @@ public class ProductService {
             throw new IllegalArgumentException("Product price must be zero or greater.");
         }
         log.info("Request received to update product id: {}", product.getId());
+        Product updatedProduct;
 
         try {
-            Product updatedProduct = productDao.updateProduct(product);
+            updatedProduct = productDao.updateProduct(product);
             log.info("Product updated successfully, id: {}", product.getId());
-            return updatedProduct;
         } catch (DataAccessException ex) {
             log.error("Error while updating product id: {}", product.getId(), ex);
             throw new RuntimeException("Failed to update product in database.", ex);
         }
+        return updatedProduct;
     }
 
     private void validateProduct(Product product) {
@@ -143,7 +147,7 @@ public class ProductService {
         if (product.getPrice() == null || product.getPrice() < 0) {
             throw new IllegalArgumentException("Product price must be zero or greater.");
         }
-        if (product.getCategoryId() == null || product.getCategoryId() <= 0) {
+        if (product.getCategory_id() == null || product.getCategory_id() <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
     }

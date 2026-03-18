@@ -2,6 +2,7 @@ package com.zs.assignment11.dao;
 
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
+
 import java.util.List;
 
 /**
@@ -34,21 +35,21 @@ public interface CategoryDao {
      * @param category the category
      * @return the category
      */
-    Category  addCategory(Category category);
+    Category addCategory(Category category);
 
     /**
-     * Delete category category.
+     * Delete category.
      *
      * @param id the id
      * @return the category
      */
-    Category  deleteCategory(Long id);
+    Category deleteCategory(Long id);
 
     /**
-     * Update category category.
+     * Update category.
      *
      * @param category the category
      * @return the category
      */
-    Category  updateCategory(Category category);
+    Category updateCategory(Category category);
 }

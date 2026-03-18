@@ -1,13 +1,17 @@
 package com.zs.assignment11.controller;
 
-
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,26 +30,8 @@ public class ProductController {
      *
      * @param productService the product service
      */
-    public ProductController(ProductService productService){
+    public ProductController(ProductService productService) {
         this.productService = productService;
-    }
-
-
-    /**
-     * Stub api get all products list.
-     *
-     * @return the list
-     */
-    @GetMapping("/stubApi/GetallProducts")
-    public List<Product> stubApiGetAllProducts(){
-        log.info("/stubApi/GetallProducts endpoint was called");
-        List<Product> products=new ArrayList<>();
-        products.add(new Product(1,"laptop",1000.0,1));
-        products.add(new Product(2,"tv",2000.0,1));
-        products.add(new Product(3,"iPhone",200.0,1));
-        products.add(new Product(4,"FaceCream",4.50,2));
-        products.add(new Product(5,"faceGel",10.0,2));
-        return products;
     }
 
     /**
@@ -54,7 +40,7 @@ public class ProductController {
      * @return the map
      */
     @GetMapping("/GetallProducts")
-    public Map<String, Object> handleGetAllProducts(){
+    public Map<String, Object> handleGetAllProducts() {
         log.debug("/allProducts endpoint was called");
         List<Product> products = productService.getAllProducts();
 
@@ -78,9 +64,9 @@ public class ProductController {
         Product addedProduct = productService.addProduct(product);
 
         Map<String, Object> response = new LinkedHashMap<>();
-        Integer id=addedProduct.getId();
+        Integer id = addedProduct.getId();
         response.put("status", "success");
-        response.put("message", "Product with ID :"+ id+" added successfully");
+        response.put("message", "Product with ID :" + id + " added successfully");
         response.put("addedProduct", addedProduct);
         return response;
     }
@@ -98,9 +84,9 @@ public class ProductController {
         Product deletedProduct = productService.deleteProduct(productId);
 
         Map<String, Object> response = new LinkedHashMap<>();
-        Integer id=deletedProduct.getId();
+        Integer id = deletedProduct.getId();
         response.put("status", "success");
-        response.put("message", "product with ID :"+id+" deleted successfully");
+        response.put("message", "product with ID :" + id + " deleted successfully");
         response.put("deletedProduct", deletedProduct);
         return response;
     }

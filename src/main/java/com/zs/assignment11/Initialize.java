@@ -25,12 +25,12 @@ public class Initialize {
     @Bean
     CommandLineRunner initializeTables(CategoryService categoryService, ProductService productService) {
         return args -> {
-            try{
+            try {
                 log.info("Initializing database tables");
                 categoryService.CreateCategoryTable();
                 productService.CreateProductTable();
                 log.info("Database tables initialized successfully");
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 log.error("Database tables initialization failed");
             }

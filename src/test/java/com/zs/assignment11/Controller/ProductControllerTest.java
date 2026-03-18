@@ -35,43 +35,12 @@ public class ProductControllerTest {
      * Setup.
      */
     @BeforeEach
-    public void setup(){
-        productService=mock(ProductService.class);
-        ProductController productController=new ProductController(productService);
-        mockMvc=MockMvcBuilders.standaloneSetup(productController)
+    public void setup() {
+        productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+        mockMvc = MockMvcBuilders.standaloneSetup(productController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
-    }
-
-    /**
-     * Stub api get all products valid end point.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void stubApiGetAllProductsValidEndPoint() throws Exception {
-        mockMvc.perform(get("/products/stubApi/GetallProducts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(5))
-                .andExpect(jsonPath("$[0].name").value("laptop"))
-                .andExpect(jsonPath("$[1].name").value("tv"))
-                .andExpect(jsonPath("$[2].name").value("iPhone"))
-                .andExpect(jsonPath("$[3].name").value("FaceCream"))
-                .andExpect(jsonPath("$[4].name").value("faceGel"));
-
-        verifyNoInteractions(productService);
-    }
-
-    /**
-     * Stub api get all products invalid end point.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void stubApiGetAllProductsInvalidEndPoint() throws Exception {
-        mockMvc.perform(get("/products/stubApi/InvalidEndpoint")).andExpect(status().isNotFound());
-        
-        verifyNoInteractions(productService);
     }
 
     /**
@@ -82,12 +51,12 @@ public class ProductControllerTest {
     @Test
     public void getAllProductsFromService() throws Exception {
         when(productService.getAllProducts()).thenReturn(List.of(
-                new Product(1,"laptop",1000.0,1),
-                new Product(2,"tv",2000.0,1),
-                new Product(3,"iPhone",200.0,1),
-                new Product(4,"FaceCream",4.50,2),
-                new Product(5,"faceGel",10.0,2)));
-        
+                new Product(1, "laptop", 1000.0, 1),
+                new Product(2, "tv", 2000.0, 1),
+                new Product(3, "iPhone", 200.0, 1),
+                new Product(4, "FaceCream", 4.50, 2),
+                new Product(5, "faceGel", 10.0, 2)));
+
         mockMvc.perform(get("/products/GetallProducts")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("all product fetched successfully"))
@@ -147,8 +116,8 @@ public class ProductControllerTest {
      */
     @Test
     public void handleAddProductDelegatesToService() throws Exception {
-		when(productService.addProduct(org.mockito.ArgumentMatchers.any(Product.class)))
-				.thenReturn(new Product(10, "Phone", 999.99, 1));
+        when(productService.addProduct(org.mockito.ArgumentMatchers.any(Product.class)))
+                .thenReturn(new Product(10, "Phone", 999.99, 1));
 
         mockMvc.perform(post("/products/addProduct")
                         .contentType(APPLICATION_JSON)
@@ -178,7 +147,7 @@ public class ProductControllerTest {
      */
     @Test
     public void handleDeleteProductDelegatesToService() throws Exception {
-		when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
+        when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
 
         mockMvc.perform(delete("/products/deleteProduct")
                         .contentType(APPLICATION_JSON)

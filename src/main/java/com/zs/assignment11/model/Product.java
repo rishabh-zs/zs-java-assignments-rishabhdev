@@ -1,109 +1,42 @@
 package com.zs.assignment11.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * The type Product.
  */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Entity
+@Table(name = "product")
 public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false)
     private Double price;
-    private Integer categoryId;
 
-    /**
-     * Instantiates a new Product.
-     */
-    public Product() {
-    }
-
-    /**
-     * Instantiates a new Product.
-     *
-     * @param id         the id
-     * @param name       the name
-     * @param price      the price
-     * @param categoryId the category id
-     */
-    public Product(Integer id, String name, Double price, Integer categoryId) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.categoryId = categoryId;
-    }
-
-    /**
-     * Gets id.
-     *
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * Sets id.
-     *
-     * @param id the id
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets name.
-     *
-     * @param name the name
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets price.
-     *
-     * @return the price
-     */
-    public Double getPrice() {
-        return price;
-    }
-
-    /**
-     * Sets price.
-     *
-     * @param price the price
-     */
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    /**
-     * Gets category id.
-     *
-     * @return the category id
-     */
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    /**
-     * Sets category id.
-     *
-     * @param categoryId the category id
-     */
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" + "id=" + id + ", name='" + name + '\'' + ", price=" + price + ", categoryId=" + categoryId + '}';
-    }
+    @JsonProperty("categoryId")
+    @JsonAlias("category_id")
+    @Column(name = "category_id", nullable = false)
+    private Integer category_id;
 }

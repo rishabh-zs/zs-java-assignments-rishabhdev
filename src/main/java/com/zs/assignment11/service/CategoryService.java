@@ -14,7 +14,6 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -23,8 +22,6 @@ import java.util.List;
  */
 @Service
 public class CategoryService {
-    private List<Category> categories = new ArrayList<>();
-    private List<Product> products = new ArrayList<>();
     private static final Logger log = LoggerUtil.getLogger(CategoryService.class);
     private final CategoryDao categoryDao;
 
@@ -33,7 +30,6 @@ public class CategoryService {
      *
      * @param categoryDao the category dao
      */
-// Constructor Injection
     public CategoryService(CategoryDao categoryDao) {
         this.categoryDao = categoryDao;
     }
@@ -57,6 +53,7 @@ public class CategoryService {
      */
     public List<Category> getAllCategories() {
         log.info("Request received to fetch all categories");
+        List<Category> categories;
         try {
             categories = categoryDao.findAllCategories();
         } catch (DataRetrievalFailureException ex) {
@@ -81,11 +78,10 @@ public class CategoryService {
         }
 
         log.info("Request received to add category: {}", category.getName());
-
+        Category newCat;
         try {
-            Category newCat=categoryDao.addCategory(category);
+            newCat = categoryDao.addCategory(category);
             log.info("Category added successfully {}", category.getName());
-            return newCat;
         } catch (DuplicateKeyException e) {
             log.warn("Duplicate category name: {}", category.getName());
             throw new CategoryAlreadyExistsException("Category already exists");
@@ -93,6 +89,7 @@ public class CategoryService {
             log.error("Error while adding category: {}", category.getName(), e);
             throw new RuntimeException("Failed to add category to database.", e);
         }
+        return newCat;
     }
 
     /**
@@ -106,16 +103,18 @@ public class CategoryService {
         if (categoryId == null || categoryId <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
+        List<Product> products;
         try {
             products = categoryDao.findAllProductsByCategoryId(categoryId);
-            return products;
         } catch (DataAccessException ex) {
             throw new CannotGetAllProductByCategoryIdException("Failed to fetch all products for category id.", ex);
         }
+        return products;
     }
 
+
     /**
-     * Delete category category.
+     * Delete category.
      *
      * @param categoryId the category id
      * @return the category
@@ -125,15 +124,15 @@ public class CategoryService {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
         log.info("Request received to delete category id: {}", categoryId);
-
+        Category delCat;
         try {
-            Category delCat=categoryDao.deleteCategory(categoryId);
+            delCat = categoryDao.deleteCategory(categoryId);
             log.info("Deleted category id: {}", categoryId);
-            return delCat;
         } catch (DataAccessException ex) {
             log.error("Error while deleting category id: {}", categoryId, ex);
             throw new RuntimeException("Failed to delete category from database.", ex);
         }
+        return delCat;
     }
 
     /**
@@ -153,14 +152,15 @@ public class CategoryService {
             throw new IllegalArgumentException("Category name must not be blank.");
         }
         log.info("Request received to update category id: {}", category.getId());
+        Category updatedCat;
 
         try {
-            Category updatedCat = categoryDao.updateCategory(category);
+            updatedCat = categoryDao.updateCategory(category);
             log.info("Category updated successfully, id: {}", category.getId());
-            return updatedCat;
         } catch (DataAccessException ex) {
             log.error("Error while updating category id: {}", category.getId(), ex);
             throw new RuntimeException("Failed to update category in database.", ex);
         }
+        return updatedCat;
     }
 }
