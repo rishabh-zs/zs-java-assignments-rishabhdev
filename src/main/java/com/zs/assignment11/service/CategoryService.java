@@ -10,8 +10,8 @@ import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -82,7 +82,7 @@ public class CategoryService {
         try {
             newCat = categoryDao.addCategory(category);
             log.info("Category added successfully {}", category.getName());
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             log.warn("Duplicate category name: {}", category.getName());
             throw new CategoryAlreadyExistsException("Category already exists");
         } catch (DataAccessException e) {

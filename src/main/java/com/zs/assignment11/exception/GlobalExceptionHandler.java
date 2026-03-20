@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ProductAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleProductAlreadyExists(ProductAlreadyExistsException ex) {
-        return buildError(HttpStatus.CONFLICT, "Product with this name already exists");
+        return buildError(HttpStatus.CONFLICT, "Products already exists");
     }
 
     /**
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(CategoryAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleCategoryAlreadyExists(CategoryAlreadyExistsException ex) {
-        return buildError(HttpStatus.CONFLICT, "category with this name already exists");
+        return buildError(HttpStatus.CONFLICT, "Categories already exists");
     }
 
     /**

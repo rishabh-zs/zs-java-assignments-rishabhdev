@@ -94,14 +94,14 @@ public class CategoryController {
     /**
      * Handle delete category map.
      *
-     * @param body the body
+     * @param categoryId the body
      * @return the map
      */
-    @DeleteMapping("/deleteCategory")
-    public Map<String, Object> handleDeleteCategory(@RequestBody Map<String, Long> body) {
-        Long categoryId = body.get("categoryId");
+    @DeleteMapping("/dCategory/{categoryId}")
+    public Map<String, Object> handleDeleteCategory(@PathVariable long categoryId) {
+        Long catId = categoryId;
         log.debug("/deleteCategory endpoint was called");
-        Category deletedCategory = categoryService.deleteCategory(categoryId);
+        Category deletedCategory = categoryService.deleteCategory(catId);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
@@ -116,7 +116,7 @@ public class CategoryController {
      * @param category the category
      * @return the map
      */
-    @PatchMapping("/updateCategory")
+    @PatchMapping("uCategory")
     public Map<String, Object> handleUpdateCategory(@RequestBody Category category) {
         log.debug("/updateCategory endpoint was called");
         Category updatedCategory = categoryService.updateCategory(category);

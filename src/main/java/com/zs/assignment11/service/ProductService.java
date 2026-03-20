@@ -7,6 +7,7 @@ import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +74,7 @@ public class ProductService {
         try {
             addedProduct = productDao.addProduct(product);
             log.info("Product added successfully: {}", product.getName());
-        } catch (DuplicateKeyException ex) {
+        } catch (DataIntegrityViolationException ex) {
             log.warn("Duplicate product name: {}", product.getName());
             throw new ProductAlreadyExistsException(product.getName());
         } catch (DataAccessException ex) {
