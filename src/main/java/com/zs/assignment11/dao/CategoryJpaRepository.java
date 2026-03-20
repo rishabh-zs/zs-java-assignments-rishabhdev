@@ -1,0 +1,31 @@
+package com.zs.assignment11.dao;
+
+import com.zs.assignment11.model.Category;
+import com.zs.assignment11.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+/**
+ * Spring Data JPA repository for Category.
+ */
+public interface CategoryJpaRepository extends JpaRepository<Category, Integer> {
+
+    /**
+     * Find all by order by id list.
+     *
+     * @return the list
+     */
+    List<Category> findAllByOrderById();
+
+    /**
+     * Find all products by category id order by id list.
+     *
+     * @param categoryId the category id
+     * @return the list
+     */
+    @Query("SELECT p FROM Product p WHERE p.category_id = :categoryId ORDER BY p.id")
+    List<Product> findAllProductsByCategoryIdOrderById(@Param("categoryId") Integer categoryId);
+}

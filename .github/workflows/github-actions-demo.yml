@@ -1,0 +1,32 @@
+name: Spring Boot Demo App Workflow
+run-name: ${{ github.actor }} is building with Gradle 🚀
+
+on:
+  push:
+    branches:
+      - assignment-11-springBootDemoApp
+
+jobs:
+  Build-Spring-Boot-App:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      # 1. Set up the Java environment (Updated to Microsoft OpenJDK 21)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+          cache: 'gradle'
+
+      # 2. Make the Gradle wrapper script executable
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 3. Run the Gradle build
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - run: echo "🍏 The build status is ${{ job.status }}."
