@@ -1,10 +1,11 @@
 package com.zs.assignment11.service;
 
-import com.zs.assignment11.dao.CategoryDao;
-import com.zs.assignment11.exception.CannotCreateCategoryTableException;
+
+import com.zs.assignment11.dao.CategoryJpaRepository;
 import com.zs.assignment11.exception.CannotGetAllCategoryException;
 import com.zs.assignment11.exception.CannotGetAllProductByCategoryIdException;
 import com.zs.assignment11.exception.CategoryAlreadyExistsException;
+import com.zs.assignment11.exception.CategoryNotFoundException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
@@ -23,27 +24,15 @@ import java.util.List;
 @Service
 public class CategoryService {
     private static final Logger log = LoggerUtil.getLogger(CategoryService.class);
-    private final CategoryDao categoryDao;
+    private final CategoryJpaRepository categoryJpaRepository;
 
     /**
      * Instantiates a new Category service.
      *
-     * @param categoryDao the category dao
+     * @param categoryJpaRepository the category dao
      */
-    public CategoryService(CategoryDao categoryDao) {
-        this.categoryDao = categoryDao;
-    }
-
-    /**
-     * Create category table.
-     */
-    public void CreateCategoryTable() {
-        log.info("Request received to create category table");
-        try {
-            categoryDao.CreateCategoryTable();
-        } catch (DataAccessException ex) {
-            throw new CannotCreateCategoryTableException("Failed to create category table.", ex);
-        }
+    public CategoryService(CategoryJpaRepository categoryJpaRepository) {
+        this.categoryJpaRepository = categoryJpaRepository;
     }
 
     /**
@@ -55,7 +44,7 @@ public class CategoryService {
         log.info("Request received to fetch all categories");
         List<Category> categories;
         try {
-            categories = categoryDao.findAllCategories();
+            categories = categoryJpaRepository.findAllByOrderById();
         } catch (DataRetrievalFailureException ex) {
             throw new CannotGetAllCategoryException("Failed to fetch all categories.", ex);
         }
@@ -69,25 +58,17 @@ public class CategoryService {
      * @return the category
      */
     public Category addCategory(Category category) {
-        if (category == null) {
-            throw new IllegalArgumentException("Category payload is required.");
-        }
-
-        if (category.getName() == null || category.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Category name must not be blank.");
-        }
+        validateCategoryPayload(category);
 
         log.info("Request received to add category: {}", category.getName());
         Category newCat;
         try {
-            newCat = categoryDao.addCategory(category);
-            log.info("Category added successfully {}", category.getName());
+            category.setId(null);
+            newCat = categoryJpaRepository.save(category);
+            log.info("Category added successfully: {}", newCat.getName());
         } catch (DataIntegrityViolationException e) {
             log.warn("Duplicate category name: {}", category.getName());
             throw new CategoryAlreadyExistsException("Category already exists");
-        } catch (DataAccessException e) {
-            log.error("Error while adding category: {}", category.getName(), e);
-            throw new RuntimeException("Failed to add category to database.", e);
         }
         return newCat;
     }
@@ -98,14 +79,17 @@ public class CategoryService {
      * @param categoryId the category id
      * @return the products by category id
      */
-    public List<Product> getProductsByCategoryId(Long categoryId) {
+    public List<Product> getProductsByCategoryId(Integer categoryId) {
+        validateCategoryId(categoryId);
         log.info("Request received to fetch products for category id: {}", categoryId);
-        if (categoryId == null || categoryId <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
+        Integer id = Math.toIntExact(categoryId);
+
+        if (!categoryJpaRepository.existsById(id)) {
+            throw new CategoryNotFoundException("Category not found for id: " + categoryId);
         }
         List<Product> products;
         try {
-            products = categoryDao.findAllProductsByCategoryId(categoryId);
+            products = categoryJpaRepository.findAllProductsByCategoryIdOrderById(categoryId);
         } catch (DataAccessException ex) {
             throw new CannotGetAllProductByCategoryIdException("Failed to fetch all products for category id.", ex);
         }
@@ -119,20 +103,21 @@ public class CategoryService {
      * @param categoryId the category id
      * @return the category
      */
-    public Category deleteCategory(Long categoryId) {
-        if (categoryId == null || categoryId <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
+    public Category deleteCategory(Integer categoryId) {
+        validateCategoryId(categoryId);
         log.info("Request received to delete category id: {}", categoryId);
-        Category delCat;
+        Integer id = Math.toIntExact(categoryId);
+
+        Category existingCategory = categoryJpaRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found for id: " + categoryId));
         try {
-            delCat = categoryDao.deleteCategory(categoryId);
+            categoryJpaRepository.delete(existingCategory);
             log.info("Deleted category id: {}", categoryId);
         } catch (DataAccessException ex) {
             log.error("Error while deleting category id: {}", categoryId, ex);
             throw new RuntimeException("Failed to delete category from database.", ex);
         }
-        return delCat;
+        return existingCategory;
     }
 
     /**
@@ -142,25 +127,39 @@ public class CategoryService {
      * @return the category
      */
     public Category updateCategory(Category category) {
-        if (category == null) {
-            throw new IllegalArgumentException("Category payload is required.");
-        }
+        validateCategoryPayload(category);
         if (category.getId() == null || category.getId() <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
-        if (category.getName() == null || category.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Category name must not be blank.");
-        }
         log.info("Request received to update category id: {}", category.getId());
-        Category updatedCat;
 
+        Category existingCategory = categoryJpaRepository.findById(category.getId())
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found for id: " + category.getId()));
+
+        Category updatedCategory;
         try {
-            updatedCat = categoryDao.updateCategory(category);
+            existingCategory.setName(category.getName());
+            updatedCategory = categoryJpaRepository.save(existingCategory);
             log.info("Category updated successfully, id: {}", category.getId());
         } catch (DataAccessException ex) {
             log.error("Error while updating category id: {}", category.getId(), ex);
             throw new RuntimeException("Failed to update category in database.", ex);
         }
-        return updatedCat;
+        return updatedCategory;
+    }
+
+    private void validateCategoryPayload(Category category) {
+        if (category == null) {
+            throw new IllegalArgumentException("Category payload is required.");
+        }
+        if (category.getName() == null || category.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name must not be blank.");
+        }
+    }
+
+    private void validateCategoryId(Integer categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            throw new IllegalArgumentException("Category id must be a positive number.");
+        }
     }
 }

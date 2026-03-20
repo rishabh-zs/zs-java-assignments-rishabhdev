@@ -1,14 +1,12 @@
 package com.zs.assignment11.service;
 
-import com.zs.assignment11.dao.ProductDao;
-import com.zs.assignment11.exception.CannotCreateProductTableException;
+import com.zs.assignment11.dao.ProductJpaRepository;
 import com.zs.assignment11.exception.ProductAlreadyExistsException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,28 +17,15 @@ import java.util.List;
 @Service
 public class ProductService {
     private static final Logger log = LoggerUtil.getLogger(ProductService.class);
-    private final ProductDao productDao;
+    private final ProductJpaRepository productJpaRepository;
 
     /**
      * Instantiates a new Product service.
      *
-     * @param productDao the product dao
+     * @param productJpaRepository the product dao
      */
-    public ProductService(ProductDao productDao) {
-        this.productDao = productDao;
-    }
-
-
-    /**
-     * Create product table.
-     */
-    public void CreateProductTable() {
-        log.info("Request received to create product table");
-        try {
-            productDao.CreateProductTable();
-        } catch (DataAccessException ex) {
-            throw new CannotCreateProductTableException("Failed to Create Product table.", ex);
-        }
+    public ProductService(ProductJpaRepository productJpaRepository) {
+        this.productJpaRepository = productJpaRepository;
     }
 
     /**
@@ -53,7 +38,7 @@ public class ProductService {
         List<Product> products;
 
         try {
-            products = productDao.findAllProducts();
+            products = productJpaRepository.findAllByOrderById();
         } catch (DataAccessException ex) {
             throw new IllegalArgumentException("Failed to fetch all products", ex);
         }
@@ -67,12 +52,13 @@ public class ProductService {
      * @return the product
      */
     public Product addProduct(Product product) {
-        log.info("Request received to add product");
         validateProduct(product);
+        log.info("Request received to add product");
         Product addedProduct;
 
         try {
-            addedProduct = productDao.addProduct(product);
+            product.setId(null);
+            addedProduct = productJpaRepository.save(product);
             log.info("Product added successfully: {}", product.getName());
         } catch (DataIntegrityViolationException ex) {
             log.warn("Duplicate product name: {}", product.getName());
@@ -90,20 +76,22 @@ public class ProductService {
      * @param productId the product id
      * @return the product
      */
-    public Product deleteProduct(Long productId) {
-        log.info("Request received to delete product by id: {}", productId);
+    public Product deleteProduct(Integer productId) {
         if (productId == null || productId <= 0) {
             throw new IllegalArgumentException("Product id must be a positive number.");
         }
-        Product deletedProduct;
+        log.info("Request received to delete product by id: {}", productId);
+        Integer id = Math.toIntExact(productId);
+        Product existingProduct = productJpaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + productId));
 
         try {
-            deletedProduct = productDao.deleteProduct(productId);
+            productJpaRepository.delete(existingProduct);
             log.info("Deleted product by id: {}", productId);
         } catch (DataAccessException ex) {
             throw new RuntimeException("Failed to delete Product from database.", ex);
         }
-        return deletedProduct;
+        return existingProduct;
     }
 
     /**
@@ -113,23 +101,16 @@ public class ProductService {
      * @return the product
      */
     public Product updateProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getId() == null || product.getId() <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
+        validateProductForUpdate(product);
         log.info("Request received to update product id: {}", product.getId());
-        Product updatedProduct;
+        Product existingProduct = productJpaRepository.findById(product.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + product.getId()));
 
+        Product updatedProduct;
         try {
-            updatedProduct = productDao.updateProduct(product);
+            existingProduct.setName(product.getName());
+            existingProduct.setPrice(product.getPrice());
+            updatedProduct = productJpaRepository.save(existingProduct);
             log.info("Product updated successfully, id: {}", product.getId());
         } catch (DataAccessException ex) {
             log.error("Error while updating product id: {}", product.getId(), ex);
@@ -150,6 +131,21 @@ public class ProductService {
         }
         if (product.getCategory_id() == null || product.getCategory_id() <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
+        }
+    }
+
+    private void validateProductForUpdate(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product payload is required.");
+        }
+        if (product.getId() == null || product.getId() <= 0) {
+            throw new IllegalArgumentException("Product id must be a positive number.");
+        }
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name must not be blank.");
+        }
+        if (product.getPrice() == null || product.getPrice() < 0) {
+            throw new IllegalArgumentException("Product price must be zero or greater.");
         }
     }
 }

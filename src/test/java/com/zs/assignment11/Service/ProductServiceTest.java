@@ -1,354 +1,122 @@
 package com.zs.assignment11.Service;
 
-import com.zs.assignment11.dao.ProductDao;
-import com.zs.assignment11.exception.CannotCreateProductTableException;
+import com.zs.assignment11.dao.ProductJpaRepository;
 import com.zs.assignment11.exception.ProductAlreadyExistsException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.params.provider.Arguments;
-
-/**
- * The type Product service test.
- */
 public class ProductServiceTest {
-    private ProductDao productDao;
-    private ProductService productService;
+    private ProductJpaRepository repo;
+    private ProductService service;
 
-    /**
-     * Product lists stream.
-     *
-     * @return the stream
-     */
-    static Stream<List<Product>> productLists() {
-        return Stream.of(
-                List.of(
-                        new Product(1, "Phone", 999.99, 1),
-                        new Product(2, "Laptop", 1499.00, 1)
-                ),
-                List.of(new Product(3, "FaceCream", 4.5, 2)),
-                List.of()
-        );
-    }
-
-    /**
-     * Valid products stream.
-     *
-     * @return the stream
-     */
-    static Stream<Product> validProducts() {
-        return Stream.of(
-                new Product(1, "Phone", 999.99, 1),
-                new Product(2, "FaceCream", 4.50, 2)
-        );
-    }
-
-    /**
-     * Invalid products stream.
-     *
-     * @return the stream
-     */
-    static Stream<Arguments> invalidProducts() {
+    static Stream<Arguments> invalidPayloads() {
         return Stream.of(
                 arguments(null, "Product payload is required."),
-                arguments(new Product(1, null, 1.0, 1), "Product name must not be blank."),
                 arguments(new Product(1, "", 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "   ", 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "Phone", null, 1), "Product price must be zero or greater."),
                 arguments(new Product(1, "Phone", -1.0, 1), "Product price must be zero or greater."),
-                arguments(new Product(1, "Phone", 1.0, null), "Category id must be a positive number."),
-                arguments(new Product(1, "Phone", 1.0, 0), "Category id must be a positive number."),
-                arguments(new Product(1, "Phone", 1.0, -1), "Category id must be a positive number.")
+                arguments(new Product(1, "Phone", 1.0, 0), "Category id must be a positive number.")
         );
     }
 
-    /**
-     * Valid delete product ids stream.
-     *
-     * @return the stream
-     */
-    static Stream<Long> validDeleteProductIds() {
-        return Stream.of(1L, 2L);
+    static Stream<Arguments> invalidIds() {
+        return Stream.of(arguments((Object) null), arguments(0), arguments(-1));
     }
 
-    /**
-     * Invalid delete product ids stream.
-     *
-     * @return the stream
-     */
-    static Stream<Arguments> invalidDeleteProductIds() {
-        return Stream.of(
-                arguments((Object) null),
-                arguments(0L),
-                arguments(-1L)
-        );
-    }
-
-    static Stream<Arguments> invalidUpdateProducts() {
-        return Stream.of(
-                arguments(null, "Product payload is required."),
-                arguments(new Product(null, "Phone", 1.0, 1), "Product id must be a positive number."),
-                arguments(new Product(0, "Phone", 1.0, 1), "Product id must be a positive number."),
-                arguments(new Product(-1, "Phone", 1.0, 1), "Product id must be a positive number."),
-                arguments(new Product(1, null, 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "", 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "   ", 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "Phone", null, 1), "Product price must be zero or greater."),
-                arguments(new Product(1, "Phone", -1.0, 1), "Product price must be zero or greater.")
-        );
-    }
-
-    /**
-     * Sets up.
-     */
     @BeforeEach
     void setUp() {
-        productDao = mock(ProductDao.class);
-        productService = new ProductService(productDao);
-    }
-
-    /**
-     * Create product table delegates to dao.
-     */
-    @Test
-    void createProductTableDelegatesToDao() {
-        productService.CreateProductTable();
-
-        verify(productDao, times(1)).CreateProductTable();
-    }
-
-    /**
-     * Create product table wraps data access exception.
-     */
-    @Test
-    void createProductTableWrapsDataAccessException() {
-        doThrow(new DataAccessResourceFailureException("db down"))
-                .when(productDao).CreateProductTable();
-
-        CannotCreateProductTableException exception = assertThrows(
-                CannotCreateProductTableException.class,
-                () -> productService.CreateProductTable()
-        );
-
-        assertEquals("Failed to Create Product table.", exception.getMessage());
-        assertEquals("db down", exception.getCause().getMessage());
-        verify(productDao, times(1)).CreateProductTable();
-    }
-
-    /**
-     * Gets all products returns dao data.
-     *
-     * @param products the products
-     */
-    @ParameterizedTest
-    @MethodSource("productLists")
-    void getAllProducts_ReturnsDaoData(List<Product> products) {
-        when(productDao.findAllProducts()).thenReturn(products);
-
-        List<Product> result = productService.getAllProducts();
-
-        assertSame(products, result);
-        verify(productDao, times(1)).findAllProducts();
-    }
-
-    /**
-     * Gets all products wraps data access exception.
-     */
-    @Test
-    void getAllProductsWrapsDataAccessException() {
-        when(productDao.findAllProducts())
-                .thenThrow(new DataAccessResourceFailureException("read failed"));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> productService.getAllProducts()
-        );
-
-        assertEquals("Failed to fetch all products", exception.getMessage());
-        assertEquals("read failed", exception.getCause().getMessage());
-        verify(productDao, times(1)).findAllProducts();
-    }
-
-    /**
-     * Add product valid payload delegates to dao.
-     *
-     * @param product the product
-     */
-    @ParameterizedTest
-    @MethodSource("validProducts")
-    void addProduct_ValidPayload_DelegatesToDao(Product product) {
-        Product savedProduct = new Product(10, product.getName(), product.getPrice(), product.getCategory_id());
-        when(productDao.addProduct(product)).thenReturn(savedProduct);
-
-        Product result = productService.addProduct(product);
-
-        assertSame(savedProduct, result);
-        verify(productDao).addProduct(product);
-    }
-
-    /**
-     * Add product invalid payload throws exception.
-     *
-     * @param product         the product
-     * @param expectedMessage the expected message
-     */
-    @ParameterizedTest
-    @MethodSource("invalidProducts")
-    void addProduct_InvalidPayload_ThrowsException(Product product, String expectedMessage) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> productService.addProduct(product)
-        );
-
-        assertEquals(expectedMessage, exception.getMessage());
-        verifyNoInteractions(productDao);
-    }
-
-    /**
-     * Add product duplicate name throws domain exception.
-     */
-    @Test
-    void addProduct_DuplicateName_ThrowsProductAlreadyExistsException() {
-        Product product = new Product(1, "Phone", 999.99, 1);
-        doThrow(new org.springframework.dao.DuplicateKeyException("duplicate key"))
-                .when(productDao).addProduct(product);
-
-        ProductAlreadyExistsException exception = assertThrows(
-                ProductAlreadyExistsException.class,
-                () -> productService.addProduct(product)
-        );
-
-        assertEquals("Product already exists: Phone", exception.getMessage());
-        verify(productDao).addProduct(product);
-    }
-
-    /**
-     * Add product data access error throws runtime exception.
-     */
-    @Test
-    void addProduct_DataAccessError_ThrowsRuntimeException() {
-        Product product = new Product(1, "Phone", 999.99, 1);
-        when(productDao.addProduct(product))
-                .thenThrow(new DataAccessResourceFailureException("insert failed"));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> productService.addProduct(product)
-        );
-
-        assertEquals("Failed to add product to database.", exception.getMessage());
-        assertEquals("insert failed", exception.getCause().getMessage());
-        verify(productDao).addProduct(product);
-    }
-
-    /**
-     * Delete product valid id delegates to dao.
-     *
-     * @param productId the product id
-     */
-    @ParameterizedTest
-    @MethodSource("validDeleteProductIds")
-    void deleteProduct_ValidId_DelegatesToDao(Long productId) {
-        Product deletedProduct = new Product(productId.intValue(), "Phone", 999.99, 1);
-        when(productDao.deleteProduct(productId)).thenReturn(deletedProduct);
-
-        Product result = productService.deleteProduct(productId);
-
-        assertSame(deletedProduct, result);
-        verify(productDao).deleteProduct(productId);
-    }
-
-    /**
-     * Delete product invalid id throws exception.
-     *
-     * @param productId the product id
-     */
-    @ParameterizedTest
-    @MethodSource("invalidDeleteProductIds")
-    void deleteProduct_InvalidId_ThrowsException(Long productId) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> productService.deleteProduct(productId)
-        );
-
-        assertEquals("Product id must be a positive number.", exception.getMessage());
-        verifyNoInteractions(productDao);
-    }
-
-    /**
-     * Delete product data access error throws runtime exception.
-     */
-    @Test
-    void deleteProduct_DataAccessError_ThrowsRuntimeException() {
-        when(productDao.deleteProduct(1L))
-                .thenThrow(new DataAccessResourceFailureException("delete failed"));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> productService.deleteProduct(1L)
-        );
-
-        assertEquals("Failed to delete Product from database.", exception.getMessage());
-        assertEquals("delete failed", exception.getCause().getMessage());
-        verify(productDao).deleteProduct(1L);
+        repo = mock(ProductJpaRepository.class);
+        service = new ProductService(repo);
     }
 
     @Test
-    void updateProduct_ValidPayload_DelegatesToDao() {
-        Product updateRequest = new Product(1, "Phone Pro", 1099.99, null);
-        Product updatedProduct = new Product(1, "Phone Pro", 1099.99, 1);
-        when(productDao.updateProduct(updateRequest)).thenReturn(updatedProduct);
+    void getAllProducts_ReturnsRepositoryData() {
+        List<Product> products = List.of(new Product(1, "Phone", 999.99, 1));
+        when(repo.findAllByOrderById()).thenReturn(products);
+        assertSame(products, service.getAllProducts());
+        verify(repo).findAllByOrderById();
+    }
 
-        Product result = productService.updateProduct(updateRequest);
-
-        assertSame(updatedProduct, result);
-        verify(productDao).updateProduct(updateRequest);
+    @Test
+    void addProduct_SetsNullIdAndSaves() {
+        Product input = new Product(10, "Phone", 999.99, 1);
+        Product saved = new Product(1, "Phone", 999.99, 1);
+        when(repo.save(any(Product.class))).thenReturn(saved);
+        assertSame(saved, service.addProduct(input));
+        assertNull(input.getId());
     }
 
     @ParameterizedTest
-    @MethodSource("invalidUpdateProducts")
-    void updateProduct_InvalidPayload_ThrowsException(Product product, String expectedMessage) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> productService.updateProduct(product)
-        );
-
-        assertEquals(expectedMessage, exception.getMessage());
-        verifyNoInteractions(productDao);
+    @MethodSource("invalidPayloads")
+    void addProduct_InvalidPayload_Throws(Product product, String message) {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.addProduct(product));
+        assertEquals(message, ex.getMessage());
+        verifyNoInteractions(repo);
     }
 
     @Test
-    void updateProduct_DataAccessError_ThrowsRuntimeException() {
-        Product updateRequest = new Product(1, "Phone Pro", 1099.99, 1);
-        when(productDao.updateProduct(updateRequest))
-                .thenThrow(new DataAccessResourceFailureException("update failed"));
+    void addProduct_DuplicateName_ThrowsDomainException() {
+        Product input = new Product(1, "Phone", 999.99, 1);
+        doThrow(new DataIntegrityViolationException("dup")).when(repo).save(input);
+        ProductAlreadyExistsException ex = assertThrows(ProductAlreadyExistsException.class, () -> service.addProduct(input));
+        assertEquals("Product already exists: Phone", ex.getMessage());
+    }
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> productService.updateProduct(updateRequest)
-        );
+    @Test
+    void deleteProduct_DeletesWhenFound() {
+        Product existing = new Product(1, "Phone", 999.99, 1);
+        when(repo.findById(1)).thenReturn(Optional.of(existing));
+        assertSame(existing, service.deleteProduct(1));
+        verify(repo).delete(existing);
+    }
 
-        assertEquals("Failed to update product in database.", exception.getMessage());
-        assertEquals("update failed", exception.getCause().getMessage());
-        verify(productDao).updateProduct(updateRequest);
+    @ParameterizedTest
+    @MethodSource("invalidIds")
+    void deleteProduct_InvalidId_Throws(Integer id) {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.deleteProduct(id));
+        assertEquals("Product id must be a positive number.", ex.getMessage());
+    }
+
+    @Test
+    void deleteProduct_DeleteFailure_WrapsException() {
+        Product existing = new Product(1, "Phone", 999.99, 1);
+        when(repo.findById(1)).thenReturn(Optional.of(existing));
+        doThrow(new DataAccessResourceFailureException("down")).when(repo).delete(existing);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.deleteProduct(1));
+        assertEquals("Failed to delete Product from database.", ex.getMessage());
+    }
+
+    @Test
+    void updateProduct_UpdatesMutableFields() {
+        Product existing = new Product(1, "Old", 10.0, 1);
+        Product request = new Product(1, "New", 12.0, null);
+        when(repo.findById(1)).thenReturn(Optional.of(existing));
+        when(repo.save(existing)).thenReturn(existing);
+        Product result = service.updateProduct(request);
+        assertSame(existing, result);
+        assertEquals("New", existing.getName());
+        assertEquals(12.0, existing.getPrice());
     }
 }

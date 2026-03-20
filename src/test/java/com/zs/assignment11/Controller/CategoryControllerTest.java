@@ -79,7 +79,7 @@ class CategoryControllerTest {
         when(categoryService.addCategory(org.mockito.ArgumentMatchers.any(Category.class)))
                 .thenReturn(new Category(10, "electronics"));
 
-        mockMvc.perform(post("/categories/addCategory")
+        mockMvc.perform(post("/categories/aCategory")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
@@ -103,13 +103,13 @@ class CategoryControllerTest {
      */
     @Test
     void handleGetAllProductByCategoryIdReturnsProductsFromService() throws Exception {
-        when(categoryService.getProductsByCategoryId(1L)).thenReturn(List.of(
+        when(categoryService.getProductsByCategoryId(1)).thenReturn(List.of(
                 new Product(1, "laptop", 4.50, 1),
                 new Product(2, "iPhone", 10.0, 1),
                 new Product(3, "tv", 10.0, 1)
         ));
 
-        when(categoryService.getProductsByCategoryId(2L)).thenReturn(List.of(
+        when(categoryService.getProductsByCategoryId(2)).thenReturn(List.of(
                 new Product(4, "FaceCream", 4.50, 2),
                 new Product(5, "faceGel", 10.0, 2)
         ));
@@ -142,8 +142,8 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.products[1].categoryId").value(2))
                 .andExpect(jsonPath("$.totalProductCountInCategory").value(2));
 
-        verify(categoryService).getProductsByCategoryId(1L);
-        verify(categoryService).getProductsByCategoryId(2L);
+        verify(categoryService).getProductsByCategoryId(1);
+        verify(categoryService).getProductsByCategoryId(2);
     }
 
     /**
@@ -153,9 +153,9 @@ class CategoryControllerTest {
      */
     @Test
     void handleDeleteCategoryDelegatesToService() throws Exception {
-        when(categoryService.deleteCategory(1L)).thenReturn(new Category(1, "electronics"));
+        when(categoryService.deleteCategory(1)).thenReturn(new Category(1, "electronics"));
 
-        mockMvc.perform(delete("/categories/dCategory/{categoryId}", 1L)
+        mockMvc.perform(delete("/categories/dCategory/{categoryId}", 1)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
@@ -163,7 +163,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.deletedCategory.id").value(1))
                 .andExpect(jsonPath("$.deletedCategory.name").value("electronics"));
 
-        verify(categoryService).deleteCategory(1L);
+        verify(categoryService).deleteCategory(1);
         verifyNoMoreInteractions(categoryService);
     }
 
@@ -174,7 +174,7 @@ class CategoryControllerTest {
      */
     @Test
     void handleGetAllProductByCategoryIdReturnsNotFoundWhenCategoryIdDoesNotExist() throws Exception {
-        when(categoryService.getProductsByCategoryId(-1L))
+        when(categoryService.getProductsByCategoryId(-1))
                 .thenThrow(new IllegalArgumentException("Category id must be a positive number."));
 
         mockMvc.perform(get("/categories/-1/products"))
@@ -182,7 +182,7 @@ class CategoryControllerTest {
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.message").value("category id does not exists"));
 
-        verify(categoryService).getProductsByCategoryId(-1L);
+        verify(categoryService).getProductsByCategoryId(-1);
     }
 
     /**

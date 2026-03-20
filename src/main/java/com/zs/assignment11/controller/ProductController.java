@@ -79,10 +79,9 @@ public class ProductController {
      * @return the map
      */
     @DeleteMapping("/dProduct/{productId}")
-    public Map<String, Object> handleDeleteProduct(@PathVariable Long productId) {
-        Long pId = productId;
+    public Map<String, Object> handleDeleteProduct(@PathVariable Integer productId) {
         log.debug("/deleteProduct endpoint was called");
-        Product deletedProduct = productService.deleteProduct(pId);
+        Product deletedProduct = productService.deleteProduct(productId);
 
         Map<String, Object> response = new LinkedHashMap<>();
         Integer id = deletedProduct.getId();

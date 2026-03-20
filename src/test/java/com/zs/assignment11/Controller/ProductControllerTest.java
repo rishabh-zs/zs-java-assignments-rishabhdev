@@ -147,9 +147,9 @@ public class ProductControllerTest {
      */
     @Test
     public void handleDeleteProductDelegatesToService() throws Exception {
-        when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
+        when(productService.deleteProduct(1)).thenReturn(new Product(1, "Phone", 999.99, 1));
 
-        mockMvc.perform(delete("/products/dProduct/{productId}", 1L)
+        mockMvc.perform(delete("/products/dProduct/{productId}", 1)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
@@ -159,7 +159,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.deletedProduct.price").value(999.99))
                 .andExpect(jsonPath("$.deletedProduct.categoryId").value(1));
 
-        verify(productService).deleteProduct(1L);
+        verify(productService).deleteProduct(1);
         verifyNoMoreInteractions(productService);
     }
 

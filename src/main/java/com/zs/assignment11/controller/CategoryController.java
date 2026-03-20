@@ -60,7 +60,7 @@ public class CategoryController {
      * @param category the category
      * @return the map
      */
-    @PostMapping("/addCategory")
+    @PostMapping("/aCategory")
     public Map<String, Object> handleAddCategory(@RequestBody Category category) {
         log.debug("/addCategory endpoint was called");
         Category addedCategory = categoryService.addCategory(category);
@@ -79,7 +79,7 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/{categoryId}/products")
-    public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Long categoryId) {
+    public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Integer categoryId) {
         log.debug("/{categoryId}/products endpoint was called");
         List<Product> products = categoryService.getProductsByCategoryId(categoryId);
 
@@ -98,8 +98,8 @@ public class CategoryController {
      * @return the map
      */
     @DeleteMapping("/dCategory/{categoryId}")
-    public Map<String, Object> handleDeleteCategory(@PathVariable long categoryId) {
-        Long catId = categoryId;
+    public Map<String, Object> handleDeleteCategory(@PathVariable Integer categoryId) {
+        Integer catId = categoryId;
         log.debug("/deleteCategory endpoint was called");
         Category deletedCategory = categoryService.deleteCategory(catId);
 

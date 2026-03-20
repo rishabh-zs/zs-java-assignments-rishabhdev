@@ -1,23 +1,17 @@
 package com.zs.assignment11.Dao;
 
 import com.zs.assignment11.dao.CategoryJpaRepository;
-import com.zs.assignment11.exception.CategoryNotFoundException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,155 +27,64 @@ class CategoryJpaRepositoryTest {
      */
     @BeforeEach
     void setUp() {
-        categoryJpaRepository = mock(CategoryJpaRepository.class, Answers.CALLS_REAL_METHODS);
+        categoryJpaRepository = mock(CategoryJpaRepository.class);
     }
 
     /**
-     * Create category table delegates to count.
+     * Find all by order by id returns ordered categories.
      */
     @Test
-    void createCategoryTable_DelegatesToCount() {
-        when(categoryJpaRepository.count()).thenReturn(1L);
-
-        categoryJpaRepository.CreateCategoryTable();
-
-        verify(categoryJpaRepository).count();
-    }
-
-    /**
-     * Find all categories returns ordered categories.
-     */
-    @Test
-    void findAllCategories_ReturnsOrderedCategories() {
+    void findAllByOrderById_ReturnsOrderedCategories() {
         List<Category> categories = List.of(new Category(1, "electronics"), new Category(2, "fashion"));
-        when(categoryJpaRepository.findAllOrderById()).thenReturn(categories);
+        when(categoryJpaRepository.findAllByOrderById()).thenReturn(categories);
 
-        List<Category> result = categoryJpaRepository.findAllCategories();
+        List<Category> result = categoryJpaRepository.findAllByOrderById();
 
         assertEquals(2, result.size());
         assertEquals("electronics", result.getFirst().getName());
-        verify(categoryJpaRepository).findAllOrderById();
+        verify(categoryJpaRepository).findAllByOrderById();
     }
 
     /**
-     * Find all products by category id returns products when category exists.
+     * Find all products by category id order by id returns products.
      */
     @Test
-    void findAllProductsByCategoryId_ReturnsProductsWhenCategoryExists() {
+    void findAllProductsByCategoryIdOrderById_ReturnsProducts() {
         List<Product> products = List.of(
                 new Product(1, "laptop", 1000.0, 1),
                 new Product(2, "tv", 2000.0, 1)
         );
-        when(categoryJpaRepository.existsById(1)).thenReturn(true);
-        when(categoryJpaRepository.findAllByCategoryIdOrderById(1)).thenReturn(products);
+        when(categoryJpaRepository.findAllProductsByCategoryIdOrderById(1)).thenReturn(products);
 
-        List<Product> result = categoryJpaRepository.findAllProductsByCategoryId(1L);
+        List<Product> result = categoryJpaRepository.findAllProductsByCategoryIdOrderById(1);
 
         assertEquals(2, result.size());
         assertEquals("laptop", result.getFirst().getName());
-        verify(categoryJpaRepository).existsById(1);
-        verify(categoryJpaRepository).findAllByCategoryIdOrderById(1);
+        verify(categoryJpaRepository).findAllProductsByCategoryIdOrderById(1);
     }
 
     /**
-     * Find all products by category id throws when category missing.
+     * Save delegates and returns persisted category.
      */
     @Test
-    void findAllProductsByCategoryId_ThrowsWhenCategoryMissing() {
-        when(categoryJpaRepository.existsById(99)).thenReturn(false);
-
-        CategoryNotFoundException exception = assertThrows(
-                CategoryNotFoundException.class,
-                () -> categoryJpaRepository.findAllProductsByCategoryId(99L)
-        );
-
-        assertEquals("Category not found for id: 99", exception.getMessage());
-        verify(categoryJpaRepository).existsById(99);
-        verify(categoryJpaRepository, never()).findAllByCategoryIdOrderById(any());
-    }
-
-    /**
-     * Add category sets null id and saves.
-     */
-    @Test
-    void addCategory_SetsNullIdAndSaves() {
-        Category request = new Category(10, "electronics");
+    void save_ReturnsSavedCategory() {
+        Category input = new Category(null, "electronics");
         Category saved = new Category(1, "electronics");
-        when(categoryJpaRepository.save(any(Category.class))).thenReturn(saved);
+        when(categoryJpaRepository.save(input)).thenReturn(saved);
 
-        Category result = categoryJpaRepository.addCategory(request);
+        Category result = categoryJpaRepository.save(input);
 
-        assertNull(request.getId());
         assertSame(saved, result);
-        verify(categoryJpaRepository).save(request);
     }
 
     /**
-     * Delete category deletes and returns entity when found.
+     * Exists by id delegates to repository.
      */
     @Test
-    void deleteCategory_DeletesAndReturnsEntityWhenFound() {
-        Category existing = new Category(1, "electronics");
-        when(categoryJpaRepository.findById(1)).thenReturn(Optional.of(existing));
-
-        Category result = categoryJpaRepository.deleteCategory(1L);
-
-        assertSame(existing, result);
-        verify(categoryJpaRepository).findById(1);
-        verify(categoryJpaRepository).delete(existing);
-    }
-
-    /**
-     * Delete category throws when not found.
-     */
-    @Test
-    void deleteCategory_ThrowsWhenNotFound() {
-        when(categoryJpaRepository.findById(7)).thenReturn(Optional.empty());
-
-        CategoryNotFoundException exception = assertThrows(
-                CategoryNotFoundException.class,
-                () -> categoryJpaRepository.deleteCategory(7L)
-        );
-
-        assertEquals("Category not found for id: 7", exception.getMessage());
-        verify(categoryJpaRepository).findById(7);
-        verify(categoryJpaRepository, never()).delete(any(Category.class));
-    }
-
-    /**
-     * Update category updates name and saves.
-     */
-    @Test
-    void updateCategory_UpdatesNameAndSaves() {
-        Category existing = new Category(2, "old");
-        Category request = new Category(2, "updated");
-        when(categoryJpaRepository.findById(2)).thenReturn(Optional.of(existing));
-        when(categoryJpaRepository.save(existing)).thenReturn(existing);
-
-        Category result = categoryJpaRepository.updateCategory(request);
-
-        assertEquals("updated", existing.getName());
-        assertSame(existing, result);
-        verify(categoryJpaRepository).findById(2);
-        verify(categoryJpaRepository).save(existing);
-    }
-
-    /**
-     * Update category throws when not found.
-     */
-    @Test
-    void updateCategory_ThrowsWhenNotFound() {
-        Category request = new Category(42, "updated");
-        when(categoryJpaRepository.findById(42)).thenReturn(Optional.empty());
-
-        CategoryNotFoundException exception = assertThrows(
-                CategoryNotFoundException.class,
-                () -> categoryJpaRepository.updateCategory(request)
-        );
-
-        assertEquals("Category not found for id: 42", exception.getMessage());
-        verify(categoryJpaRepository).findById(42);
-        verify(categoryJpaRepository, never()).save(any(Category.class));
+    void existsById_DelegatesToRepository() {
+        when(categoryJpaRepository.existsById(1)).thenReturn(true);
+        assertTrue(categoryJpaRepository.existsById(1));
+        verify(categoryJpaRepository).existsById(1);
     }
 }
 
