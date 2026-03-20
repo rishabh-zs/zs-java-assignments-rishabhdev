@@ -200,7 +200,7 @@ public class ProductControllerTest {
         when(productService.updateProduct(org.mockito.ArgumentMatchers.any(Product.class)))
                 .thenThrow(new IllegalArgumentException("Product id must be a positive number."));
 
-        mockMvc.perform(patch("/products/updateProduct")
+        mockMvc.perform(patch("/products/uProduct")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
