@@ -119,7 +119,7 @@ public class ProductControllerTest {
         when(productService.addProduct(org.mockito.ArgumentMatchers.any(Product.class)))
                 .thenReturn(new Product(10, "Phone", 999.99, 1));
 
-        mockMvc.perform(post("/products/addProduct")
+        mockMvc.perform(post("/products/aProduct")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
@@ -149,13 +149,8 @@ public class ProductControllerTest {
     public void handleDeleteProductDelegatesToService() throws Exception {
         when(productService.deleteProduct(1L)).thenReturn(new Product(1, "Phone", 999.99, 1));
 
-        mockMvc.perform(delete("/products/deleteProduct")
-                        .contentType(APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "productId": 1
-                                }
-                                """))
+        mockMvc.perform(delete("/products/dProduct/{productId}", 1L)
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("product with ID :1 deleted successfully"))
@@ -178,7 +173,7 @@ public class ProductControllerTest {
         when(productService.updateProduct(org.mockito.ArgumentMatchers.any(Product.class)))
                 .thenReturn(new Product(1, "Phone Pro", 1099.99, 1));
 
-        mockMvc.perform(patch("/products/updateProduct")
+        mockMvc.perform(patch("/products/uProduct")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {

@@ -155,13 +155,8 @@ class CategoryControllerTest {
     void handleDeleteCategoryDelegatesToService() throws Exception {
         when(categoryService.deleteCategory(1L)).thenReturn(new Category(1, "electronics"));
 
-        mockMvc.perform(delete("/categories/deleteCategory")
-                        .contentType(APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "categoryId": 1
-                                }
-                                """))
+        mockMvc.perform(delete("/categories/dCategory/{categoryId}", 1L)
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("category deleted with id :1"))
@@ -200,7 +195,7 @@ class CategoryControllerTest {
         when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
                 .thenReturn(new Category(1, "electronics-updated"));
 
-        mockMvc.perform(patch("/categories/updateCategory")
+        mockMvc.perform(patch("/categories/uCategory")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
@@ -226,7 +221,7 @@ class CategoryControllerTest {
         when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
                 .thenThrow(new IllegalArgumentException("Category id must be a positive number."));
 
-        mockMvc.perform(patch("/categories/updateCategory")
+        mockMvc.perform(patch("/categories/uCategory")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {

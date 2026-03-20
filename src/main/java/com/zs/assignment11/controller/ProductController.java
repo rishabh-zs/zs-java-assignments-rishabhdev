@@ -59,7 +59,7 @@ public class ProductController {
      * @param product the product
      * @return the map
      */
-    @PostMapping("/addProduct")
+    @PostMapping("/aProduct")
     public Map<String, Object> handleAddProduct(@RequestBody Product product) {
         log.debug("/addProduct endpoint was called");
         Product addedProduct = productService.addProduct(product);
