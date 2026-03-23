@@ -4,9 +4,8 @@ FROM eclipse-temurin:21-jdk-alpine
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the pre-built JAR file that GitHub Actions already compiled!
-# (The GitHub Actions SCP step places it exactly in this folder structure)
-COPY build/libs/*.jar app.jar
+# Copy ONLY the executable JAR file (ignoring the -plain.jar)
+COPY build/libs/*SNAPSHOT.jar app.jar
 
 # Expose the port your Spring Boot app runs on
 EXPOSE 8080
