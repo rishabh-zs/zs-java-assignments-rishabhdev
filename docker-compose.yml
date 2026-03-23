@@ -1,13 +1,10 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:latest
-    container_name: assignment-11-db
     environment:
       POSTGRES_USER: user1
       POSTGRES_PASSWORD: User#2026
-      POSTGRES_DB: assignment11_db
+      POSTGRES_DB: assignment11
     ports:
       - "5466:5432"
     volumes:
@@ -16,14 +13,13 @@ services:
 
   app:
     build: .
-    container_name: springboot_app
     depends_on:
       - db
     environment:
-      # Keep this as 5432! Docker services communicate using the internal container port, not the external host port.
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/assignment11_db
-      - SPRING_DATASOURCE_USERNAME=user1
-      - SPRING_DATASOURCE_PASSWORD=User#2026
+      # Use the same db.* contract as local config; only host/port changes for Docker networking.
+      - DB_URL=jdbc:postgresql://db:5432/assignment11
+      - DB_USERNAME=user1
+      - DB_PASSWORD=User#2026
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
       - "8080:8080"
