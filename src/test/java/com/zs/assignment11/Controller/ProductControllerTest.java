@@ -128,7 +128,7 @@ public class ProductControllerTest {
                                   "categoryId": 1
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("Product with ID :10 added successfully"))
                 .andExpect(jsonPath("$.addedProduct.id").value(10))

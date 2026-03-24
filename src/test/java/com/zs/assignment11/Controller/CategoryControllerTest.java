@@ -86,7 +86,7 @@ class CategoryControllerTest {
                                   "name": "electronics"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("category added successfully with id: 10"))
                 .andExpect(jsonPath("$.addedCategory.id").value(10))
