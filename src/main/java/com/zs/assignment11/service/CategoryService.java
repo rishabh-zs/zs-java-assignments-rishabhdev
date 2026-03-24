@@ -66,9 +66,9 @@ public class CategoryService {
             category.setId(null);
             newCat = categoryJpaRepository.save(category);
             log.info("Category added successfully: {}", newCat.getName());
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException ex) {
             log.warn("Duplicate category name: {}", category.getName());
-            throw new CategoryAlreadyExistsException("Category already exists");
+            throw new CategoryAlreadyExistsException("Category already exists", ex);
         }
         return newCat;
     }

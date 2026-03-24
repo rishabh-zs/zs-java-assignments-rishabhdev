@@ -17,44 +17,40 @@ public class GlobalExceptionHandler {
     /**
      * Handle product already exists response entity.
      *
-     * @param ex the ex
      * @return the response entity
      */
     @ExceptionHandler(ProductAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleProductAlreadyExists(ProductAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleProductAlreadyExists() {
         return buildError(HttpStatus.CONFLICT, "Products already exists");
     }
 
     /**
      * Handle category already exists response entity.
      *
-     * @param ex the ex
      * @return the response entity
      */
     @ExceptionHandler(CategoryAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleCategoryAlreadyExists(CategoryAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleCategoryAlreadyExists() {
         return buildError(HttpStatus.CONFLICT, "Categories already exists");
     }
 
     /**
      * Handle product not found response entity.
      *
-     * @param ex the ex
      * @return the response entity
      */
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleProductNotFound(ProductNotFoundException ex) {
-        return buildError(HttpStatus.NOT_FOUND, "product id does not exists");
+    public ResponseEntity<Map<String, Object>> handleProductNotFound(String message) {
+        return buildError(HttpStatus.NOT_FOUND, message);
     }
 
     /**
      * Handle category not found response entity.
      *
-     * @param ex the ex
      * @return the response entity
      */
     @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCategoryNotFound(CategoryNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleCategoryNotFound() {
         return buildError(HttpStatus.NOT_FOUND, "category id does not exists");
     }
 
@@ -74,6 +70,26 @@ public class GlobalExceptionHandler {
             return buildError(HttpStatus.NOT_FOUND, "category id does not exists");
         }
         return buildError(HttpStatus.BAD_REQUEST, message != null ? message : "invalid request");
+    }
+
+    /**
+     * Handle cannot get all category exception response entity.
+     *
+     * @return the response entity
+     */
+    @ExceptionHandler(CannotGetAllCategoryException.class)
+    public ResponseEntity<Map<String, Object>> handleCannotGetAllCategoryException() {
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "cannot get all categories");
+    }
+
+    /**
+     * Handle cannot get all product by category id exception response entity.
+     *
+     * @return the response entity
+     */
+    @ExceptionHandler(CannotGetAllProductByCategoryIdException.class)
+    public ResponseEntity<Map<String, Object>> handleCannotGetAllProductByCategoryIdException() {
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "cannot get all products by category id");
     }
 
     private ResponseEntity<Map<String, Object>> buildError(HttpStatus statusCode, String message) {

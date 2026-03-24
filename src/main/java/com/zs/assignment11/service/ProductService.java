@@ -2,6 +2,7 @@ package com.zs.assignment11.service;
 
 import com.zs.assignment11.dao.ProductJpaRepository;
 import com.zs.assignment11.exception.ProductAlreadyExistsException;
+import com.zs.assignment11.exception.ProductNotFoundException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class ProductService {
         log.info("Request received to delete product by id: {}", productId);
         Integer id = Math.toIntExact(productId);
         Product existingProduct = productJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + productId));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + productId));
 
         try {
             productJpaRepository.delete(existingProduct);

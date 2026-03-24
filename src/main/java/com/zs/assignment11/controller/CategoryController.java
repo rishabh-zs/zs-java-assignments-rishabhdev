@@ -5,6 +5,7 @@ import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.CategoryService;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +44,7 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/GetallCategories")
-    public Map<String, Object> handleGetAllCategories() {
+    public ResponseEntity<Map<String, Object>> handleGetAllCategories() {
         log.debug("/GetallCategories endpoint was called");
         List<Category> categories = categoryService.getAllCategories();
 
@@ -51,7 +53,7 @@ public class CategoryController {
         response.put("message", "all category fetched successfully");
         response.put("categories", categories);
         response.put("totalCategoryCount", categories.size());
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -61,7 +63,7 @@ public class CategoryController {
      * @return the map
      */
     @PostMapping("/aCategory")
-    public Map<String, Object> handleAddCategory(@RequestBody Category category) {
+    public ResponseEntity<Map<String, Object>> handleAddCategory(@RequestBody Category category) {
         log.debug("/addCategory endpoint was called");
         Category addedCategory = categoryService.addCategory(category);
 
@@ -69,7 +71,7 @@ public class CategoryController {
         response.put("status", "success");
         response.put("message", "category added successfully with id: " + addedCategory.getId());
         response.put("addedCategory", addedCategory);
-        return response;
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -79,7 +81,7 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/{categoryId}/products")
-    public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleGetAllProductByCategoryId(@PathVariable Integer categoryId) {
         log.debug("/{categoryId}/products endpoint was called");
         List<Product> products = categoryService.getProductsByCategoryId(categoryId);
 
@@ -88,7 +90,7 @@ public class CategoryController {
         response.put("message", "products fetched successfully for category id: " + categoryId);
         response.put("products", products);
         response.put("totalProductCountInCategory", products.size());
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -98,7 +100,7 @@ public class CategoryController {
      * @return the map
      */
     @DeleteMapping("/dCategory/{categoryId}")
-    public Map<String, Object> handleDeleteCategory(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleDeleteCategory(@PathVariable Integer categoryId) {
         Integer catId = categoryId;
         log.debug("/deleteCategory endpoint was called");
         Category deletedCategory = categoryService.deleteCategory(catId);
@@ -107,7 +109,7 @@ public class CategoryController {
         response.put("status", "success");
         response.put("message", "category deleted with id :" + categoryId);
         response.put("deletedCategory", deletedCategory);
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -117,14 +119,14 @@ public class CategoryController {
      * @return the map
      */
     @PatchMapping("uCategory")
-    public Map<String, Object> handleUpdateCategory(@RequestBody Category category) {
+    public ResponseEntity<Map<String, Object>> handleUpdateCategory(@RequestBody Category category) {
         log.debug("/updateCategory endpoint was called");
         Category updatedCategory = categoryService.updateCategory(category);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "category updated with " + updatedCategory.getId());
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

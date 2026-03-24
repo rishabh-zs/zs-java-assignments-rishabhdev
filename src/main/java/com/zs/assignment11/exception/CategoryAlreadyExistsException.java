@@ -10,8 +10,8 @@ public class CategoryAlreadyExistsException extends RuntimeException {
      *
      * @param message the message
      */
-    public CategoryAlreadyExistsException(String message) {
-        super(message);
+    public CategoryAlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
 

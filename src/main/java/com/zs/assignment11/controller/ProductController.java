@@ -4,6 +4,8 @@ import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import com.zs.assignment11.util.LoggerUtil;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,7 +43,7 @@ public class ProductController {
      * @return the map
      */
     @GetMapping("/GetallProducts")
-    public Map<String, Object> handleGetAllProducts() {
+    public ResponseEntity<Map<String, Object>> handleGetAllProducts() {
         log.debug("/allProducts endpoint was called");
         List<Product> products = productService.getAllProducts();
 
@@ -50,7 +52,7 @@ public class ProductController {
         response.put("message", "all product fetched successfully");
         response.put("products", products);
         response.put("totalProductCount", products.size());
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -60,7 +62,7 @@ public class ProductController {
      * @return the map
      */
     @PostMapping("/aProduct")
-    public Map<String, Object> handleAddProduct(@RequestBody Product product) {
+    public ResponseEntity<Map<String, Object>> handleAddProduct(@RequestBody Product product) {
         log.debug("/addProduct endpoint was called");
         Product addedProduct = productService.addProduct(product);
 
@@ -69,7 +71,7 @@ public class ProductController {
         response.put("status", "success");
         response.put("message", "Product with ID :" + id + " added successfully");
         response.put("addedProduct", addedProduct);
-        return response;
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -79,7 +81,7 @@ public class ProductController {
      * @return the map
      */
     @DeleteMapping("/dProduct/{productId}")
-    public Map<String, Object> handleDeleteProduct(@PathVariable Integer productId) {
+    public ResponseEntity<Map<String, Object>> handleDeleteProduct(@PathVariable Integer productId) {
         log.debug("/deleteProduct endpoint was called");
         Product deletedProduct = productService.deleteProduct(productId);
 
@@ -88,7 +90,7 @@ public class ProductController {
         response.put("status", "success");
         response.put("message", "product with ID :" + id + " deleted successfully");
         response.put("deletedProduct", deletedProduct);
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -98,13 +100,13 @@ public class ProductController {
      * @return the map
      */
     @PatchMapping("/uProduct")
-    public Map<String, Object> handleUpdateProduct(@RequestBody Product product) {
+    public ResponseEntity<Map<String, Object>> handleUpdateProduct(@RequestBody Product product) {
         log.debug("/updateProduct endpoint was called");
         Product updatedProduct = productService.updateProduct(product);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "product with " + updatedProduct.getId() + " updated successfully");
-        return response;
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
