@@ -2,6 +2,7 @@ package com.zs.assignment11.Service;
 
 import com.zs.assignment11.dao.ProductJpaRepository;
 import com.zs.assignment11.exception.ProductAlreadyExistsException;
+import com.zs.assignment11.exception.ProductNotFoundException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -32,17 +34,16 @@ public class ProductServiceTest {
     private ProductJpaRepository repo;
     private ProductService service;
 
-    static Stream<Arguments> invalidPayloads() {
+    static Stream<Product> nonValidatedPayloads() {
         return Stream.of(
-                arguments(null, "Product payload is required."),
-                arguments(new Product(1, "", 1.0, 1), "Product name must not be blank."),
-                arguments(new Product(1, "Phone", -1.0, 1), "Product price must be zero or greater."),
-                arguments(new Product(1, "Phone", 1.0, 0), "Category id must be a positive number.")
+                new Product(1, "", 1.0, 1),
+                new Product(1, "Phone", -1.0, 1),
+                new Product(1, "Phone", 1.0, 0)
         );
     }
 
-    static Stream<Arguments> invalidIds() {
-        return Stream.of(arguments((Object) null), arguments(0), arguments(-1));
+    static Stream<Arguments> nonPositiveIds() {
+        return Stream.of(arguments(0), arguments(-1));
     }
 
     @BeforeEach
@@ -68,12 +69,18 @@ public class ProductServiceTest {
         assertNull(input.getId());
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidPayloads")
-    void addProduct_InvalidPayload_Throws(Product product, String message) {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.addProduct(product));
-        assertEquals(message, ex.getMessage());
+    @Test
+    void addProduct_NullPayload_ThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> service.addProduct(null));
         verifyNoInteractions(repo);
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonValidatedPayloads")
+    void addProduct_NonValidatedPayloads_DelegateToRepository(Product product) {
+        assertDoesNotThrow(() -> service.addProduct(product));
+        verify(repo).save(product);
+        assertNull(product.getId());
     }
 
     @Test
@@ -92,11 +99,18 @@ public class ProductServiceTest {
         verify(repo).delete(existing);
     }
 
+    @Test
+    void deleteProduct_NullId_ThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> service.deleteProduct(null));
+        verifyNoInteractions(repo);
+    }
+
     @ParameterizedTest
-    @MethodSource("invalidIds")
-    void deleteProduct_InvalidId_Throws(Integer id) {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.deleteProduct(id));
-        assertEquals("Product id must be a positive number.", ex.getMessage());
+    @MethodSource("nonPositiveIds")
+    void deleteProduct_NonPositiveId_ThrowsProductNotFoundException(Integer id) {
+        ProductNotFoundException ex = assertThrows(ProductNotFoundException.class, () -> service.deleteProduct(id));
+        assertEquals("Product not found with id: " + id, ex.getMessage());
+        verify(repo).findById(id);
     }
 
     @Test
