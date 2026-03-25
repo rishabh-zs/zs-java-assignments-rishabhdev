@@ -58,8 +58,6 @@ public class CategoryService {
      * @return the category
      */
     public Category addCategory(Category category) {
-        validateCategoryPayload(category);
-
         log.info("Request received to add category: {}", category.getName());
         Category newCat;
         try {
@@ -80,7 +78,6 @@ public class CategoryService {
      * @return the products by category id
      */
     public List<Product> getProductsByCategoryId(Integer categoryId) {
-        validateCategoryId(categoryId);
         log.info("Request received to fetch products for category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
 
@@ -104,7 +101,6 @@ public class CategoryService {
      * @return the category
      */
     public Category deleteCategory(Integer categoryId) {
-        validateCategoryId(categoryId);
         log.info("Request received to delete category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
 
@@ -127,7 +123,6 @@ public class CategoryService {
      * @return the category
      */
     public Category updateCategory(Category category) {
-        validateCategoryPayload(category);
         if (category.getId() == null || category.getId() <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
@@ -146,20 +141,5 @@ public class CategoryService {
             throw new RuntimeException("Failed to update category in database.", ex);
         }
         return updatedCategory;
-    }
-
-    private void validateCategoryPayload(Category category) {
-        if (category == null) {
-            throw new IllegalArgumentException("Category payload is required.");
-        }
-        if (category.getName() == null || category.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Category name must not be blank.");
-        }
-    }
-
-    private void validateCategoryId(Integer categoryId) {
-        if (categoryId == null || categoryId <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
     }
 }

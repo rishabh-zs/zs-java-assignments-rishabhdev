@@ -53,7 +53,6 @@ public class ProductService {
      * @return the product
      */
     public Product addProduct(Product product) {
-        validateProduct(product);
         log.info("Request received to add product");
         Product addedProduct;
 
@@ -78,9 +77,6 @@ public class ProductService {
      * @return the product
      */
     public Product deleteProduct(Integer productId) {
-        if (productId == null || productId <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
         log.info("Request received to delete product by id: {}", productId);
         Integer id = Math.toIntExact(productId);
         Product existingProduct = productJpaRepository.findById(id)
@@ -90,6 +86,7 @@ public class ProductService {
             productJpaRepository.delete(existingProduct);
             log.info("Deleted product by id: {}", productId);
         } catch (DataAccessException ex) {
+            log.error("Error while deleting product id: {}", productId, ex);
             throw new RuntimeException("Failed to delete Product from database.", ex);
         }
         return existingProduct;
@@ -102,7 +99,6 @@ public class ProductService {
      * @return the product
      */
     public Product updateProduct(Product product) {
-        validateProductForUpdate(product);
         log.info("Request received to update product id: {}", product.getId());
         Product existingProduct = productJpaRepository.findById(product.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + product.getId()));
@@ -118,36 +114,6 @@ public class ProductService {
             throw new RuntimeException("Failed to update product in database.", ex);
         }
         return updatedProduct;
-    }
-
-    private void validateProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
-        if (product.getCategory_id() == null || product.getCategory_id() <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
-    }
-
-    private void validateProductForUpdate(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getId() == null || product.getId() <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
     }
 }
 

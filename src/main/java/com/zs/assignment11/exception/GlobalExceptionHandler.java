@@ -1,10 +1,16 @@
 package com.zs.assignment11.exception;
 
+import com.zs.assignment11.service.CategoryService;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,11 +43,12 @@ public class GlobalExceptionHandler {
     /**
      * Handle product not found response entity.
      *
+     * @param ex the exception
      * @return the response entity
      */
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleProductNotFound(String message) {
-        return buildError(HttpStatus.NOT_FOUND, message);
+    public ResponseEntity<Map<String, Object>> handleProductNotFound(ProductNotFoundException ex) {
+        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     /**
@@ -50,8 +57,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCategoryNotFound() {
-        return buildError(HttpStatus.NOT_FOUND, "category id does not exists");
+    public ResponseEntity<Map<String, Object>> handleCategoryNotFound(CategoryNotFoundException ex) {
+        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     /**
@@ -92,10 +99,78 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "cannot get all products by category id");
     }
 
+    /**
+     * Handle method argument not valid exception response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        Map<String, Object> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    /**
+     * Handle constraint violation exception response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException ex) {
+        String message = ex.getMessage();
+        if (message != null && message.toLowerCase().contains("productid")) {
+            return buildError(HttpStatus.BAD_REQUEST, "product id must be greater than 0");
+        }
+        return buildError(HttpStatus.BAD_REQUEST, message != null ? message : "invalid request");
+    }
+
+    /**
+     * Handle method argument type mismatch exception response entity.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        if ("productId".equals(ex.getName())) {
+            return buildError(HttpStatus.BAD_REQUEST, "product id must be a valid integer");
+        }
+        return buildError(HttpStatus.BAD_REQUEST, "invalid request parameter");
+    }
+
+    /**
+     * Handle method-level validation errors for path/query parameters.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+        String defaultMessage = ex.getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .filter(message -> message != null && !message.isBlank())
+                .findFirst()
+                .orElse("invalid request");
+
+        return buildDefaultMessageError(HttpStatus.BAD_REQUEST, defaultMessage);
+    }
+
     private ResponseEntity<Map<String, Object>> buildError(HttpStatus statusCode, String message) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "error");
         response.put("message", message);
+        return ResponseEntity.status(statusCode).body(response);
+    }
+
+    private ResponseEntity<Map<String, Object>> buildDefaultMessageError(HttpStatus statusCode, String defaultMessage) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("defaultMessage", defaultMessage);
         return ResponseEntity.status(statusCode).body(response);
     }
 }

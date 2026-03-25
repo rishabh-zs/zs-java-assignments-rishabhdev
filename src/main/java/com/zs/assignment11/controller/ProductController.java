@@ -3,6 +3,8 @@ package com.zs.assignment11.controller;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import com.zs.assignment11.util.LoggerUtil;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +64,7 @@ public class ProductController {
      * @return the map
      */
     @PostMapping("/aProduct")
-    public ResponseEntity<Map<String, Object>> handleAddProduct(@RequestBody Product product) {
+    public ResponseEntity<Map<String, Object>> handleAddProduct(@Valid @RequestBody Product product) {
         log.debug("/addProduct endpoint was called");
         Product addedProduct = productService.addProduct(product);
 
@@ -81,7 +83,7 @@ public class ProductController {
      * @return the map
      */
     @DeleteMapping("/dProduct/{productId}")
-    public ResponseEntity<Map<String, Object>> handleDeleteProduct(@PathVariable Integer productId) {
+    public ResponseEntity<Map<String, Object>> handleDeleteProduct(@PathVariable @Positive Integer productId) {
         log.debug("/deleteProduct endpoint was called");
         Product deletedProduct = productService.deleteProduct(productId);
 
@@ -100,7 +102,7 @@ public class ProductController {
      * @return the map
      */
     @PatchMapping("/uProduct")
-    public ResponseEntity<Map<String, Object>> handleUpdateProduct(@RequestBody Product product) {
+    public ResponseEntity<Map<String, Object>> handleUpdateProduct(@Valid @RequestBody Product product) {
         log.debug("/updateProduct endpoint was called");
         Product updatedProduct = productService.updateProduct(product);
 

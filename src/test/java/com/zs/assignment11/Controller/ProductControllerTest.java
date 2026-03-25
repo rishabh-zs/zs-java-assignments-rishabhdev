@@ -4,11 +4,13 @@ import com.zs.assignment11.exception.GlobalExceptionHandler;
 import com.zs.assignment11.controller.ProductController;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -161,6 +163,42 @@ public class ProductControllerTest {
 
         verify(productService).deleteProduct(1);
         verifyNoMoreInteractions(productService);
+    }
+
+    /**
+     * Handle delete product returns bad request for negative id.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleDeleteProductReturnsBadRequestForNegativeId() throws Exception {
+        when(productService.deleteProduct(-1)).thenThrow(
+                new ConstraintViolationException("handleDeleteProduct.productId: must be greater than 0", Collections.emptySet()));
+
+        mockMvc.perform(delete("/products/dProduct/{productId}", -1)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("product id must be greater than 0"));
+
+        verify(productService).deleteProduct(-1);
+        verifyNoMoreInteractions(productService);
+    }
+
+    /**
+     * Handle delete product returns bad request for non-numeric id.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleDeleteProductReturnsBadRequestForInvalidIdFormat() throws Exception {
+        mockMvc.perform(delete("/products/dProduct/abc")
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("product id must be a valid integer"));
+
+        verifyNoInteractions(productService);
     }
 
     /**

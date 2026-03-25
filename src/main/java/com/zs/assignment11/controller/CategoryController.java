@@ -4,6 +4,8 @@ import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.CategoryService;
 import com.zs.assignment11.util.LoggerUtil;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,7 +65,7 @@ public class CategoryController {
      * @return the map
      */
     @PostMapping("/aCategory")
-    public ResponseEntity<Map<String, Object>> handleAddCategory(@RequestBody Category category) {
+    public ResponseEntity<Map<String, Object>> handleAddCategory(@Valid @RequestBody Category category) {
         log.debug("/addCategory endpoint was called");
         Category addedCategory = categoryService.addCategory(category);
 
@@ -81,7 +83,7 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/{categoryId}/products")
-    public ResponseEntity<Map<String, Object>> handleGetAllProductByCategoryId(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleGetAllProductByCategoryId(@PathVariable @Positive Integer categoryId) {
         log.debug("/{categoryId}/products endpoint was called");
         List<Product> products = categoryService.getProductsByCategoryId(categoryId);
 
@@ -100,7 +102,7 @@ public class CategoryController {
      * @return the map
      */
     @DeleteMapping("/dCategory/{categoryId}")
-    public ResponseEntity<Map<String, Object>> handleDeleteCategory(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleDeleteCategory(@PathVariable @Positive Integer categoryId) {
         Integer catId = categoryId;
         log.debug("/deleteCategory endpoint was called");
         Category deletedCategory = categoryService.deleteCategory(catId);
@@ -119,7 +121,7 @@ public class CategoryController {
      * @return the map
      */
     @PatchMapping("uCategory")
-    public ResponseEntity<Map<String, Object>> handleUpdateCategory(@RequestBody Category category) {
+    public ResponseEntity<Map<String, Object>> handleUpdateCategory(@Valid @RequestBody Category category) {
         log.debug("/updateCategory endpoint was called");
         Category updatedCategory = categoryService.updateCategory(category);
 
