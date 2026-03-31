@@ -8,11 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +36,7 @@ public class Product {
     @Column(nullable = false, unique = true)
     @NotBlank(message = "Employee name cannot be blank")
     @NotNull(message = "Employee name cannot be null")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Employee name must contain only letters and spaces")
     private String name;
 
     @Column(nullable = false)

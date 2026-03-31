@@ -9,13 +9,19 @@ import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The type Product service.
  */
 @Service
+@CacheConfig(cacheNames = "products")
 public class ProductService {
     private static final Logger log = LoggerUtil.getLogger(ProductService.class);
     private final ProductJpaRepository productJpaRepository;
@@ -34,12 +40,15 @@ public class ProductService {
      *
      * @return the all products
      */
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    @Cacheable(key = "'all'", unless = "#result == null")
     public List<Product> getAllProducts() {
         log.info("Request received to fetch all products");
         List<Product> products;
 
         try {
             products = productJpaRepository.findAllByOrderById();
+            log.info("All products fetched successfully");
         } catch (DataAccessException ex) {
             throw new IllegalArgumentException("Failed to fetch all products", ex);
         }
@@ -52,6 +61,8 @@ public class ProductService {
      * @param product the product
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Product addProduct(Product product) {
         log.info("Request received to add product");
         Product addedProduct;
@@ -76,6 +87,8 @@ public class ProductService {
      * @param productId the product id
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Product deleteProduct(Integer productId) {
         log.info("Request received to delete product by id: {}", productId);
         Integer id = Math.toIntExact(productId);
@@ -98,7 +111,14 @@ public class ProductService {
      * @param product the product
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Product updateProduct(Product product) {
+        Objects.requireNonNull(product, "Product payload cannot be null");
+        if (product.getId() == null || product.getId() <= 0) {
+            throw new IllegalArgumentException("Product id must be a positive number.");
+        }
+
         log.info("Request received to update product id: {}", product.getId());
         Product existingProduct = productJpaRepository.findById(product.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + product.getId()));
@@ -116,4 +136,3 @@ public class ProductService {
         return updatedProduct;
     }
 }
-

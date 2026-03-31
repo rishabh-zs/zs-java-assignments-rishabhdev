@@ -1,6 +1,5 @@
 package com.zs.assignment11.service;
 
-
 import com.zs.assignment11.dao.CategoryJpaRepository;
 import com.zs.assignment11.exception.CannotGetAllCategoryException;
 import com.zs.assignment11.exception.CannotGetAllProductByCategoryIdException;
@@ -9,6 +8,10 @@ import com.zs.assignment11.exception.CategoryNotFoundException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,12 +19,14 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
  * The type Category service.
  */
 @Service
+@CacheConfig(cacheNames = "categories")
 public class CategoryService {
     private static final Logger log = LoggerUtil.getLogger(CategoryService.class);
     private final CategoryJpaRepository categoryJpaRepository;
@@ -40,11 +45,14 @@ public class CategoryService {
      *
      * @return the all categories
      */
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    @Cacheable(key = "'all'", unless = "#result == null")
     public List<Category> getAllCategories() {
         log.info("Request received to fetch all categories");
         List<Category> categories;
         try {
             categories = categoryJpaRepository.findAllByOrderById();
+            log.info("All categories retrieved successfully");
         } catch (DataRetrievalFailureException ex) {
             throw new CannotGetAllCategoryException("Failed to fetch all categories.", ex);
         }
@@ -57,15 +65,17 @@ public class CategoryService {
      * @param category the category
      * @return the category
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Category addCategory(Category category) {
         log.info("Request received to add category: {}", category.getName());
         Category newCat;
         try {
             category.setId(null);
             newCat = categoryJpaRepository.save(category);
-            log.info("Category added successfully: {}", newCat.getName());
+            log.info("Category added successfully with id: {}", newCat.getId());
         } catch (DataIntegrityViolationException ex) {
-            log.warn("Duplicate category name: {}", category.getName());
+            log.error("Duplicate category name: {}", category.getName());
             throw new CategoryAlreadyExistsException("Category already exists", ex);
         }
         return newCat;
@@ -77,6 +87,8 @@ public class CategoryService {
      * @param categoryId the category id
      * @return the products by category id
      */
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    @Cacheable(key = "'products:' + #categoryId", unless = "#result == null")
     public List<Product> getProductsByCategoryId(Integer categoryId) {
         log.info("Request received to fetch products for category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
@@ -87,7 +99,9 @@ public class CategoryService {
         List<Product> products;
         try {
             products = categoryJpaRepository.findAllProductsByCategoryIdOrderById(categoryId);
+            log.info("Products retrieved successfully with Category id: {}", categoryId);
         } catch (DataAccessException ex) {
+            log.error("error while fetching products for category id: {}", categoryId, ex);
             throw new CannotGetAllProductByCategoryIdException("Failed to fetch all products for category id.", ex);
         }
         return products;
@@ -100,6 +114,8 @@ public class CategoryService {
      * @param categoryId the category id
      * @return the category
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Category deleteCategory(Integer categoryId) {
         log.info("Request received to delete category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
@@ -108,7 +124,7 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found for id: " + categoryId));
         try {
             categoryJpaRepository.delete(existingCategory);
-            log.info("Deleted category id: {}", categoryId);
+            log.info("Category deleted successfully with id: {}", categoryId);
         } catch (DataAccessException ex) {
             log.error("Error while deleting category id: {}", categoryId, ex);
             throw new RuntimeException("Failed to delete category from database.", ex);
@@ -122,7 +138,10 @@ public class CategoryService {
      * @param category the category
      * @return the category
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
     public Category updateCategory(Category category) {
+        Objects.requireNonNull(category, "Category payload cannot be null");
         if (category.getId() == null || category.getId() <= 0) {
             throw new IllegalArgumentException("Category id must be a positive number.");
         }
@@ -135,7 +154,7 @@ public class CategoryService {
         try {
             existingCategory.setName(category.getName());
             updatedCategory = categoryJpaRepository.save(existingCategory);
-            log.info("Category updated successfully, id: {}", category.getId());
+            log.info("Category updated successfully with id: {}", category.getId());
         } catch (DataAccessException ex) {
             log.error("Error while updating category id: {}", category.getId(), ex);
             throw new RuntimeException("Failed to update category in database.", ex);

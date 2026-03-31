@@ -1,11 +1,11 @@
 package com.zs.assignment11.exception;
 
-import com.zs.assignment11.service.CategoryService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -161,6 +161,21 @@ public class GlobalExceptionHandler {
         return buildDefaultMessageError(HttpStatus.BAD_REQUEST, defaultMessage);
     }
 
+    /**
+     * Handle malformed JSON payloads.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        String message = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+        if (message != null && message.toLowerCase().contains("unexpected character") && message.contains(",")) {
+            return buildError(HttpStatus.BAD_REQUEST, "Invalid JSON: provide a valid integer for category id.");
+        }
+        return buildError(HttpStatus.BAD_REQUEST, "Invalid request body format.");
+    }
+
     private ResponseEntity<Map<String, Object>> buildError(HttpStatus statusCode, String message) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "error");
@@ -174,4 +189,3 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(statusCode).body(response);
     }
 }
-
