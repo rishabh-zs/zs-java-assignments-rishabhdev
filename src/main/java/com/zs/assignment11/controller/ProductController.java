@@ -3,6 +3,7 @@ package com.zs.assignment11.controller;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.ProductService;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/products")
+@Observed(name = "product.controller", contextualName = "Product Controller")
 public class ProductController {
     private static final Logger log = LoggerUtil.getLogger(ProductController.class);
     private final ProductService productService;

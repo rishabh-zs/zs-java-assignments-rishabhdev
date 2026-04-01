@@ -190,19 +190,19 @@ class CategoryControllerTest {
     @Test
     void handleUpdateCategoryDelegatesToService() throws Exception {
         when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
-                .thenReturn(new Category(1, "electronics-updated"));
+                .thenReturn(new Category(1, "electronics updated"));
 
         mockMvc.perform(patch("/categories/uCategory")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
                                   "id": 1,
-                                  "name": "electronics-updated"
+                                  "name": "electronics updated"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.message").value("category updated with 1"));
+                .andExpect(jsonPath("$.message").value("category updated with ID1"));
 
         verify(categoryService).updateCategory(org.mockito.ArgumentMatchers.any(Category.class));
         verifyNoMoreInteractions(categoryService);
@@ -223,7 +223,7 @@ class CategoryControllerTest {
                         .content("""
                                 {
                                   "id": -1,
-                                  "name": "electronics-updated"
+                                  "name": "electronics updated"
                                 }
                                 """))
                 .andExpect(status().isNotFound())

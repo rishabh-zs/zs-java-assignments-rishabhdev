@@ -4,6 +4,7 @@ import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.CategoryService;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/categories")
+@Observed(name = "category.controller", contextualName = "Category Controller")
 public class CategoryController {
     private static final Logger log = LoggerUtil.getLogger(CategoryController.class);
     private final CategoryService categoryService;

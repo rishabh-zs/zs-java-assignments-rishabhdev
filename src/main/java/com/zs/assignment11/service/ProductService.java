@@ -5,6 +5,7 @@ import com.zs.assignment11.exception.ProductAlreadyExistsException;
 import com.zs.assignment11.exception.ProductNotFoundException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +41,7 @@ public class ProductService {
      *
      * @return the all products
      */
+    @Observed(name = "product.service", contextualName = "Fetch All Products")
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     @Cacheable(key = "'all'", unless = "#result == null")
     public List<Product> getAllProducts() {
@@ -63,6 +65,7 @@ public class ProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Add Product")
     public Product addProduct(Product product) {
         log.info("Request received to add product");
         Product addedProduct;
@@ -89,6 +92,7 @@ public class ProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Delete Product")
     public Product deleteProduct(Integer productId) {
         log.info("Request received to delete product by id: {}", productId);
         Integer id = Math.toIntExact(productId);
@@ -113,6 +117,7 @@ public class ProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Update Product")
     public Product updateProduct(Product product) {
         Objects.requireNonNull(product, "Product payload cannot be null");
         if (product.getId() == null || product.getId() <= 0) {

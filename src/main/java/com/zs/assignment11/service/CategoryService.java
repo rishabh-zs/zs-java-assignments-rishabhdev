@@ -8,6 +8,7 @@ import com.zs.assignment11.exception.CategoryNotFoundException;
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -45,6 +46,7 @@ public class CategoryService {
      *
      * @return the all categories
      */
+    @Observed(name = "category.service", contextualName = "Fetch All Categories")
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     @Cacheable(key = "'all'", unless = "#result == null")
     public List<Category> getAllCategories() {
@@ -67,6 +69,7 @@ public class CategoryService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "category.service", contextualName = "Add Category")
     public Category addCategory(Category category) {
         log.info("Request received to add category: {}", category.getName());
         Category newCat;
@@ -89,6 +92,7 @@ public class CategoryService {
      */
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     @Cacheable(key = "'products:' + #categoryId", unless = "#result == null")
+    @Observed(name = "category.service", contextualName = "Get Products By Category")
     public List<Product> getProductsByCategoryId(Integer categoryId) {
         log.info("Request received to fetch products for category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
@@ -116,6 +120,7 @@ public class CategoryService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "category.service", contextualName = "Delete Category")
     public Category deleteCategory(Integer categoryId) {
         log.info("Request received to delete category id: {}", categoryId);
         Integer id = Math.toIntExact(categoryId);
@@ -140,6 +145,7 @@ public class CategoryService {
      */
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "category.service", contextualName = "Update Category")
     public Category updateCategory(Category category) {
         Objects.requireNonNull(category, "Category payload cannot be null");
         if (category.getId() == null || category.getId() <= 0) {
