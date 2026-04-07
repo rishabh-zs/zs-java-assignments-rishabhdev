@@ -138,7 +138,7 @@ public class CategoryController {
      * @param category the category
      * @return the map
      */
-    @PatchMapping("uCategory")
+    @PatchMapping("/uCategory")
     public ResponseEntity<Map<String, Object>> handleUpdateCategory(@Valid @RequestBody Category category) {
         long startTime = System.currentTimeMillis();
         log.debug("/updateCategory endpoint was called");

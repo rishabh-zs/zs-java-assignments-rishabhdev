@@ -43,8 +43,8 @@ public class Configure {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(daoAuthenticationProvider)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/user/register","/auth/user/handleLogin").permitAll()
-                    .requestMatchers("/categories/**", "/products/**","auth/user/getUser").authenticated()
+                    .requestMatchers("/auth/user/register","/auth/user/login").permitAll()
+                    .requestMatchers("/categories/**", "/products/**", "/auth/user/getUsers").authenticated()
                     .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
