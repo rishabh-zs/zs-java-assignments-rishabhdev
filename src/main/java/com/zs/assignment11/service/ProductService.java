@@ -2,19 +2,27 @@ package com.zs.assignment11.service;
 
 import com.zs.assignment11.dao.ProductJpaRepository;
 import com.zs.assignment11.exception.ProductAlreadyExistsException;
+import com.zs.assignment11.exception.ProductNotFoundException;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The type Product service.
  */
 @Service
+@CacheConfig(cacheNames = "products")
 public class ProductService {
     private static final Logger log = LoggerUtil.getLogger(ProductService.class);
     private final ProductJpaRepository productJpaRepository;
@@ -33,12 +41,16 @@ public class ProductService {
      *
      * @return the all products
      */
+    @Observed(name = "product.service", contextualName = "Fetch All Products")
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    @Cacheable(key = "'all'", unless = "#result == null")
     public List<Product> getAllProducts() {
         log.info("Request received to fetch all products");
         List<Product> products;
 
         try {
             products = productJpaRepository.findAllByOrderById();
+            log.info("All products fetched successfully");
         } catch (DataAccessException ex) {
             throw new IllegalArgumentException("Failed to fetch all products", ex);
         }
@@ -51,8 +63,10 @@ public class ProductService {
      * @param product the product
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Add Product")
     public Product addProduct(Product product) {
-        validateProduct(product);
         log.info("Request received to add product");
         Product addedProduct;
 
@@ -76,19 +90,20 @@ public class ProductService {
      * @param productId the product id
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Delete Product")
     public Product deleteProduct(Integer productId) {
-        if (productId == null || productId <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
         log.info("Request received to delete product by id: {}", productId);
         Integer id = Math.toIntExact(productId);
         Product existingProduct = productJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + productId));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + productId));
 
         try {
             productJpaRepository.delete(existingProduct);
             log.info("Deleted product by id: {}", productId);
         } catch (DataAccessException ex) {
+            log.error("Error while deleting product id: {}", productId, ex);
             throw new RuntimeException("Failed to delete Product from database.", ex);
         }
         return existingProduct;
@@ -100,8 +115,15 @@ public class ProductService {
      * @param product the product
      * @return the product
      */
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(allEntries = true, condition = "#result != null")
+    @Observed(name = "product.service", contextualName = "Update Product")
     public Product updateProduct(Product product) {
-        validateProductForUpdate(product);
+        Objects.requireNonNull(product, "Product payload cannot be null");
+        if (product.getId() == null || product.getId() <= 0) {
+            throw new IllegalArgumentException("Product id must be a positive number.");
+        }
+
         log.info("Request received to update product id: {}", product.getId());
         Product existingProduct = productJpaRepository.findById(product.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found for id: " + product.getId()));
@@ -118,35 +140,4 @@ public class ProductService {
         }
         return updatedProduct;
     }
-
-    private void validateProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
-        if (product.getCategory_id() == null || product.getCategory_id() <= 0) {
-            throw new IllegalArgumentException("Category id must be a positive number.");
-        }
-    }
-
-    private void validateProductForUpdate(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product payload is required.");
-        }
-        if (product.getId() == null || product.getId() <= 0) {
-            throw new IllegalArgumentException("Product id must be a positive number.");
-        }
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Product name must not be blank.");
-        }
-        if (product.getPrice() == null || product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price must be zero or greater.");
-        }
-    }
 }
-

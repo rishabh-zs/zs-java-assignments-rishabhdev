@@ -7,32 +7,34 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The type Category.
- */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
-@Table(name = "category")
-public class Category {
+@Table(name = "app_user")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(nullable = false, unique = true)
-    @NotBlank(message = "name cannot be blank")
-    @NotNull(message = "name cannot be null")
-    @Pattern(regexp = "^[A-Za-z ]+$", message = "name must contain only letters and spaces")
-    private String name;
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Username cannot be blank")
+    private String username;
+
+    @Column(nullable = false)
+    @NotBlank(message = "Password cannot be blank")
+    private String password;
+
+    @Column(nullable = false)
+    @NotBlank(message = "Role cannot be null")
+    private String role;
 }

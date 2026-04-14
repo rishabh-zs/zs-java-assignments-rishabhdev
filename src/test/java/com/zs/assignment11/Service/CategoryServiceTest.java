@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -45,12 +46,10 @@ class CategoryServiceTest {
         );
     }
 
-    static Stream<Arguments> invalidCategories() {
+    static Stream<Category> categoriesWithBlankName() {
         return Stream.of(
-                arguments(null, "Category payload is required."),
-                arguments(new Category(1, null), "Category name must not be blank."),
-                arguments(new Category(1, ""), "Category name must not be blank."),
-                arguments(new Category(1, "   "), "Category name must not be blank.")
+                new Category(1, ""),
+                new Category(1, "   ")
         );
     }
 
@@ -62,23 +61,26 @@ class CategoryServiceTest {
         );
     }
 
-    static Stream<Arguments> invalidCategoryIds() {
+    static Stream<Arguments> nonPositiveCategoryIds() {
         return Stream.of(
-                arguments((Object) null),
                 arguments(0),
                 arguments(-1)
         );
     }
 
-    static Stream<Arguments> invalidUpdateCategories() {
+    static Stream<Category> invalidUpdateCategoryIds() {
         return Stream.of(
-                arguments(null, "Category payload is required."),
-                arguments(new Category(null, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(0, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(-1, "electronics"), "Category id must be a positive number."),
-                arguments(new Category(1, null), "Category name must not be blank."),
-                arguments(new Category(1, ""), "Category name must not be blank."),
-                arguments(new Category(1, "   "), "Category name must not be blank.")
+                new Category(null, "electronics"),
+                new Category(0, "electronics"),
+                new Category(-1, "electronics")
+        );
+    }
+
+    static Stream<Arguments> updateCategoriesWithMissingName() {
+        return Stream.of(
+                arguments(new Category(1, null), "Category not found for id: 1"),
+                arguments(new Category(1, ""), "Category not found for id: 1"),
+                arguments(new Category(1, "   "), "Category not found for id: 1")
         );
     }
 
@@ -127,16 +129,26 @@ class CategoryServiceTest {
         verify(categoryJpaRepository).save(category);
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidCategories")
-    void addCategory_InvalidPayload_ThrowsException(Category category, String expectedMessage) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> categoryService.addCategory(category)
-        );
-
-        assertEquals(expectedMessage, exception.getMessage());
+    @Test
+    void addCategory_NullPayload_ThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> categoryService.addCategory(null));
         verifyNoInteractions(categoryJpaRepository);
+    }
+
+    @Test
+    void addCategory_NullName_ThrowsNullPointerException() {
+        Category category = new Category(1, null);
+        assertThrows(NullPointerException.class, () -> categoryService.addCategory(category));
+        verify(categoryJpaRepository).save(category);
+    }
+
+    @ParameterizedTest
+    @MethodSource("categoriesWithBlankName")
+    void addCategory_BlankOrNullName_DelegatesToRepository(Category category) {
+        when(categoryJpaRepository.save(category)).thenReturn(category);
+        assertDoesNotThrow(() -> categoryService.addCategory(category));
+        verify(categoryJpaRepository).save(category);
+        assertNull(category.getId());
     }
 
     @Test
@@ -167,16 +179,22 @@ class CategoryServiceTest {
         verify(categoryJpaRepository).findAllProductsByCategoryIdOrderById(categoryId);
     }
 
+    @Test
+    void getProductsByCategoryId_NullId_ThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> categoryService.getProductsByCategoryId(null));
+        verifyNoInteractions(categoryJpaRepository);
+    }
+
     @ParameterizedTest
-    @MethodSource("invalidCategoryIds")
-    void getProductsByCategoryId_InvalidId_ThrowsException(Integer categoryId) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+    @MethodSource("nonPositiveCategoryIds")
+    void getProductsByCategoryId_NonPositiveId_ThrowsCategoryNotFound(Integer categoryId) {
+        CategoryNotFoundException exception = assertThrows(
+                CategoryNotFoundException.class,
                 () -> categoryService.getProductsByCategoryId(categoryId)
         );
 
-        assertEquals("Category id must be a positive number.", exception.getMessage());
-        verifyNoInteractions(categoryJpaRepository);
+        assertEquals("Category not found for id: " + categoryId, exception.getMessage());
+        verify(categoryJpaRepository).existsById(categoryId);
     }
 
     @Test
@@ -248,16 +266,34 @@ class CategoryServiceTest {
         assertEquals("delete failed", exception.getCause().getMessage());
     }
 
+    @Test
+    void updateCategory_NullPayload_ThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> categoryService.updateCategory(null));
+        verifyNoInteractions(categoryJpaRepository);
+    }
+
     @ParameterizedTest
-    @MethodSource("invalidUpdateCategories")
-    void updateCategory_InvalidPayload_ThrowsException(Category category, String expectedMessage) {
+    @MethodSource("invalidUpdateCategoryIds")
+    void updateCategory_InvalidId_ThrowsException(Category category) {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> categoryService.updateCategory(category)
         );
 
-        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals("Category id must be a positive number.", exception.getMessage());
         verifyNoInteractions(categoryJpaRepository);
+    }
+
+    @ParameterizedTest
+    @MethodSource("updateCategoriesWithMissingName")
+    void updateCategory_MissingName_ThrowsCategoryNotFound(Category category, String expectedMessage) {
+        CategoryNotFoundException exception = assertThrows(
+                CategoryNotFoundException.class,
+                () -> categoryService.updateCategory(category)
+        );
+
+        assertEquals(expectedMessage, exception.getMessage());
+        verify(categoryJpaRepository).findById(1);
     }
 
     @Test

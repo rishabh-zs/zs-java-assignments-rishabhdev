@@ -1,27 +1,11 @@
-# ==========================================
-# Stage 1: Build the application using Gradle
-# ==========================================
-FROM gradle:jdk21-alpine AS build
-
-# Set the working directory
-WORKDIR /app
-
-# Copy all project files into the container
-COPY . .
-
-# Build the JAR using the built-in gradle command (skipping tests)
-RUN gradle clean build -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx512m"
-
-# ==========================================
-# Stage 2: Run the application
-# ==========================================
+# Use a lightweight Java 21 environment
 FROM eclipse-temurin:21-jdk-alpine
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy ONLY the built JAR file from the 'build' stage
-COPY --from=build /app/build/libs/*.jar app.jar
+# Copy ONLY the executable JAR file (ignoring the -plain.jar)
+COPY build/libs/*SNAPSHOT.jar app.jar
 
 # Expose the port your Spring Boot app runs on
 EXPOSE 8080

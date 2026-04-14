@@ -128,7 +128,7 @@ public class ProductControllerTest {
                                   "categoryId": 1
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("Product with ID :10 added successfully"))
                 .andExpect(jsonPath("$.addedProduct.id").value(10))
@@ -164,6 +164,37 @@ public class ProductControllerTest {
     }
 
     /**
+     * Handle delete product returns bad request for negative id.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleDeleteProductReturnsBadRequestForNegativeId() throws Exception {
+        mockMvc.perform(delete("/products/dProduct/{productId}", -1)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.defaultMessage").value("must be greater than 0"));
+
+        verifyNoInteractions(productService);
+    }
+
+    /**
+     * Handle delete product returns bad request for non-numeric id.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void handleDeleteProductReturnsBadRequestForInvalidIdFormat() throws Exception {
+        mockMvc.perform(delete("/products/dProduct/abc")
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.message").value("product id must be a valid integer"));
+
+        verifyNoInteractions(productService);
+    }
+
+    /**
      * Handle update product delegates to service.
      *
      * @throws Exception the exception
@@ -179,7 +210,8 @@ public class ProductControllerTest {
                                 {
                                   "id": 1,
                                   "name": "Phone Pro",
-                                  "price": 1099.99
+                                                  "price": 1099.99,
+                                                  "categoryId": 1
                                 }
                                 """))
                 .andExpect(status().isOk())
@@ -206,7 +238,8 @@ public class ProductControllerTest {
                                 {
                                   "id": -1,
                                   "name": "Phone Pro",
-                                  "price": 1099.99
+                                                  "price": 1099.99,
+                                                  "categoryId": 1
                                 }
                                 """))
                 .andExpect(status().isNotFound())

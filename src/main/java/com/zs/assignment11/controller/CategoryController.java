@@ -4,7 +4,12 @@ import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
 import com.zs.assignment11.service.CategoryService;
 import com.zs.assignment11.util.LoggerUtil;
+import io.micrometer.observation.annotation.Observed;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,6 +28,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/categories")
+@Observed(name = "category.controller", contextualName = "Category Controller")
 public class CategoryController {
     private static final Logger log = LoggerUtil.getLogger(CategoryController.class);
     private final CategoryService categoryService;
@@ -42,16 +48,20 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/GetallCategories")
-    public Map<String, Object> handleGetAllCategories() {
+    public ResponseEntity<Map<String, Object>> handleGetAllCategories() {
+        long startTime = System.currentTimeMillis();
         log.debug("/GetallCategories endpoint was called");
         List<Category> categories = categoryService.getAllCategories();
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "all category fetched successfully");
         response.put("categories", categories);
         response.put("totalCategoryCount", categories.size());
-        return response;
+        response.put("responseTime", responseTime + "ms");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -61,15 +71,19 @@ public class CategoryController {
      * @return the map
      */
     @PostMapping("/aCategory")
-    public Map<String, Object> handleAddCategory(@RequestBody Category category) {
+    public ResponseEntity<Map<String, Object>> handleAddCategory(@Valid @RequestBody Category category) {
+        long startTime = System.currentTimeMillis();
         log.debug("/addCategory endpoint was called");
         Category addedCategory = categoryService.addCategory(category);
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "category added successfully with id: " + addedCategory.getId());
         response.put("addedCategory", addedCategory);
-        return response;
+        response.put("responseTime", responseTime + "ms");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -79,16 +93,20 @@ public class CategoryController {
      * @return the map
      */
     @GetMapping("/{categoryId}/products")
-    public Map<String, Object> handleGetAllProductByCategoryId(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleGetAllProductByCategoryId(@PathVariable @Positive Integer categoryId) {
+        long startTime = System.currentTimeMillis();
         log.debug("/{categoryId}/products endpoint was called");
         List<Product> products = categoryService.getProductsByCategoryId(categoryId);
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "products fetched successfully for category id: " + categoryId);
         response.put("products", products);
         response.put("totalProductCountInCategory", products.size());
-        return response;
+        response.put("responseTime", responseTime + "ms");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -98,16 +116,20 @@ public class CategoryController {
      * @return the map
      */
     @DeleteMapping("/dCategory/{categoryId}")
-    public Map<String, Object> handleDeleteCategory(@PathVariable Integer categoryId) {
+    public ResponseEntity<Map<String, Object>> handleDeleteCategory(@PathVariable @Positive Integer categoryId) {
+        long startTime = System.currentTimeMillis();
         Integer catId = categoryId;
         log.debug("/deleteCategory endpoint was called");
         Category deletedCategory = categoryService.deleteCategory(catId);
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
         response.put("message", "category deleted with id :" + categoryId);
         response.put("deletedCategory", deletedCategory);
-        return response;
+        response.put("responseTime", responseTime + "ms");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**
@@ -116,15 +138,19 @@ public class CategoryController {
      * @param category the category
      * @return the map
      */
-    @PatchMapping("uCategory")
-    public Map<String, Object> handleUpdateCategory(@RequestBody Category category) {
+    @PatchMapping("/uCategory")
+    public ResponseEntity<Map<String, Object>> handleUpdateCategory(@Valid @RequestBody Category category) {
+        long startTime = System.currentTimeMillis();
         log.debug("/updateCategory endpoint was called");
         Category updatedCategory = categoryService.updateCategory(category);
+        long endTime = System.currentTimeMillis();
+        long responseTime = endTime - startTime;
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
-        response.put("message", "category updated with " + updatedCategory.getId());
-        return response;
+        response.put("message", "category updated with ID" + updatedCategory.getId());
+        response.put("responseTime", responseTime + "ms");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

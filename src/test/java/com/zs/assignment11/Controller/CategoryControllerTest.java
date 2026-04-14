@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -86,7 +87,7 @@ class CategoryControllerTest {
                                   "name": "electronics"
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.message").value("category added successfully with id: 10"))
                 .andExpect(jsonPath("$.addedCategory.id").value(10))
@@ -168,21 +169,17 @@ class CategoryControllerTest {
     }
 
     /**
-     * Handle get all product by category id returns not found when category id does not exist.
+     * Handle get all product by category id returns bad request for negative category id.
      *
      * @throws Exception the exception
      */
     @Test
-    void handleGetAllProductByCategoryIdReturnsNotFoundWhenCategoryIdDoesNotExist() throws Exception {
-        when(categoryService.getProductsByCategoryId(-1))
-                .thenThrow(new IllegalArgumentException("Category id must be a positive number."));
-
+    void handleGetAllProductByCategoryIdReturnsBadRequestForNegativeCategoryId() throws Exception {
         mockMvc.perform(get("/categories/-1/products"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value("error"))
-                .andExpect(jsonPath("$.message").value("category id does not exists"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.defaultMessage").value("must be greater than 0"));
 
-        verify(categoryService).getProductsByCategoryId(-1);
+        verifyNoInteractions(categoryService);
     }
 
     /**
@@ -193,19 +190,19 @@ class CategoryControllerTest {
     @Test
     void handleUpdateCategoryDelegatesToService() throws Exception {
         when(categoryService.updateCategory(org.mockito.ArgumentMatchers.any(Category.class)))
-                .thenReturn(new Category(1, "electronics-updated"));
+                .thenReturn(new Category(1, "electronics updated"));
 
         mockMvc.perform(patch("/categories/uCategory")
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
                                   "id": 1,
-                                  "name": "electronics-updated"
+                                  "name": "electronics updated"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.message").value("category updated with 1"));
+                .andExpect(jsonPath("$.message").value("category updated with ID1"));
 
         verify(categoryService).updateCategory(org.mockito.ArgumentMatchers.any(Category.class));
         verifyNoMoreInteractions(categoryService);
@@ -226,7 +223,7 @@ class CategoryControllerTest {
                         .content("""
                                 {
                                   "id": -1,
-                                  "name": "electronics-updated"
+                                  "name": "electronics updated"
                                 }
                                 """))
                 .andExpect(status().isNotFound())

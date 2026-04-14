@@ -2,6 +2,7 @@ package com.zs.assignment11.dao;
 
 import com.zs.assignment11.model.Category;
 import com.zs.assignment11.model.Product;
+import io.micrometer.observation.annotation.Observed;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,7 @@ public interface CategoryJpaRepository extends JpaRepository<Category, Integer> 
      *
      * @return the list
      */
+    @Observed(name = "category.database", contextualName = "Find All Categories")
     List<Category> findAllByOrderById();
 
     /**
@@ -27,5 +29,6 @@ public interface CategoryJpaRepository extends JpaRepository<Category, Integer> 
      * @return the list
      */
     @Query("SELECT p FROM Product p WHERE p.category_id = :categoryId ORDER BY p.id")
+    @Observed(name = "category.database", contextualName = "Find Products By Category Id")
     List<Product> findAllProductsByCategoryIdOrderById(@Param("categoryId") Integer categoryId);
 }
